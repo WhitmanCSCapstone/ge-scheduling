@@ -1,11 +1,11 @@
 // TODO Search for header names instead of assuming the column indexes
-const COLUMN_FIRST_NAME = 10;
-const COLUMN_LAST_NAME = 11;
-const COLUMN_PREFERENCE_1 = 1;
-const COLUMN_PREFERENCE_2 = 2;
-const COLUMN_PREFERENCE_3 = 3;
+var COLUMN_FIRST_NAME = 10;
+var COLUMN_LAST_NAME = 11;
+var COLUMN_PREFERENCE_1 = 1;
+var COLUMN_PREFERENCE_2 = 2;
+var COLUMN_PREFERENCE_3 = 3;
 
-const OUTPUT_SHEET_ID = "13K10UA0ZNjCDGTbVbO104CdW97DJgm3MaK2TZpiRytw";
+var OUTPUT_SHEET_ID = "13K10UA0ZNjCDGTbVbO104CdW97DJgm3MaK2TZpiRytw";
 
 /**
 Automatically runs when sheet is opened.
