@@ -22,14 +22,17 @@ function matchGirls() {
     var responseData = responseSheet.getDataRange().getValues();
 
     var outputSheet = SpreadsheetApp.openById(OUTPUT_SHEET_ID);
-    outputSheet.appendRow(['Cell A1', 5]);
-    outputSheet.appendRow(['Cell A2', 9]);
-    //for (var i = 1; i < data.length; i++){
+    for (var i = 1; i < data.length; i++){
         //Logger.log('First name: ' + data[i][COLUMN_FIRST_NAME]);
         //Logger.log('Last name: ' + data[i][COLUMN_LAST_NAME]);
         //Logger.log('Workshop A: ' + data[i][COLUMN_PREFERENCE_1]);
         //Logger.log('Workshop B: ' + data[i][COLUMN_PREFERENCE_2]);
         //Logger.log('Workshop C: ' + data[i][COLUMN_PREFERENCE_3]);
-        
-    //}
+        var firstName = data[i][COLUMN_FIRST_NAME];
+        var lastName = data[i][COLUMN_LAST_NAME];
+        var preference_1 = data[i][COLUMN_PREFERENCE_1];
+        var preference_2 = data[i][COLUMN_PREFERENCE_2];
+        var preference_3 = data[i][COLUMN_PREFERENCE_3];
+        outputSheet.appendRow([firstName, lastName, preference_1, preference_2, preference_3]);
+    }
 }
