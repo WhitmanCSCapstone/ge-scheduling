@@ -33,6 +33,8 @@ function matchGirls() {
 }
 
 function scorer(){
+    var noMatch = true;
+    var noMatchStudents = [];
     var score = 0;
     var responseSheet = SpreadsheetApp.getActiveSheet();
     var responseData = responseSheet.getDataRange().getValues();
@@ -41,34 +43,50 @@ function scorer(){
     var outputData = outputSheet.getDataRange().getValues();
 
     for (var i = 1; i < responseData.length; i++){
+        noMatch = true;
         if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_1])
             || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_1])
             || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_1])){
             score += 1;
+            noMatch = false;
         }
         if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_2])
             || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_2])
             || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_2])){
             score += 3;
+            noMatch = false;
         }
         if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_3])
             || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_3])
             || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_3])){
             score += 5;
+            noMatch = false;
         }
         if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_4])
             || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_4])
             || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_4])){
             score += 10;
-        }if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_5])
+            noMatch = false;
+        }
+        if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_5])
             || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_5])
             || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_5])){
             score += 11;
-        }if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_6])
+            noMatch = false;
+        }
+        if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_6])
             || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_6])
             || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_6])){
             score += 12;
+            noMatch = false;
+        }
+        if noMatch {
+            var firstName = responseData[i][COLUMN_FIRST_NAME];
+            var lastName = responseData[i][COLUMN_LAST_NAME];
+            var wholeName = firstName.concat(' ', lastName);
+            noMatchStudents.push(wholeName);
         }
     }
-    Logger.log('Score: ' + score)
+    Logger.log('Score: ' + score);
+    Logger.log('Students with no top 6 matches: ' + noMatchStudents);
 }
