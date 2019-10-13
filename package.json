@@ -1,0 +1,29 @@
+{
+    "name": "ge-scheduling",
+    "author": "lads",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/WhitmanCSCapstone/ge-scheduling.git"
+    },
+    "devDependencies": {
+        "husky": "^3.0.9",
+        "lint-staged": "^9.4.2",
+        "lynt": "^0.5.5",
+        "prettier": "1.18.2"
+    },
+    "scripts": {
+        "lint": "lynt"
+    },
+    "lint-staged": {
+        "*.{js,gs,json,css,md}": [
+            "prettier --config .prettierrc --write",
+            "git add"
+        ]
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "yarn lint-staged && yarn lint"
+        }
+    }
+}
