@@ -4,6 +4,13 @@ var COLUMN_LAST_NAME = 11;
 var COLUMN_PREFERENCE_1 = 1;
 var COLUMN_PREFERENCE_2 = 2;
 var COLUMN_PREFERENCE_3 = 3;
+var COLUMN_PREFERENCE_4 = 4;
+var COLUMN_PREFERENCE_5 = 5;
+var COLUMN_PREFERENCE_6 = 6;
+
+var OUTPUT_WORKSHOP_1 = 2;
+var OUTPUT_WORKSHOP_2 = 3;
+var OUTPUT_WORKSHOP_3 = 4;
 
 var OUTPUT_SHEET_ID = "13K10UA0ZNjCDGTbVbO104CdW97DJgm3MaK2TZpiRytw";
 
@@ -41,32 +48,32 @@ function scorer() {
     var outputData = outputSheet.getDataRange().getValues();
 
     for (var i = 1; i < responseData.length; i++) {
-        if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_1])
-            || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_1])
-            || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_1])) {
+        if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_1])
+            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_1])
+            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_1])) {
             score += 1;
         }
-        if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_2])
-            || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_2])
-            || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_2])) {
+        if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_2])
+            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_2])
+            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_2])) {
             score += 3;
         }
-        if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_3])
-            || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_3])
-            || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_3])) {
+        if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_3])
+            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_3])
+            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_3])) {
             score += 5;
         }
-        if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_4])
-            || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_4])
-            || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_4])) {
+        if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_4])
+            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_4])
+            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_4])) {
             score += 10;
-        }if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_5])
-            || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_5])
-            || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_5])) {
+        }if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_5])
+            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_5])
+            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_5])) {
             score += 11;
-        }if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_6])
-            || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_6])
-            || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_6])) {
+        }if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_6])
+            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_6])
+            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_6])) {
             score += 12;
         }
     }
