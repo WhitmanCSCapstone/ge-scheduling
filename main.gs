@@ -24,6 +24,10 @@ function onOpen() {
         .addToUi();
 }
 
+/**
+ * Assign each girl to their top 3 workshops
+ */
+
 function matchGirls() {
     var responseSheet = SpreadsheetApp.getActiveSheet();
     var responseData = responseSheet.getDataRange().getValues();
@@ -38,6 +42,10 @@ function matchGirls() {
         outputSheet.appendRow([firstName, lastName, preference_1, preference_2, preference_3]);
     }
 }
+
+/**
+ * Compare each girl's workshop preferences to what they were assigned in the output sheet and return a score.
+ */
 
 function scorer() {
     var score = 0;
