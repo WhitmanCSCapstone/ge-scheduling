@@ -32,9 +32,7 @@ function matchGirls() {
     }
 }
 
-function scorer(){
-    var noMatch = true;
-    var noMatchStudents = [];
+function scorer() {
     var score = 0;
     var responseSheet = SpreadsheetApp.getActiveSheet();
     var responseData = responseSheet.getDataRange().getValues();
@@ -42,51 +40,85 @@ function scorer(){
     var outputSheet = SpreadsheetApp.openById(OUTPUT_SHEET_ID);
     var outputData = outputSheet.getDataRange().getValues();
 
+    for (var i = 1; i < responseData.length; i++) {
+        if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_1])
+            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_1])
+            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_1])) {
+            score += 1;
+        }
+        if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_2])
+            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_2])
+            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_2])) {
+            score += 3;
+        }
+        if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_3])
+            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_3])
+            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_3])) {
+            score += 5;
+        }
+        if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_4])
+            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_4])
+            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_4])) {
+            score += 10;
+        }if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_5])
+            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_5])
+            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_5])) {
+            score += 11;
+        }if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_6])
+            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_6])
+            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_6])) {
+            score += 12;
+        }
+    }
+    Logger.log('Score: ' + score)
+}
+
+function checkMatches(){
+    var studentMatches = [];
+    var responseSheet = SpreadsheetApp.getActiveSheet();
+    var responseData = responseSheet.getDataRange().getValues();
+    var outputSheet = SpreadsheetApp.openById(OUTPUT_SHEET_ID);
+    var outputData = outputSheet.getDataRange().getValues();
+
     for (var i = 1; i < responseData.length; i++){
-        noMatch = true;
+        studentMatches = [];
         if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_1])
             || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_1])
             || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_1])){
-            score += 1;
-            noMatch = false;
+            studentMatches.push("1");
         }
         if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_2])
             || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_2])
             || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_2])){
-            score += 3;
-            noMatch = false;
+            studentMatches.push("2");
         }
         if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_3])
             || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_3])
             || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_3])){
-            score += 5;
-            noMatch = false;
+            studentMatches.push("3");
         }
         if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_4])
             || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_4])
             || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_4])){
-            score += 10;
-            noMatch = false;
+            studentMatches.push("4");
         }
         if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_5])
             || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_5])
             || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_5])){
-            score += 11;
-            noMatch = false;
+            studentMatches.push("5");
         }
         if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_6])
             || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_6])
             || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_6])){
-            score += 12;
-            noMatch = false;
+            studentMatches.push("6");
         }
-        if noMatch {
-            var firstName = responseData[i][COLUMN_FIRST_NAME];
-            var lastName = responseData[i][COLUMN_LAST_NAME];
-            var wholeName = firstName.concat(' ', lastName);
-            noMatchStudents.push(wholeName);
+        studentMatches.sort()
+        while (studentMatches.length < 3) {
+            studentMatches.push("X")
+        }
+        outputData[i][5] = studentMatches
+        if (studentMatches == ["X", "X", "X"]) {
+            outputData[i][6] = "NO MATCHES"
         }
     }
-    Logger.log('Score: ' + score);
-    Logger.log('Students with no top 6 matches: ' + noMatchStudents);
 }
