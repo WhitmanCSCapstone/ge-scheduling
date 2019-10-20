@@ -25,9 +25,8 @@ function onOpen() {
 }
 
 /**
- * Assign each girl to their top 3 workshops
+ * Assign each girl to their top 3 workshops.
  */
-
 function matchGirls() {
     var responseSheet = SpreadsheetApp.getActiveSheet();
     var responseData = responseSheet.getDataRange().getValues();
@@ -43,10 +42,17 @@ function matchGirls() {
     }
 }
 
+function scorePreference(row, preferredWorkshop, points) {
+    if(    (outputData[row][OUTPUT_WORKSHOP_1] == responseData[row][preferredWorkshop])
+        || (outputData[row][OUTPUT_WORKSHOP_2] == responseData[row][preferredWorkshop])
+        || (outputData[row][OUTPUT_WORKSHOP_3] == responseData[row][preferredWorkshop])) {
+        score += points;
+    }
+}
+
 /**
  * Compare each girl's workshop preferences to what they were assigned in the output sheet and return a score.
  */
-
 function scorer() {
     var score = 0;
     var responseSheet = SpreadsheetApp.getActiveSheet();
@@ -56,34 +62,12 @@ function scorer() {
     var outputData = outputSheet.getDataRange().getValues();
 
     for (var i = 1; i < responseData.length; i++) {
-        if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_1])
-            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_1])
-            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_1])) {
-            score += 1;
-        }
-        if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_2])
-            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_2])
-            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_2])) {
-            score += 3;
-        }
-        if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_3])
-            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_3])
-            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_3])) {
-            score += 5;
-        }
-        if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_4])
-            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_4])
-            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_4])) {
-            score += 10;
-        }if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_5])
-            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_5])
-            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_5])) {
-            score += 11;
-        }if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_6])
-            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_6])
-            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_6])) {
-            score += 12;
-        }
+        scorePreference(i, COLUMN_PREFERENCE_1, 1);
+        scorePreference(i, COLUMN_PREFERENCE_2, 3);
+        scorePreference(i, COLUMN_PREFERENCE_3, 5);
+        scorePreference(i, COLUMN_PREFERENCE_4, 10);
+        scorePreference(i, COLUMN_PREFERENCE_5, 11);
+        scorePreference(i, COLUMN_PREFERENCE_5, 12);
     }
     Logger.log('Score: ' + score)
 }
