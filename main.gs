@@ -46,30 +46,6 @@ function matchGirls() {
 }
 
 /**
- * Check if a student is in a particular workshop and grant points accordingly.
- *
- * @param outputData       sheet with scheduling results to evaluate
- * @param studentRow       index of a row in the sheet representing a student
- * @param preferenceColumn workshop the student wants to be enrolled in
- * @param points           the amount that the score should be increased by if
- *                         the student is in this workshop
- */
-function scorePreference(preferenceData, outputData, studentRow, preferenceColumn, points) {
-    // If ANY one of the student's enrollments matches this preference,
-    if(ENROLLED.some(function(session) {
-        enrolledWorkshop = outputData[studentRow][session];
-        preferredWorkshop = preferenceData[studentRow][preferenceColumn];
-        return enrolledWorkshop == preferredWorkshop;
-    })) {
-        // Then return the points to add to the score.
-        return points;
-    } else {
-        // Otherwise, increase the score by the worst amount.
-        return UNPREFERRED_SCORE;
-    }
-}
-
-/**
  * Compare each girl's workshop preferences to what they were assigned in the output sheet and return a score.
  */
 function scorer() {
@@ -80,15 +56,30 @@ function scorer() {
     var outputSheet = SpreadsheetApp.openById(OUTPUT_SHEET_ID);
     var outputData = outputSheet.getDataRange().getValues();
 
-    // Header is at row 0, read data starting from row 1
-    for (var i = 1; i < outputData.length; i++) {
-        for (var j = 0; j < PREFERENCES.length; j++) {
-            // Check if the student is enrolled in that preferred workshop
-            score += scorePreference(responseData, outputData, i, PREFERENCES[j], POINTS[j]);
+    for (var i = 1; i < outputData.length; i++) { // for every student i
+        var studentMatches = [];
+        for (var j = 0; j < PREFERENCES.length; j++) { // for every student's preference j
+            tempScore = POINTS[j];
+            var preferredWorkshop = responseData[i][PREFERENCES[j]]; // TODO: NEEDS HELPER FUNCTION TO EXTRACT WORKSHOP NUMBER
+            for (var k = 0; k < ENROLLED.length; k++) {
+                var enrolledWorkshop = outputData[i][ENROLLED[k]]; // for every student's assigned workshop k
+                if (enrolledWorkshop == preferredWorkshop) {
+                    if ((studentMatches.length < 3) && (studentMatches.indexOf(PREFERENCES[j]) == -1)) {
+                        studentMatches.push(PREFERENCES[j].toString());
+                        score += tempScore
+                    }
+                }
+            }
+        }
+        studentMatches.sort();
+        while (studentMatches.length < 3) {
+            studentMatches.push("X");
+            score += UNPREFERRED_SCORE;
         }
     }
     Logger.log('Score: ' + score);
 }
+
 /**
  * Compare each girl's workshop preferences to what they were assigned in the output sheet
  * Appends a list to the row of the girl describing the numbers of her preferences that she recieved
