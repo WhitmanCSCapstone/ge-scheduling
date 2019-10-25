@@ -1,9 +1,17 @@
-// TODO Search for header names instead of assuming the column indexes
 var COLUMN_FIRST_NAME = 10;
 var COLUMN_LAST_NAME = 11;
-var COLUMN_PREFERENCE_1 = 1;
-var COLUMN_PREFERENCE_2 = 2;
-var COLUMN_PREFERENCE_3 = 3;
+
+// Column indices of student preferences in order from most preferred to least
+var PREFERENCES = [1, 2, 3, 4, 5, 6];
+
+// Points given for workshop assignments from most preferred to least preferred
+var POINTS = [1, 3, 5, 10, 11, 12];
+
+// Column indices of student enrollments in order of session time
+var ENROLLED = [2, 3, 4];
+
+// Points to be added for each workshop a student didn't want
+var UNPREFERRED_SCORE = 20;
 
 var OUTPUT_SHEET_ID = "13K10UA0ZNjCDGTbVbO104CdW97DJgm3MaK2TZpiRytw";
 
@@ -22,6 +30,11 @@ function matchGirls() {
     var responseData = responseSheet.getDataRange().getValues();
 
     var outputSheet = SpreadsheetApp.openById(OUTPUT_SHEET_ID);
+    outputSheet.getActiveSheet().clear();
+
+    // Recreate headers
+    outputSheet.appendRow(HEADERS);
+
     for (var i = 1; i < responseData.length; i++){
         var firstName = responseData[i][COLUMN_FIRST_NAME];
         var lastName = responseData[i][COLUMN_LAST_NAME];
@@ -32,6 +45,33 @@ function matchGirls() {
     }
 }
 
+/**
+ * Check if a student is in a particular workshop and grant points accordingly.
+ *
+ * @param outputData       sheet with scheduling results to evaluate
+ * @param studentRow       index of a row in the sheet representing a student
+ * @param preferenceColumn workshop the student wants to be enrolled in
+ * @param points           the amount that the score should be increased by if
+ *                         the student is in this workshop
+ */
+function scorePreference(preferenceData, outputData, studentRow, preferenceColumn, points) {
+    // If ANY one of the student's enrollments matches this preference,
+    if(ENROLLED.some(function(session) {
+        enrolledWorkshop = outputData[studentRow][session];
+        preferredWorkshop = preferenceData[studentRow][preferenceColumn];
+        return enrolledWorkshop == preferredWorkshop;
+    })) {
+        // Then return the points to add to the score.
+        return points;
+    } else {
+        // Otherwise, increase the score by the worst amount.
+        return UNPREFERRED_SCORE;
+    }
+}
+
+/**
+ * Compare each girl's workshop preferences to what they were assigned in the output sheet and return a score.
+ */
 function scorer() {
     var score = 0;
     var responseSheet = SpreadsheetApp.getActiveSheet();
@@ -40,85 +80,56 @@ function scorer() {
     var outputSheet = SpreadsheetApp.openById(OUTPUT_SHEET_ID);
     var outputData = outputSheet.getDataRange().getValues();
 
-    for (var i = 1; i < responseData.length; i++) {
-        if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_1])
-            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_1])
-            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_1])) {
-            score += 1;
-        }
-        if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_2])
-            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_2])
-            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_2])) {
-            score += 3;
-        }
-        if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_3])
-            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_3])
-            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_3])) {
-            score += 5;
-        }
-        if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_4])
-            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_4])
-            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_4])) {
-            score += 10;
-        }if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_5])
-            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_5])
-            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_5])) {
-            score += 11;
-        }if((outputData[i][OUTPUT_WORKSHOP_1] == responseData[i][COLUMN_PREFERENCE_6])
-            || (outputData[i][OUTPUT_WORKSHOP_2] == responseData[i][COLUMN_PREFERENCE_6])
-            || (outputData[i][OUTPUT_WORKSHOP_3] == responseData[i][COLUMN_PREFERENCE_6])) {
-            score += 12;
+    // Header is at row 0, read data starting from row 1
+    for (var i = 1; i < outputData.length; i++) {
+        for (var j = 0; j < PREFERENCES.length; j++) {
+            // Check if the student is enrolled in that preferred workshop
+            score += scorePreference(responseData, outputData, i, PREFERENCES[j], POINTS[j]);
         }
     }
-    Logger.log('Score: ' + score)
+    Logger.log('Score: ' + score);
 }
-
-function checkMatches(){
-    var studentMatches = [];
+/**
+ * Compare each girl's workshop preferences to what they were assigned in the output sheet
+ * Appends a list to the row of the girl describing the numbers of her preferences that she recieved
+ * Appends "NO MATCHES" to the row of each girl who did not receive any of her top 6 preferences
+ */
+function checkMatches() {
     var responseSheet = SpreadsheetApp.getActiveSheet();
     var responseData = responseSheet.getDataRange().getValues();
+    
     var outputSheet = SpreadsheetApp.openById(OUTPUT_SHEET_ID);
     var outputData = outputSheet.getDataRange().getValues();
 
-    for (var i = 1; i < responseData.length; i++){
-        studentMatches = [];
-        if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_1])
-            || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_1])
-            || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_1])){
-            studentMatches.push("1");
+    for (var i = 1; i < outputData.length; i++) { // for every student i
+        var studentMatches = [];
+        for (var j = 0; j < PREFERENCES.length; j++) { // for every student's preference j
+            var preferredWorkshop = responseData[i][PREFERENCES[j]]; // TODO: NEEDS HELPER FUNCTION TO EXTRACT WORKSHOP NUMBER
+            for (var k = 0; k < ENROLLED.length; k++) {
+                var enrolledWorkshop = outputData[i][ENROLLED[k]]; // for every student's assigned workshop k
+                if (enrolledWorkshop == preferredWorkshop) {
+                    if ((studentMatches.length < 3) && (studentMatches.indexOf(PREFERENCES[j]) == -1)) {
+                        studentMatches.push(PREFERENCES[j].toString());
+                    }
+                }
+            }
         }
-        if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_2])
-            || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_2])
-            || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_2])){
-            studentMatches.push("2");
-        }
-        if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_3])
-            || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_3])
-            || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_3])){
-            studentMatches.push("3");
-        }
-        if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_4])
-            || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_4])
-            || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_4])){
-            studentMatches.push("4");
-        }
-        if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_5])
-            || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_5])
-            || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_5])){
-            studentMatches.push("5");
-        }
-        if((outputData[i][2] == responseData[i][COLUMN_PREFERENCE_6])
-            || (outputData[i][3] == responseData[i][COLUMN_PREFERENCE_6])
-            || (outputData[i][4] == responseData[i][COLUMN_PREFERENCE_6])){
-            studentMatches.push("6");
-        }
-        studentMatches.sort()
+        studentMatches.sort();
         while (studentMatches.length < 3) {
-            studentMatches.push("X")
+            studentMatches.push("X");
         }
-        outputData[i][5] = studentMatches
-        if (studentMatches == ["X", "X", "X"]) {
-            outputData[i][6] = "NO MATCHES"
+        
+        var matchCell = "F".concat((i+1).toString());
+        var warningCell = "G".concat((i+1).toString());
+
+        outputSheet.getRange(matchCell).setValue(studentMatches.toString());
+
+        if (studentMatches.toString() == ["X","X","X"].toString()) {
+            outputSheet.getRange(warningCell).setValue("NO MATCHES");
+            Logger.log("no matches");
+        }
+        else {
+            outputSheet.getRange(warningCell).setValue(null);
         }
     }
 }
