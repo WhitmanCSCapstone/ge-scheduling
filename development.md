@@ -4,12 +4,13 @@ Development setup
 
 - `git clone` this repository.
 - Install [Node.js]. To check if you already have Node.js, run `npm --version`.
-- Install [clasp] and enable the Google Apps Script API as explained in the
+- Install [clasp][1] and enable the Google Apps Script API as explained in the
   installation instructions.
-- Make a copy of the [test registration form results][1] for testing and
-  development. This will also make a hidden copy of the Google Apps
-  Script project.
-- View [your projects][2] and pick the new Master Workshop Matcher.
+- Make a copy of the [test registration form results][2] for testing and
+  development. This will also make a hidden copy of the Google Apps Script
+  project, which we'll access next.
+- View [your projects][3] and pick the new Master Workshop Matcher. This should
+  show you a dashboard with statistics on your Google Apps Script project.
 - Copy the project ID from the URL. It should look like this:
   `https://script.google.com/home/projects/27f2D1ErmlvpFxNnfyGP4E2E9MMcdEsPtYv4Ws1xFr934jl_o22eR35jl`
   Where `27f2D1ErmlvpFxNnfyGP4E2E9MMcdEsPtYv4Ws1xFr934jl_o22eR35jl` is the
@@ -18,8 +19,11 @@ Development setup
   this, using the project ID from the previous step:
   `{"scriptId":"18e9H9CkBihCahyMUjkb9w7o9MMcdEEPGyf7nN4xFp958vl_m55rE87df"}`
   Save and close the file.
+- Run `clasp login` in the project directory. You'll need to continue using a
+  browser.
 - `clasp push` to make your Apps Script project reflect your local repository.
-  A successful push will say "Pushed N files."
+  A successful push will say "Pushed N files." If you get an error, check that
+  you [enabled the Google Apps Script API][1].
 
 Testing and contribution
 ========================
@@ -37,7 +41,7 @@ To test changes:
   changes will resolve.
 
 [Node.js]: https://nodejs.org/en/download/
-[clasp]: https://github.com/google/clasp#install
-[1]: https://docs.google.com/spreadsheets/d/1XxMdbq54kqv8qE32OTr-V9RTcmxdRWDafwCSU26pGFU/edit?usp=sharing
-[2]: https://script.google.com/home/my
+[1]: https://github.com/google/clasp#install
+[2]: https://docs.google.com/spreadsheets/d/1XxMdbq54kqv8qE32OTr-V9RTcmxdRWDafwCSU26pGFU/edit?usp=sharing
+[3]: https://script.google.com/home/my
 [new pull request]: https://github.com/WhitmanCSCapstone/ge-scheduling/compare
