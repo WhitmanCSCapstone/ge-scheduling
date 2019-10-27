@@ -32,10 +32,12 @@ To test changes:
   Matches" sheet if you made changes to the matching algorithm.
 - Once everything works, stage your changes and commit them to a feature
   branch.
-- Push your feature branch with `git push --set-upstream origin
-  $(git_current_branch)` and make a new pull request for that branch.
+- Push your feature branch with `git push --set-upstream origin` followed by the name of your branch.
+- Make a [new pull request] for that branch. Mention the issue number that your
+  changes will resolve.
 
 [Node.js]: https://nodejs.org/en/download/
 [clasp]: https://github.com/google/clasp#install
 [1]: https://docs.google.com/spreadsheets/d/1XxMdbq54kqv8qE32OTr-V9RTcmxdRWDafwCSU26pGFU/edit?usp=sharing
 [2]: https://script.google.com/home/my
+[new pull request]: https://github.com/WhitmanCSCapstone/ge-scheduling/compare
