@@ -79,3 +79,48 @@ function scorer() {
     }
     Logger.log('Score: ' + score);
 }
+
+/**
+ * Compare each girl's workshop preferences to what they were assigned in the output sheet
+ * Appends a list to the row of the girl describing the numbers of her preferences that she recieved
+ * Appends "NO MATCHES" to the row of each girl who did not receive any of her top 6 preferences
+ */
+function checkMatches() {
+    var responseSheet = SpreadsheetApp.getActiveSheet();
+    var responseData = responseSheet.getDataRange().getValues();
+    
+    var outputSheet = SpreadsheetApp.openById(OUTPUT_SHEET_ID);
+    var outputData = outputSheet.getDataRange().getValues();
+
+    for (var i = 1; i < outputData.length; i++) { // for every student i
+        var studentMatches = [];
+        for (var j = 0; j < PREFERENCES.length; j++) { // for every student's preference j
+            var preferredWorkshop = responseData[i][PREFERENCES[j]]; // TODO: NEEDS HELPER FUNCTION TO EXTRACT WORKSHOP NUMBER
+            for (var k = 0; k < ENROLLED.length; k++) {
+                var enrolledWorkshop = outputData[i][ENROLLED[k]]; // for every student's assigned workshop k
+                if (enrolledWorkshop == preferredWorkshop) {
+                    if ((studentMatches.length < 3) && (studentMatches.indexOf(PREFERENCES[j]) == -1)) {
+                        studentMatches.push(PREFERENCES[j].toString());
+                    }
+                }
+            }
+        }
+        studentMatches.sort();
+        while (studentMatches.length < 3) {
+            studentMatches.push("X");
+        }
+        
+        var matchCell = "F".concat((i+1).toString());
+        var warningCell = "G".concat((i+1).toString());
+
+        outputSheet.getRange(matchCell).setValue(studentMatches.toString());
+
+        if (studentMatches.toString() == ["X","X","X"].toString()) {
+            outputSheet.getRange(warningCell).setValue("NO MATCHES");
+            Logger.log("no matches");
+        }
+        else {
+            outputSheet.getRange(warningCell).setValue(null);
+        }
+    }
+}
