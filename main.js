@@ -111,6 +111,24 @@ var Workshop = function(row){
             throw new Error("This is not a valid session letter");
         }
     }
+
+    this.setSessionCapacity = function(session, value) {
+        if (session == "A") {
+            this.dynamicCapacityA = value;
+            this.statusUpdate();
+        }
+        else if (session == "B") {
+            this.dynamicCapacityB = value;
+            this.statusUpdate();
+        }
+        else if (session == "C") {
+            this.dynamicCapacityC = value;
+            this.statusUpdate();
+        }
+        else {
+            throw new Error("This is not a valid session letter");
+        }
+    }
 }
       
 function workshopTesting() {
@@ -118,6 +136,12 @@ function workshopTesting() {
     var workShopOne = new Workshop(row);
     Logger.log(workShopOne.nameEnglish);
     Logger.log(workShopOne.isFullA);
+    Logger.log(workShopOne.dynamicCapacityA);
+    workShopOne.addStudentToSession("A");
+    Logger.log(workShopOne.dynamicCapacityA);
+    workShopOne.setSessionCapacity("A", 1);
+    Logger.log(workShopOne.dynamicCapacityA);
+    Logger.log(workShopOne.dynamicCapacityTotal);
 }
 
 function matchGirls() {
