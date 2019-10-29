@@ -66,7 +66,7 @@ function scorer() {
         var studentMatches = [];
         for (var j = 0; j < PREFERENCES.length; j++) { // for every student's preference j
             tempScore = POINTS[j];
-            var preferredWorkshop = responseData[i][PREFERENCES[j]]; // TODO: NEEDS HELPER FUNCTION TO EXTRACT WORKSHOP NUMBER
+            var preferredWorkshop = responseData[i][PREFERENCES[j]];
             for (var k = 0; k < ENROLLED.length; k++) {
                 var enrolledWorkshop = outputData[i][ENROLLED[k]]; // for every student's assigned workshop k
                 if (enrolledWorkshop == preferredWorkshop) {
