@@ -1,5 +1,8 @@
 var COLUMN_FIRST_NAME = 10;
 var COLUMN_LAST_NAME = 11;
+var COLUMN_PREFERENCE_1 = 1;
+var COLUMN_PREFERENCE_2 = 2;
+var COLUMN_PREFERENCE_3 = 3;
 
 // Column indices of student preferences in order from most preferred to least
 var PREFERENCES = [1, 2, 3, 4, 5, 6];
@@ -12,6 +15,8 @@ var ENROLLED = [2, 3, 4];
 
 // Points to be added for each workshop a student didn't want
 var UNPREFERRED_SCORE = 20;
+
+var HEADERS = ['First name', 'Last name', 'Session 1', 'Session 2', 'Session 3'];
 
 var OUTPUT_SHEET_ID = "13K10UA0ZNjCDGTbVbO104CdW97DJgm3MaK2TZpiRytw";
 
