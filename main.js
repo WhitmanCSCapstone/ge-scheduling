@@ -9,7 +9,7 @@ var COLUMN_PREFERENCE_3 = 3;
 var COLUMN_WORKSHOP_NAME_ENGLISH = 2;
 var COLUMN_WORKSHOP_NAME_SPANISH = 8;
 var COLUMN_WORKSHOP_CAPACITY = 6;
-var MINIMUM_WORKSHOP_FILL = 0.75;
+var MINIMUM_WORKSHOP_FILL = 0.75; // TODO: calculate what this value should be based on the sum of total workshop capacities and total number of students
 
 // Column indices of student preferences in order from most preferred to least
 var PREFERENCES = [1, 2, 3, 4, 5, 6];
@@ -64,8 +64,8 @@ var Workshop = function(row){
     this.isFullB = (this.dynamicCapacityB == 0);
     this.isFullC = (this.dynamicCapacityC == 0);
 
-    this.popularityScore = 0;
-    this.popularityRank = 0;
+    this.popularityScore = 0; // TODO: calculate this based on the student preferences
+    this.popularityRank = 0; // TODO: calculate this based on the student preferences
 
     this.statusUpdate = function() {
         this.hasReachedQuorumA = this.dynamicCapacityA <= (this.staticCapacityA * (1 - MINIMUM_WORKSHOP_FILL));
