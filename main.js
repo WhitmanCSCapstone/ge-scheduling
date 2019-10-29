@@ -5,6 +5,11 @@ var COLUMN_PREFERENCE_1 = 1;
 var COLUMN_PREFERENCE_2 = 2;
 var COLUMN_PREFERENCE_3 = 3;
 
+// Column indicies of workshop info for the workshop class
+var COLUMN_WORKSHOP_NAME_ENGLISH = 2;
+var COLUMN_WORKSHOP_NAME_SPANISH = 8;
+var COLUMN_WORKSHOP_CAPACITY = 6;
+var MINIMUM_WORKSHOP_FILL = 0.75;
 
 // Column indices of student preferences in order from most preferred to least
 var PREFERENCES = [1, 2, 3, 4, 5, 6];
@@ -18,10 +23,10 @@ var ENROLLED = [2, 3, 4];
 // Points to be added for each workshop a student didn't want
 var UNPREFERRED_SCORE = 20;
 
-
 var HEADERS = ['First name', 'Last name', 'Session 1', 'Session 2', 'Session 3'];
 
 var OUTPUT_SHEET_ID = "13K10UA0ZNjCDGTbVbO104CdW97DJgm3MaK2TZpiRytw";
+var WORKSHOP_SHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
 
 /**
 Automatically runs when sheet is opened.
@@ -31,6 +36,88 @@ function onOpen() {
         .createMenu('Great Explorations')
         .addItem('Match Girls to Workshops', 'matchGirls')
         .addToUi();
+}
+
+var Workshop = function(row){
+    var workshopSheet = SpreadsheetApp.openById(WORKSHOP_SHEET_ID);
+    var workshopData = workshopSheet.getDataRange().getValues();
+
+    this.nameEnglish = workshopData[row][COLUMN_WORKSHOP_NAME_ENGLISH];
+    this.nameSpanish = workshopData[row][COLUMN_WORKSHOP_NAME_SPANISH];
+    this.number = row + 1;
+
+    this.staticCapacityA = workshopData[row][COLUMN_WORKSHOP_CAPACITY];
+    this.staticCapacityB = workshopData[row][COLUMN_WORKSHOP_CAPACITY];
+    this.staticCapacityC = workshopData[row][COLUMN_WORKSHOP_CAPACITY];
+    this.staticCapacityTotal = this.staticCapacityA + this.staticCapacityB + this.staticCapacityC;
+
+    this.dynamicCapacityA = this.staticCapacityA;
+    this.dynamicCapacityB = this.staticCapacityB;
+    this.dynamicCapacityC = this.staticCapacityC;
+    this.dynamicCapacityTotal = this.staticCapacityTotal;
+
+    this.hasReachedQuorumA = this.dynamicCapacityA <= (this.staticCapacityA * (1 - MINIMUM_WORKSHOP_FILL));
+    this.hasReachedQuorumB = this.dynamicCapacityB <= (this.staticCapacityB * (1 - MINIMUM_WORKSHOP_FILL));
+    this.hasReachedQuorumC = this.dynamicCapacityC <= (this.staticCapacityC * (1 - MINIMUM_WORKSHOP_FILL));
+
+    this.isFullA = (this.dynamicCapacityA == 0);
+    this.isFullB = (this.dynamicCapacityB == 0);
+    this.isFullC = (this.dynamicCapacityC == 0);
+
+    this.popularityScore = 0;
+    this.popularityRank = 0;
+
+    this.statusUpdate = function() {
+        this.hasReachedQuorumA = this.dynamicCapacityA <= (this.staticCapacityA * (1 - MINIMUM_WORKSHOP_FILL));
+        this.hasReachedQuorumB = this.dynamicCapacityB <= (this.staticCapacityB * (1 - MINIMUM_WORKSHOP_FILL));
+        this.hasReachedQuorumC = this.dynamicCapacityC <= (this.staticCapacityC * (1 - MINIMUM_WORKSHOP_FILL));
+
+        this.isFullA = (this.dynamicCapacityA == 0);
+        this.isFullB = (this.dynamicCapacityB == 0);
+        this.isFullC = (this.dynamicCapacityC == 0);
+
+        this.dynamicCapacityTotal = this.dynamicCapacityA + this.dynamicCapacityB +this.dynamicCapacityC;
+    }
+
+    this.addStudentToSession = function(session) {
+        if (session == "A") {
+            if (this.isFullA) {
+                throw new Error("Session A is full for " + this.nameEnglish);
+            }
+            else {
+                this.dynamicCapacityA -= 1;
+                this.statusUpdate();
+            }
+        }
+        else if (session == "B") {
+            if (this.isFullB) {
+                throw new Error("Session B is full for " + this.nameEnglish);
+            }
+            else {
+                this.dynamicCapacityB -= 1;
+                this.statusUpdate();
+            }
+        }
+        else if (session == "C") {
+            if (this.isFullB) {
+                throw new Error("Session C is full for " + this.nameEnglish);
+            }
+            else {
+                this.dynamicCapacityC -= 1;
+                this.statusUpdate();
+            }
+        }
+        else {
+            throw new Error("This is not a valid session letter");
+        }
+    }
+}
+      
+function workshopTesting() {
+    var row = 1;
+    var workShopOne = new Workshop(row);
+    Logger.log(workShopOne.nameEnglish);
+    Logger.log(workShopOne.isFullA);
 }
 
 function matchGirls() {
