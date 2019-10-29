@@ -1,3 +1,4 @@
+// TODO Search for header names instead of assuming the column indexes
 var COLUMN_FIRST_NAME = 10;
 var COLUMN_LAST_NAME = 11;
 var COLUMN_PREFERENCE_1 = 1;
