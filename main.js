@@ -99,7 +99,7 @@ var Workshop = function(row){
             }
         }
         else if (session == "C") {
-            if (this.isFullB) {
+            if (this.isFullC) {
                 throw new Error("Session C is full for " + this.nameEnglish);
             }
             else {
