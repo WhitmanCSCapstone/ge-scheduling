@@ -145,20 +145,24 @@ var Workshop = function(row, workshopData, responseData){
      */
     this.setSessionCapacity = function(session, value) {
         if (session == "A") {
+            this.staticCapacityA = value;
             this.dynamicCapacityA = value;
             this.statusUpdate();
         }
         else if (session == "B") {
+            this.staticCapacityB = value;
             this.dynamicCapacityB = value;
             this.statusUpdate();
         }
         else if (session == "C") {
+            this.staticCapacityC = value;
             this.dynamicCapacityC = value;
             this.statusUpdate();
         }
         else {
             throw new Error("This is not a valid session letter");
         }
+        this.staticCapacityTotal = this.staticCapacityA + this.staticCapacityB + this.staticCapacityC; 
     }
 }
 
