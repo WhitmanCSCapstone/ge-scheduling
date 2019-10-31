@@ -17,6 +17,9 @@ var PREFERENCES = [1, 2, 3, 4, 5, 6];
 // Points given for workshop assignments from most preferred to least preferred
 var POINTS = [1, 3, 5, 10, 11, 12];
 
+// Points given for calculating workshop popularity based on what number preference the workshop is listed
+var POPULARITY_POINTS = [1, 1, 1, 1, 1, 1];
+
 // Column indices of student enrollments in order of session time
 var ENROLLED = [2, 3, 4];
 
@@ -38,13 +41,19 @@ function onOpen() {
         .addToUi();
 }
 
-var Workshop = function(row){
-    var workshopSheet = SpreadsheetApp.openById(WORKSHOP_SHEET_ID);
-    var workshopData = workshopSheet.getDataRange().getValues();
-
+/**
+ * Workshop Class.
+ * 
+ * An object that contains all significant information about a single workshop.
+ * 
+ * @param {int}     row             The row number of the workshop as it appears in workshopData
+ * @param {array}   workshopData    The array containing all information about the workshops
+ * @param {array}   responseData    The array containing the girls' responses about their workshop preferences
+ */
+var Workshop = function(row, workshopData, responseData){
     this.nameEnglish = workshopData[row][COLUMN_WORKSHOP_NAME_ENGLISH];
     this.nameSpanish = workshopData[row][COLUMN_WORKSHOP_NAME_SPANISH];
-    this.number = row + 1;
+    this.number = row;
 
     this.staticCapacityA = workshopData[row][COLUMN_WORKSHOP_CAPACITY];
     this.staticCapacityB = workshopData[row][COLUMN_WORKSHOP_CAPACITY];
@@ -64,9 +73,20 @@ var Workshop = function(row){
     this.isFullB = (this.dynamicCapacityB == 0);
     this.isFullC = (this.dynamicCapacityC == 0);
 
-    this.popularityScore = 0; // TODO: calculate this based on the student preferences
-    this.popularityRank = 0; // TODO: calculate this based on the student preferences
+    this.popularityScore = 0;
+    for (var i = 1; i < responseData.length; i++) { // for every student i
+        for (var j = 0; j < PREFERENCES.length; j++) { // for every student preference j
+            var preferredWorkshop = responseData[i][PREFERENCES[j]];
+            var workshopNum = parseFloat(preferredWorkshop.slice(preferredWorkshop.indexOf("(")+1, preferredWorkshop.indexOf(")")));
+            if (workshopNum == this.number) {
+                this.popularityScore += POPULARITY_POINTS[j];
+            }
+        }
+    }
 
+    /**
+     * Recalculates important class variables used for analysis based on changes to other ones
+     */
     this.statusUpdate = function() {
         this.hasReachedQuorumA = this.dynamicCapacityA <= (this.staticCapacityA * (1 - MINIMUM_WORKSHOP_FILL));
         this.hasReachedQuorumB = this.dynamicCapacityB <= (this.staticCapacityB * (1 - MINIMUM_WORKSHOP_FILL));
@@ -79,6 +99,11 @@ var Workshop = function(row){
         this.dynamicCapacityTotal = this.dynamicCapacityA + this.dynamicCapacityB +this.dynamicCapacityC;
     }
 
+    /**
+     * Subtracts 1 from the specified session's capacity and updates other variables accordingly
+     * 
+     * @param {char}    session     a character "A", "B", or "C" that describes which session that will have its capacity changed
+     */
     this.addStudentToSession = function(session) {
         if (session == "A") {
             if (this.isFullA) {
@@ -112,6 +137,12 @@ var Workshop = function(row){
         }
     }
 
+    /**
+     * Manually sets a workshop's specified session's capacity to a discrete value and updates other variables accordingly
+     * 
+     * @param {char}    session     a character "A", "B", or "C" that describes which session that will have its capacity changed
+     * @param {int}     value       the new integer value for the session's remaining capacity
+     */
     this.setSessionCapacity = function(session, value) {
         if (session == "A") {
             this.dynamicCapacityA = value;
@@ -130,19 +161,46 @@ var Workshop = function(row){
         }
     }
 }
-      
-function workshopTesting() {
-    var row = 1;
-    var workShopOne = new Workshop(row);
-    Logger.log(workShopOne.nameEnglish);
-    Logger.log(workShopOne.isFullA);
-    Logger.log(workShopOne.dynamicCapacityA);
-    workShopOne.addStudentToSession("A");
-    Logger.log(workShopOne.dynamicCapacityA);
-    workShopOne.setSessionCapacity("A", 1);
-    Logger.log(workShopOne.dynamicCapacityA);
-    Logger.log(workShopOne.dynamicCapacityTotal);
+
+/**
+ * Returns an array of workshop objects based on the workshop sheet and response sheets.
+ */
+function makeWorkshopArray() {
+    var responseSheet = SpreadsheetApp.getActiveSheet();
+    var responseData = responseSheet.getDataRange().getValues();
+
+    var workshopSheet = SpreadsheetApp.openById(WORKSHOP_SHEET_ID);
+    var workshopData = workshopSheet.getDataRange().getValues();
+
+    var workshopArray = [];
+
+    for (var i = 1; i < workshopData.length; i++) {
+        var newWorkshop = new Workshop(i, workshopData, responseData);
+        workshopArray.push(newWorkshop);
+    }
+    return workshopArray;
 }
+
+/**
+ * Used to compare two workshops based on their popularity scores.
+ * 
+ * @param {workshop} a A workshop from the workshop class.
+ * @param {workshop} b A workshop from the workshop class.
+ */
+function morePopular(a, b) {
+    if (a.popularityScore < b.popularityScore) {
+        return -1;
+    }
+    else if (a.popularityScore > b.popularityScore) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+// An array containing every workshop object, sorted from least to most popular
+WORKSHOP_ARRAY = makeWorkshopArray().sort(morePopular);
 
 function matchGirls() {
     var responseSheet = SpreadsheetApp.getActiveSheet();
@@ -161,7 +219,7 @@ function matchGirls() {
         var preference_2 = responseData[i][COLUMN_PREFERENCE_2];
         var preference_3 = responseData[i][COLUMN_PREFERENCE_3];
         outputSheet.appendRow([firstName, lastName, preference_1, preference_2, preference_3]);
-    }
+    } 
 }
 
 /**
@@ -236,7 +294,6 @@ function checkMatches() {
 
         if (studentMatches.toString() == ["X","X","X"].toString()) {
             outputSheet.getRange(warningCell).setValue("NO MATCHES");
-            Logger.log("no matches");
         }
         else {
             outputSheet.getRange(warningCell).setValue(null);
