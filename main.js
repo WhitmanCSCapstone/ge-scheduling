@@ -84,7 +84,8 @@ function scorer() {
             var tempScore = POINTS[j];
             var preferredWorkshop = responseData[i][PREFERENCES[j]];
             for (var k = 0; k < ENROLLED.length; k++) {
-                var enrolledWorkshop = outputData[i][ENROLLED[k]]; // for every student's assigned workshop k
+                // for every student's assigned workshop k
+                var enrolledWorkshop = outputData[i][ENROLLED[k]];
                 if (enrolledWorkshop === preferredWorkshop) {
                     if (
                         studentMatches.length < 3 &&
