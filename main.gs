@@ -5,6 +5,14 @@ var COLUMN_PREFERENCE_1 = 1;
 var COLUMN_PREFERENCE_2 = 2;
 var COLUMN_PREFERENCE_3 = 3;
 
+var HEADERS = [
+    "First name",
+    "Last name",
+    "Session 1",
+    "Session 2",
+    "Session 3"
+];
+
 var OUTPUT_SHEET_ID = "13K10UA0ZNjCDGTbVbO104CdW97DJgm3MaK2TZpiRytw";
 
 /**
@@ -22,6 +30,11 @@ function matchGirls() {
     var responseData = responseSheet.getDataRange().getValues();
 
     var outputSheet = SpreadsheetApp.openById(OUTPUT_SHEET_ID);
+    outputSheet.getActiveSheet().clear();
+
+    // Recreate headers
+    outputSheet.appendRow(HEADERS);
+
     for (var i = 1; i < responseData.length; i++) {
         var firstName = responseData[i][COLUMN_FIRST_NAME];
         var lastName = responseData[i][COLUMN_LAST_NAME];
