@@ -2,6 +2,7 @@
 
 -   `git clone` this repository.
 -   Install [Node.js]. To check if you already have Node.js, run `npm --version`.
+-   Install dependencies with `npm install`.
 -   Install [clasp][1] and enable the Google Apps Script API as explained in the
     installation instructions.
 -   Make a copy of the [test registration form results][2] for testing and
