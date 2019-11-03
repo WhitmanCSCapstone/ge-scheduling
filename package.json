@@ -1,5 +1,6 @@
 {
     "name": "ge-scheduling",
+    "description": "Scheduling algorithm for Great Explorations Walla Walla",
     "author": "lads",
     "license": "MIT",
     "repository": {
