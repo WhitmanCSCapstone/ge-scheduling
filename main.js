@@ -64,39 +64,65 @@ var Workshop = function(row, workshopData, responseData){
     this.dynamicCapacityB = this.staticCapacityB;
     this.dynamicCapacityC = this.staticCapacityC;
     this.dynamicCapacityTotal = this.staticCapacityTotal;
-
-    this.hasReachedQuorumA = this.dynamicCapacityA <= (this.staticCapacityA * (1 - MINIMUM_WORKSHOP_FILL));
-    this.hasReachedQuorumB = this.dynamicCapacityB <= (this.staticCapacityB * (1 - MINIMUM_WORKSHOP_FILL));
-    this.hasReachedQuorumC = this.dynamicCapacityC <= (this.staticCapacityC * (1 - MINIMUM_WORKSHOP_FILL));
-
-    this.isFullA = (this.dynamicCapacityA == 0);
-    this.isFullB = (this.dynamicCapacityB == 0);
-    this.isFullC = (this.dynamicCapacityC == 0);
-
+    
     this.popularityScore = 0;
-    for (var i = 1; i < responseData.length; i++) { // for every student i
-        for (var j = 0; j < PREFERENCES.length; j++) { // for every student preference j
-            var preferredWorkshop = responseData[i][PREFERENCES[j]];
-            var workshopNum = parseFloat(preferredWorkshop.slice(preferredWorkshop.indexOf("(")+1, preferredWorkshop.indexOf(")")));
-            if (workshopNum == this.number) {
-                this.popularityScore += POPULARITY_POINTS[j];
+    this.calcPopularity(responseData);
+
+    /**
+     * Calculates the popularity score of a given workshop based on how often they occur in the response data
+     * 
+     * @param {array}   responseData    The array containing the girls' responses about their workshop preferences
+     */
+    this.calcPopularity = function(responseData) {
+        for (var i = 1; i < responseData.length; i++) { // for every student i
+            for (var j = 0; j < PREFERENCES.length; j++) { // for every student preference j
+                var preferredWorkshop = responseData[i][PREFERENCES[j]];
+                var workshopNum = parseFloat(preferredWorkshop.slice(preferredWorkshop.indexOf("(")+1, preferredWorkshop.indexOf(")")));
+                if (workshopNum == this.number) {
+                    this.popularityScore += POPULARITY_POINTS[j];
+                }
             }
         }
     }
 
     /**
-     * Recalculates important class variables used for analysis based on changes to other ones
+     * Calculates and returns whether or not the session is "full enough" based on the MINIMUM_WORKSHOP_FILL variable
+     * 
+     * @param {char}    session     a character "A", "B", or "C" that describes which session to calculate the variable for
      */
-    this.statusUpdate = function() {
-        this.hasReachedQuorumA = this.dynamicCapacityA <= (this.staticCapacityA * (1 - MINIMUM_WORKSHOP_FILL));
-        this.hasReachedQuorumB = this.dynamicCapacityB <= (this.staticCapacityB * (1 - MINIMUM_WORKSHOP_FILL));
-        this.hasReachedQuorumC = this.dynamicCapacityC <= (this.staticCapacityC * (1 - MINIMUM_WORKSHOP_FILL));
+    this.hasReachedQuorum = function(session) {
+        if (session == "A") {
+            return (this.dynamicCapacityA <= (this.staticCapacityA * (1 - MINIMUM_WORKSHOP_FILL)));
+        }
+        else if (session == "B") {
+            return (this.dynamicCapacityB <= (this.staticCapacityB * (1 - MINIMUM_WORKSHOP_FILL)));
+        }
+        else if (session == "C") {
+            return (this.dynamicCapacityC <= (this.staticCapacityC * (1 - MINIMUM_WORKSHOP_FILL)));
+        }
+        else {
+            throw new Error("This is not a valid session letter");
+        }
+    }
 
-        this.isFullA = (this.dynamicCapacityA == 0);
-        this.isFullB = (this.dynamicCapacityB == 0);
-        this.isFullC = (this.dynamicCapacityC == 0);
-
-        this.dynamicCapacityTotal = this.dynamicCapacityA + this.dynamicCapacityB +this.dynamicCapacityC;
+    /**
+     * Calculates and returns whether or not the session is completely full
+     * 
+     * @param {char}    session     a character "A", "B", or "C" that describes which session to calculate the variable for
+     */
+    this.isFull = function(session) {
+        if (session == "A") {
+            return (this.dynamicCapacityA == 0);
+        }
+        else if (session == "B") {
+            return (this.dynamicCapacityB == 0);
+        }
+        else if (session == "C") {
+            return (this.dynamicCapacityC == 0);
+        }
+        else {
+            throw new Error("This is not a valid session letter");
+        }
     }
 
     /**
@@ -105,36 +131,22 @@ var Workshop = function(row, workshopData, responseData){
      * @param {char}    session     a character "A", "B", or "C" that describes which session that will have its capacity changed
      */
     this.addStudentToSession = function(session) {
+        if (this.isFull(session)) {
+            throw new Error("Session " + session + " is full for " + this.nameEnglish);
+        }
         if (session == "A") {
-            if (this.isFullA) {
-                throw new Error("Session A is full for " + this.nameEnglish);
-            }
-            else {
-                this.dynamicCapacityA -= 1;
-                this.statusUpdate();
-            }
+            this.dynamicCapacityA -= 1;
         }
         else if (session == "B") {
-            if (this.isFullB) {
-                throw new Error("Session B is full for " + this.nameEnglish);
-            }
-            else {
-                this.dynamicCapacityB -= 1;
-                this.statusUpdate();
-            }
+            this.dynamicCapacityB -= 1;
         }
         else if (session == "C") {
-            if (this.isFullC) {
-                throw new Error("Session C is full for " + this.nameEnglish);
-            }
-            else {
-                this.dynamicCapacityC -= 1;
-                this.statusUpdate();
-            }
+            this.dynamicCapacityC -= 1;
         }
         else {
             throw new Error("This is not a valid session letter");
         }
+        this.dynamicCapacityTotal = this.dynamicCapacityA + this.dynamicCapacityB +this.dynamicCapacityC;
     }
 
     /**
@@ -147,21 +159,19 @@ var Workshop = function(row, workshopData, responseData){
         if (session == "A") {
             this.staticCapacityA = value;
             this.dynamicCapacityA = value;
-            this.statusUpdate();
         }
         else if (session == "B") {
             this.staticCapacityB = value;
             this.dynamicCapacityB = value;
-            this.statusUpdate();
         }
         else if (session == "C") {
             this.staticCapacityC = value;
             this.dynamicCapacityC = value;
-            this.statusUpdate();
         }
         else {
             throw new Error("This is not a valid session letter");
         }
+        this.dynamicCapacityTotal = this.dynamicCapacityA + this.dynamicCapacityB +this.dynamicCapacityC;
         this.staticCapacityTotal = this.staticCapacityA + this.staticCapacityB + this.staticCapacityC; 
     }
 }
