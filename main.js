@@ -195,7 +195,7 @@ var Student = function(row, responseData) {
 
     this.preferences = [];
     for (var i = 0; i < PREFERENCES.length; i++) {
-        var preferredWorkshop = responseData[row][PREFERENCES[j]];
+        var preferredWorkshop = responseData[row][PREFERENCES[i]];
         var workshopNum = parseFloat(preferredWorkshop.slice(preferredWorkshop.indexOf("(")+1, preferredWorkshop.indexOf(")")));
         for (var j = 0; j < WORKSHOP_ARRAY.length; j++) {
             if (WORKSHOP_ARRAY[j].number == workshopNum) {
