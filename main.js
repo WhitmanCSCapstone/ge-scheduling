@@ -42,34 +42,34 @@ function onOpen() {
 }
 
 /**
- * Workshop Session Class
+ * Workshop Session Class.
  * 
  * An object that contains all significant information about a single session in a workshop.
- * This is meant to condense the workshop class's methods to avoid redundancy
+ * This is meant to condense the workshop class's methods to avoid redundancy.
  * 
- * @param {int}     row             The row number of the workshop as it appears in workshopData
- * @param {array}   workshopData    The array containing the girls' responses about their workshop preferences
+ * @param {int}   row          The row number of the workshop as it appears in workshopData.
+ * @param {array} workshopData The array containing the girls' responses about their workshop preferences.
  */
 var Session = function(row, workshopData) {
     this.originalCapacity = workshopData[row][COLUMN_WORKSHOP_CAPACITY];
     this.remainingCapacity = this.originalCapacity;
 
     /**
-     * Calculates and returns whether or not the session is completely full
+     * Calculates and returns whether or not the session is completely full.
      */
     this.isFull = function() {
         return (this.remainingCapacity == 0);
     }
 
     /**
-     * Calculates and returns whether or not the session is "full enough" based on the MINIMUM_WORKSHOP_FILL variable
+     * Calculates and returns whether or not the session is "full enough" based on the MINIMUM_WORKSHOP_FILL variable.
      */
     this.hasReachedQuorum = function() {
         return (this.remainingCapacity <= (this.originalCapacity * (1 - MINIMUM_WORKSHOP_FILL)))
     }
 
     /**
-     * Subtracts 1 from the session's remaining capacity
+     * Subtracts 1 from the session's remaining capacity.
      */
     this.addStudent = function() {
         if (this.isFull()) {
@@ -81,9 +81,21 @@ var Session = function(row, workshopData) {
     }
 
     /**
-     * Manually sets a the session's original and remaining capacities to a discrete value
+     * Adds 1 to the session's remaining capacity.
+     */
+    this.subtractStudent = function() {
+        if (this.remainingCapacity == this.originalCapacity) {
+            throw new Error("Cannot remove students from an empty session");
+        }
+        else {
+            this.remainingCapacity += 1;
+        }
+    }
+
+    /**
+     * Manually sets a the session's original and remaining capacities to a discrete value.
      * 
-     * @param {int}     value   the new integer value for the session's remaining capacity
+     * @param {int} value the new integer value for the session's remaining capacity.
      */
     this.setCapacity = function(value) {
         this.originalCapacity = value;
@@ -96,9 +108,9 @@ var Session = function(row, workshopData) {
  * 
  * An object that contains all significant information about a single workshop.
  * 
- * @param {int}     row             The row number of the workshop as it appears in workshopData
- * @param {array}   workshopData    The array containing all information about the workshops
- * @param {array}   responseData    The array containing the girls' responses about their workshop preferences
+ * @param {int}   row          The row number of the workshop as it appears in workshopData.
+ * @param {array} workshopData The array containing all information about the workshops.
+ * @param {array} responseData The array containing the girls' responses about their workshop preferences.
  */
 var Workshop = function(row, workshopData, responseData){
     this.name = workshopData[row][COLUMN_WORKSHOP_NAME];
@@ -121,7 +133,7 @@ var Workshop = function(row, workshopData, responseData){
     }
     
     /**
-     * Calculates the total remaining capacity of the workshop
+     * Calculates the total remaining capacity of the workshop.
      */
     this.totalRemainingCapacity = function(){
         var total = 0;
@@ -173,7 +185,81 @@ function morePopular(a, b) {
 WORKSHOP_ARRAY = makeWorkshopArray().sort(morePopular);
 
 /**
- * The main algorithm that matches each girl with as many of her preferred workshops as possible
+ * Student Class.
+ * 
+ * An object that contains all significant information about a single student.
+ */
+var Student = function(row, responseData) {
+    this.firstName = responseData[row][COLUMN_FIRST_NAME];
+    this.lastName = responseData[row][COLUMN_LAST_NAME];
+
+    this.preferences = [];
+    for (var i = 0; i < PREFERENCES.length; i++) {
+        var preferredWorkshop = responseData[row][PREFERENCES[j]];
+        var workshopNum = parseFloat(preferredWorkshop.slice(preferredWorkshop.indexOf("(")+1, preferredWorkshop.indexOf(")")));
+        for (var j = 0; j < WORKSHOP_ARRAY.length; j++) {
+            if (WORKSHOP_ARRAY[j].number == workshopNum) {
+                this.preferences.push(WORKSHOP_ARRAY[j]);
+            }
+        }
+    }
+
+    this.assignedWorkshops = [null, null, null];
+
+    this.assignWorkshop = function(workshop, session) {
+        workshop.sessions[session].addStudent();
+        this.assignedWorkshops[session] = this.preferences[session];
+    }
+
+    /**
+     * Swaps the session times of two workshops the student is assigned to, or moves an assigned workshop from one session time to another empty one.
+     * 
+     * @param {int} session1 the index of one of the workshops in the student's assigned workshops.
+     * @param {int} session2 the index of one of the workshops in the student's assigned workshops.
+     */
+    this.swapWorkshops = function(session1, session2) {
+        if (this.assignedWorkshops[session1] != null) {
+            this.assignedWorkshops[session1].sessions[session1].subtractStudent();
+        }
+        if (this.assignedWorkshops[session2] != null) {
+            this.assignedWorkshops[session2].sessions[session2].subtractStudent();
+        }
+
+        var temp = this.assignedWorkshops[session1];
+        this.assignedWorkshops[session1] = this.assignedWorkshops[session2];
+        this.assignedWorkshops[session2] = temp;
+        
+        if (this.assignedWorkshops[session1] != null) {
+            this.assignedWorkshops[session1].sessions[session1].addStudent();
+        }
+        if (this.assignedWorkshops[session2] != null) {
+            this.assignedWorkshops[session2].sessions[session2].addStudent();
+        }
+    }
+
+    /**
+     * Calculates and returns the number of workshops that the student has already been assigned to.
+     */
+    this.numberAssigned = function() {
+        var total = 0;
+        for (var i = 0; i < this.assignedWorkshops.length; i++) {
+            if (this.assignedWorkshops[i] != null) {
+                total += 1;
+            }
+        }
+        return total;
+    }
+
+    /**
+     * Calculates and returns whether or not the student has been assigned a workshop in all 3 sessions.
+     */
+    this.fullyAssigned = function() {
+        return (this.numberAssigned == 3);
+    }
+}
+
+/**
+ * The main algorithm that matches each girl with as many of her preferred workshops as possible.
  */
 function matchGirls() {
     var responseSheet = SpreadsheetApp.getActiveSheet();
@@ -185,7 +271,7 @@ function matchGirls() {
     // Recreate headers
     outputSheet.appendRow(HEADERS);
 
-    for (var i = 1; i < responseData.length; i++){
+    for (var i = 1; i < responseData.length; i++) {
         var firstName = responseData[i][COLUMN_FIRST_NAME];
         var lastName = responseData[i][COLUMN_LAST_NAME];
         var preference_1 = responseData[i][COLUMN_PREFERENCE_1];
@@ -231,9 +317,9 @@ function scorer() {
 }
 
 /**
- * Compare each girl's workshop preferences to what they were assigned in the output sheet
- * Appends a list to the row of the girl describing the numbers of her preferences that she recieved
- * Appends "NO MATCHES" to the row of each girl who did not receive any of her top 6 preferences
+ * Compare each girl's workshop preferences to what they were assigned in the output sheet.
+ * Appends a list to the row of the girl describing the numbers of her preferences that she recieved.
+ * Appends "NO MATCHES" to the row of each girl who did not receive any of her top 6 preferences.
  */
 function checkMatches() {
     var responseSheet = SpreadsheetApp.getActiveSheet();
@@ -265,7 +351,7 @@ function checkMatches() {
 
         outputSheet.getRange(matchCell).setValue(studentMatches.toString());
 
-        if (studentMatches.toString() == ["X","X","X"].toString()) {
+        if (studentMatches.toString() == ["X", "X", "X"].toString()) {
             outputSheet.getRange(warningCell).setValue("NO MATCHES");
         }
         else {
