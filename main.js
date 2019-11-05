@@ -254,7 +254,7 @@ var Student = function(row, responseData) {
      * Calculates and returns whether or not the student has been assigned a workshop in all 3 sessions.
      */
     this.fullyAssigned = function() {
-        return (this.numberAssigned == 3);
+        return (this.numberAssigned == SESSIONS_PER_WORKSHOP);
     }
 }
 
