@@ -145,7 +145,7 @@ var Workshop = function(row, workshopData, responseData){
 }
 
 /**
- * Returns an array of workshop objects based on the workshop sheet and response sheets.
+ * Returns an array of Workshop objects based on the workshop sheet and response sheets.
  */
 function makeWorkshopArray() {
     var responseSheet = SpreadsheetApp.getActiveSheet();
@@ -257,6 +257,23 @@ var Student = function(row, responseData) {
         return (this.numberAssigned == SESSIONS_PER_WORKSHOP);
     }
 }
+
+/**
+ * Returns an array of Student objects based on the response data.
+ */
+function makeStudentArray() {
+    var responseSheet = SpreadsheetApp.getActiveSheet();
+    var responseData = responseSheet.getDataRange().getValues();
+
+    var studentArray = [];
+
+    for (var i = 1; i < responseData.length; i++) {
+        studentArray.push(new Student(i, responseData));
+    }
+    return studentArray;
+}
+
+var STUDENT_ARRAY = makeStudentArray();
 
 /**
  * The main algorithm that matches each girl with as many of her preferred workshops as possible.
