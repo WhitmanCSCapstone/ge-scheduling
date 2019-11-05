@@ -64,7 +64,7 @@ var Workshop = function(row, workshopData, responseData){
     this.dynamicCapacityB = this.staticCapacityB;
     this.dynamicCapacityC = this.staticCapacityC;
     this.dynamicCapacityTotal = this.staticCapacityTotal;
-    
+
     this.popularityScore = 0;
     this.calcPopularity(responseData);
 
@@ -216,6 +216,9 @@ function morePopular(a, b) {
 // An array containing every workshop object, sorted from least to most popular
 WORKSHOP_ARRAY = makeWorkshopArray().sort(morePopular);
 
+/**
+ * The main algorithm that matches each girl with as many of her preferred workshops as possible
+ */
 function matchGirls() {
     var responseSheet = SpreadsheetApp.getActiveSheet();
     var responseData = responseSheet.getDataRange().getValues();
