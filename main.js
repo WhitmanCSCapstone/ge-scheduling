@@ -6,10 +6,10 @@ var COLUMN_PREFERENCE_2 = 2;
 var COLUMN_PREFERENCE_3 = 3;
 
 // Column indicies of workshop info for the workshop class
-var COLUMN_WORKSHOP_NAME_ENGLISH = 2;
-var COLUMN_WORKSHOP_NAME_SPANISH = 8;
+var COLUMN_WORKSHOP_NAME = 2;
 var COLUMN_WORKSHOP_CAPACITY = 6;
-var MINIMUM_WORKSHOP_FILL = 0.75; // TODO: calculate what this value should be based on the sum of total workshop capacities and total number of students
+var MINIMUM_WORKSHOP_FILL = 0.75; // TODO: calculate what this value should be based on the sum of total workshop capacities and total number of students\
+var SESSIONS_PER_WORKSHOP = 3;
 
 // Column indices of student preferences in order from most preferred to least
 var PREFERENCES = [1, 2, 3, 4, 5, 6];
@@ -42,6 +42,56 @@ function onOpen() {
 }
 
 /**
+ * Workshop Session Class
+ * 
+ * An object that contains all significant information about a single session in a workshop.
+ * This is meant to condense the workshop class's methods to avoid redundancy
+ * 
+ * @param {int}     row             The row number of the workshop as it appears in workshopData
+ * @param {array}   workshopData    The array containing the girls' responses about their workshop preferences
+ */
+var Session = function(row, workshopData) {
+    this.originalCapacity = workshopData[row][COLUMN_WORKSHOP_CAPACITY];
+    this.remainingCapacity = this.originalCapacity;
+
+    /**
+     * Calculates and returns whether or not the session is completely full
+     */
+    this.isFull = function() {
+        return (this.remainingCapacity == 0);
+    }
+
+    /**
+     * Calculates and returns whether or not the session is "full enough" based on the MINIMUM_WORKSHOP_FILL variable
+     */
+    this.hasReachedQuorum = function() {
+        return (this.remainingCapacity <= (this.originalCapacity * (1 - MINIMUM_WORKSHOP_FILL)))
+    }
+
+    /**
+     * Subtracts 1 from the session's remaining capacity
+     */
+    this.addStudent = function() {
+        if (this.isFull()) {
+            throw new Error("Cannot add students to a full session");
+        }
+        else {
+            this.remainingCapacity -= 1;
+        }
+    }
+
+    /**
+     * Manually sets a the session's original and remaining capacities to a discrete value
+     * 
+     * @param {int}     value   the new integer value for the session's remaining capacity
+     */
+    this.setCapacity = function(value) {
+        this.originalCapacity = value;
+        this.remainingCapacity = value;
+    }
+}
+
+/**
  * Workshop Class.
  * 
  * An object that contains all significant information about a single workshop.
@@ -51,128 +101,34 @@ function onOpen() {
  * @param {array}   responseData    The array containing the girls' responses about their workshop preferences
  */
 var Workshop = function(row, workshopData, responseData){
-    this.nameEnglish = workshopData[row][COLUMN_WORKSHOP_NAME_ENGLISH];
-    this.nameSpanish = workshopData[row][COLUMN_WORKSHOP_NAME_SPANISH];
+    this.name = workshopData[row][COLUMN_WORKSHOP_NAME];
     this.number = row;
 
-    this.staticCapacityA = workshopData[row][COLUMN_WORKSHOP_CAPACITY];
-    this.staticCapacityB = workshopData[row][COLUMN_WORKSHOP_CAPACITY];
-    this.staticCapacityC = workshopData[row][COLUMN_WORKSHOP_CAPACITY];
-    this.staticCapacityTotal = this.staticCapacityA + this.staticCapacityB + this.staticCapacityC;
-
-    this.dynamicCapacityA = this.staticCapacityA;
-    this.dynamicCapacityB = this.staticCapacityB;
-    this.dynamicCapacityC = this.staticCapacityC;
-    this.dynamicCapacityTotal = this.staticCapacityTotal;
+    this.sessions = [];
+    for (var i = 0; i < SESSIONS_PER_WORKSHOP; i++) {
+        this.sessions.push(new Session(row, workshopData));
+    }
 
     this.popularityScore = 0;
-    this.calcPopularity(responseData);
-
-    /**
-     * Calculates the popularity score of a given workshop based on how often they occur in the response data
-     * 
-     * @param {array}   responseData    The array containing the girls' responses about their workshop preferences
-     */
-    this.calcPopularity = function(responseData) {
-        for (var i = 1; i < responseData.length; i++) { // for every student i
-            for (var j = 0; j < PREFERENCES.length; j++) { // for every student preference j
-                var preferredWorkshop = responseData[i][PREFERENCES[j]];
-                var workshopNum = parseFloat(preferredWorkshop.slice(preferredWorkshop.indexOf("(")+1, preferredWorkshop.indexOf(")")));
-                if (workshopNum == this.number) {
-                    this.popularityScore += POPULARITY_POINTS[j];
-                }
+    for (var i = 1; i < responseData.length; i++) { // for every student i
+        for (var j = 0; j < PREFERENCES.length; j++) { // for every student preference j
+            var preferredWorkshop = responseData[i][PREFERENCES[j]];
+            var workshopNum = parseFloat(preferredWorkshop.slice(preferredWorkshop.indexOf("(")+1, preferredWorkshop.indexOf(")")));
+            if (workshopNum == this.number) {
+                this.popularityScore += POPULARITY_POINTS[j];
             }
         }
     }
-
+    
     /**
-     * Calculates and returns whether or not the session is "full enough" based on the MINIMUM_WORKSHOP_FILL variable
-     * 
-     * @param {char}    session     a character "A", "B", or "C" that describes which session to calculate the variable for
+     * Calculates the total remaining capacity of the workshop
      */
-    this.hasReachedQuorum = function(session) {
-        if (session == "A") {
-            return (this.dynamicCapacityA <= (this.staticCapacityA * (1 - MINIMUM_WORKSHOP_FILL)));
+    this.totalRemainingCapacity = function(){
+        var total = 0;
+        for (var i = 0; i < this.sessions.length; i++) {
+            total += this.sessions[i].remainingCapacity;
         }
-        else if (session == "B") {
-            return (this.dynamicCapacityB <= (this.staticCapacityB * (1 - MINIMUM_WORKSHOP_FILL)));
-        }
-        else if (session == "C") {
-            return (this.dynamicCapacityC <= (this.staticCapacityC * (1 - MINIMUM_WORKSHOP_FILL)));
-        }
-        else {
-            throw new Error("This is not a valid session letter");
-        }
-    }
-
-    /**
-     * Calculates and returns whether or not the session is completely full
-     * 
-     * @param {char}    session     a character "A", "B", or "C" that describes which session to calculate the variable for
-     */
-    this.isFull = function(session) {
-        if (session == "A") {
-            return (this.dynamicCapacityA == 0);
-        }
-        else if (session == "B") {
-            return (this.dynamicCapacityB == 0);
-        }
-        else if (session == "C") {
-            return (this.dynamicCapacityC == 0);
-        }
-        else {
-            throw new Error("This is not a valid session letter");
-        }
-    }
-
-    /**
-     * Subtracts 1 from the specified session's capacity and updates other variables accordingly
-     * 
-     * @param {char}    session     a character "A", "B", or "C" that describes which session that will have its capacity changed
-     */
-    this.addStudentToSession = function(session) {
-        if (this.isFull(session)) {
-            throw new Error("Session " + session + " is full for " + this.nameEnglish);
-        }
-        if (session == "A") {
-            this.dynamicCapacityA -= 1;
-        }
-        else if (session == "B") {
-            this.dynamicCapacityB -= 1;
-        }
-        else if (session == "C") {
-            this.dynamicCapacityC -= 1;
-        }
-        else {
-            throw new Error("This is not a valid session letter");
-        }
-        this.dynamicCapacityTotal = this.dynamicCapacityA + this.dynamicCapacityB +this.dynamicCapacityC;
-    }
-
-    /**
-     * Manually sets a workshop's specified session's capacity to a discrete value and updates other variables accordingly
-     * 
-     * @param {char}    session     a character "A", "B", or "C" that describes which session that will have its capacity changed
-     * @param {int}     value       the new integer value for the session's remaining capacity
-     */
-    this.setSessionCapacity = function(session, value) {
-        if (session == "A") {
-            this.staticCapacityA = value;
-            this.dynamicCapacityA = value;
-        }
-        else if (session == "B") {
-            this.staticCapacityB = value;
-            this.dynamicCapacityB = value;
-        }
-        else if (session == "C") {
-            this.staticCapacityC = value;
-            this.dynamicCapacityC = value;
-        }
-        else {
-            throw new Error("This is not a valid session letter");
-        }
-        this.dynamicCapacityTotal = this.dynamicCapacityA + this.dynamicCapacityB +this.dynamicCapacityC;
-        this.staticCapacityTotal = this.staticCapacityA + this.staticCapacityB + this.staticCapacityC; 
+        return total;
     }
 }
 
