@@ -1,4 +1,3 @@
-// TODO Search for header names instead of assuming the column indexes
 var COLUMN_FIRST_NAME = 10;
 var COLUMN_LAST_NAME = 11;
 var COLUMN_PREFERENCE_1 = 1;
@@ -8,7 +7,7 @@ var COLUMN_PREFERENCE_3 = 3;
 // Column indicies of workshop info for the workshop class
 var COLUMN_WORKSHOP_NAME = 2;
 var COLUMN_WORKSHOP_CAPACITY = 6;
-var MINIMUM_WORKSHOP_FILL = 0.75; // TODO: calculate what this value should be based on the sum of total workshop capacities and total number of students\
+var MINIMUM_WORKSHOP_FILL = 0.75;
 var SESSIONS_PER_WORKSHOP = 3;
 
 // Column indices of student preferences in order from most preferred to least
@@ -373,7 +372,7 @@ function checkMatches() {
     for (var i = 1; i < outputData.length; i++) { // for every student i
         var studentMatches = [];
         for (var j = 0; j < PREFERENCES.length; j++) { // for every student's preference j
-            var preferredWorkshop = responseData[i][PREFERENCES[j]]; // TODO: NEEDS HELPER FUNCTION TO EXTRACT WORKSHOP NUMBER
+            var preferredWorkshop = responseData[i][PREFERENCES[j]];
             for (var k = 0; k < ENROLLED.length; k++) {
                 var enrolledWorkshop = outputData[i][ENROLLED[k]]; // for every student's assigned workshop k
                 if (enrolledWorkshop == preferredWorkshop) {
