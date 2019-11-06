@@ -51,8 +51,10 @@ function onOpen() {
  * @param {array} workshopData The array containing the girls' responses about their workshop preferences.
  */
 var Session = function(row, workshopData) {
-    this.originalCapacity = workshopData[row][COLUMN_WORKSHOP_CAPACITY];
-    this.remainingCapacity = this.originalCapacity;
+    this.init = function() {
+        this.originalCapacity = workshopData[row][COLUMN_WORKSHOP_CAPACITY];
+        this.remainingCapacity = this.originalCapacity;
+    }
 
     /**
      * Calculates and returns whether or not the session is completely full.
@@ -101,6 +103,8 @@ var Session = function(row, workshopData) {
         this.originalCapacity = value;
         this.remainingCapacity = value;
     }
+
+    this.init();
 }
 
 /**
@@ -112,24 +116,34 @@ var Session = function(row, workshopData) {
  * @param {array} workshopData The array containing all information about the workshops.
  * @param {array} responseData The array containing the girls' responses about their workshop preferences.
  */
-var Workshop = function(row, workshopData, responseData){
-    this.name = workshopData[row][COLUMN_WORKSHOP_NAME];
-    this.number = row;
+var Workshop = function(row, workshopData, responseData) {
+    this.init = function() {
+        this.name = workshopData[row][COLUMN_WORKSHOP_NAME];
+        this.number = row;
 
-    this.sessions = [];
-    for (var i = 0; i < SESSIONS_PER_WORKSHOP; i++) {
-        this.sessions.push(new Session(row, workshopData));
+        this.sessions = [];
+        for (var i = 0; i < SESSIONS_PER_WORKSHOP; i++) {
+            this.sessions.push(new Session(row, workshopData));
+        }
+
+        this.popularityScore = this.calculatePopularity();
     }
 
-    this.popularityScore = 0;
-    for (var i = 1; i < responseData.length; i++) { // for every student i
-        for (var j = 0; j < PREFERENCES.length; j++) { // for every student preference j
-            var preferredWorkshop = responseData[i][PREFERENCES[j]];
-            var workshopNum = parseFloat(preferredWorkshop.slice(preferredWorkshop.indexOf("(")+1, preferredWorkshop.indexOf(")")));
-            if (workshopNum == this.number) {
-                this.popularityScore += POPULARITY_POINTS[j];
+    /**
+     * Calcuates the popularity of the workshop based on the students' survey responses.
+     */
+    this.calculatePopularity = function() {
+        var popularity = 0;
+        for (var i = 1; i < responseData.length; i++) { // for every student i
+            for (var j = 0; j < PREFERENCES.length; j++) { // for every student preference j
+                var preferredWorkshop = responseData[i][PREFERENCES[j]];
+                var workshopNum = parseFloat(preferredWorkshop.slice(preferredWorkshop.indexOf("(")+1, preferredWorkshop.indexOf(")")));
+                if (workshopNum == this.number) {
+                    popularity += POPULARITY_POINTS[j];
+                }
             }
         }
+        return popularity;
     }
     
     /**
@@ -142,6 +156,8 @@ var Workshop = function(row, workshopData, responseData){
         }
         return total;
     }
+
+    this.init();
 }
 
 /**
@@ -190,21 +206,28 @@ WORKSHOP_ARRAY = makeWorkshopArray().sort(morePopular);
  * An object that contains all significant information about a single student.
  */
 var Student = function(row, responseData) {
-    this.firstName = responseData[row][COLUMN_FIRST_NAME];
-    this.lastName = responseData[row][COLUMN_LAST_NAME];
+    this.init = function() {
+        this.firstName = responseData[row][COLUMN_FIRST_NAME];
+        this.lastName = responseData[row][COLUMN_LAST_NAME];
 
-    this.preferences = [];
-    for (var i = 0; i < PREFERENCES.length; i++) {
-        var preferredWorkshop = responseData[row][PREFERENCES[i]];
-        var workshopNum = parseFloat(preferredWorkshop.slice(preferredWorkshop.indexOf("(")+1, preferredWorkshop.indexOf(")")));
-        for (var j = 0; j < WORKSHOP_ARRAY.length; j++) {
-            if (WORKSHOP_ARRAY[j].number == workshopNum) {
-                this.preferences.push(WORKSHOP_ARRAY[j]);
-            }
-        }
+        this.preferences = this.getPreferences();
+
+        this.assignedWorkshops = [null, null, null];
     }
 
-    this.assignedWorkshops = [null, null, null];
+    this.getPreferences = function() {
+        var preferences = [];
+        for (var i = 0; i < PREFERENCES.length; i++) {
+            var preferredWorkshop = responseData[row][PREFERENCES[i]];
+            var workshopNum = parseFloat(preferredWorkshop.slice(preferredWorkshop.indexOf("(")+1, preferredWorkshop.indexOf(")")));
+            for (var j = 0; j < WORKSHOP_ARRAY.length; j++) {
+                if (WORKSHOP_ARRAY[j].number == workshopNum) {
+                    preferences.push(WORKSHOP_ARRAY[j]);
+                }
+            }
+        }
+        return preferences;
+    }
 
     this.assignWorkshop = function(workshop, session) {
         workshop.sessions[session].addStudent();
@@ -256,6 +279,8 @@ var Student = function(row, responseData) {
     this.fullyAssigned = function() {
         return (this.numberAssigned == SESSIONS_PER_WORKSHOP);
     }
+
+    this.init();
 }
 
 /**
