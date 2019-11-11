@@ -1,5 +1,3 @@
-/*globals SpreadsheetApp, Logger */
-
 var COLUMN_FIRST_NAME = 10;
 var COLUMN_LAST_NAME = 11;
 var COLUMN_PREFERENCE_1 = 1;
@@ -27,13 +25,7 @@ var ENROLLED = [2, 3, 4];
 // Points to be added for each workshop a student didn't want
 var UNPREFERRED_SCORE = 20;
 
-var HEADERS = [
-    "First name",
-    "Last name",
-    "Session 1",
-    "Session 2",
-    "Session 3"
-];
+var HEADERS = ['First name', 'Last name', 'Session 1', 'Session 2', 'Session 3'];
 
 var OUTPUT_SHEET_ID = "13K10UA0ZNjCDGTbVbO104CdW97DJgm3MaK2TZpiRytw";
 var WORKSHOP_SHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
@@ -43,42 +35,38 @@ Automatically runs when sheet is opened.
 */
 function onOpen() {
     SpreadsheetApp.getUi()
-        .createMenu("Great Explorations")
-        .addItem("Match Girls to Workshops", "matchGirls")
+        .createMenu('Great Explorations')
+        .addItem('Match Girls to Workshops', 'matchGirls')
         .addToUi();
 }
 
 /**
  * Workshop Session Class.
- *
+ * 
  * An object that contains all significant information about a single session in a workshop.
  * This is meant to condense the workshop class's methods to avoid redundancy.
- *
- * @param {int}   row          The row number of the workshop as it appears in workshopData.
- * @param {array} workshopData The array containing the girls' responses about their workshop preferences.
+ * 
+ * @param {int} capacity The number of students who can be assigned to this workshop session.
  */
-var Session = function(row, workshopData) {
+var Session = function(capacity) {
     this.init = function() {
-        this.originalCapacity = workshopData[row][COLUMN_WORKSHOP_CAPACITY];
+        this.originalCapacity = capacity
         this.remainingCapacity = this.originalCapacity;
-    };
+    }
 
     /**
      * Calculates and returns whether or not the session is completely full.
      */
     this.isFull = function() {
-        return this.remainingCapacity === 0;
-    };
+        return (this.remainingCapacity == 0);
+    }
 
     /**
      * Calculates and returns whether or not the session is "full enough" based on the MINIMUM_WORKSHOP_FILL variable.
      */
     this.hasReachedQuorum = function() {
-        return (
-            this.remainingCapacity <=
-            this.originalCapacity * (1 - MINIMUM_WORKSHOP_FILL)
-        );
-    };
+        return (this.remainingCapacity <= (this.originalCapacity * (1 - MINIMUM_WORKSHOP_FILL)))
+    }
 
     /**
      * Subtracts 1 from the session's remaining capacity.
@@ -86,201 +74,162 @@ var Session = function(row, workshopData) {
     this.addStudent = function() {
         if (this.isFull()) {
             throw new Error("Cannot add students to a full session");
-        } else {
+        }
+        else {
             this.remainingCapacity -= 1;
         }
-    };
+    }
 
     /**
      * Adds 1 to the session's remaining capacity.
      */
     this.subtractStudent = function() {
-        if (this.remainingCapacity === this.originalCapacity) {
+        if (this.remainingCapacity == this.originalCapacity) {
             throw new Error("Cannot remove students from an empty session");
-        } else {
+        }
+        else {
             this.remainingCapacity += 1;
         }
-    };
+    }
 
     /**
      * Manually sets a the session's original and remaining capacities to a discrete value.
-     *
+     * 
      * @param {int} value the new integer value for the session's remaining capacity.
      */
     this.setCapacity = function(value) {
         this.originalCapacity = value;
         this.remainingCapacity = value;
-    };
+    }
 
     this.init();
-};
+}
 
 /**
  * Workshop Class.
- *
+ * 
  * An object that contains all significant information about a single workshop.
- *
- * @param {int}   row          The row number of the workshop as it appears in workshopData.
- * @param {array} workshopData The array containing all information about the workshops.
- * @param {array} responseData The array containing the girls' responses about their workshop preferences.
+ * 
+ * @param {string} name     The name of the workshop.
+ * @param {int}    number   The number of the workshop as it appears in the workshop sheet.
+ * @param {int}    capacity The capacity of a single session of the workshop
  */
-var Workshop = function(row, workshopData, responseData) {
+var Workshop = function(name, number, capacity) {
     this.init = function() {
-        this.name = workshopData[row][COLUMN_WORKSHOP_NAME];
-        this.number = row;
+        this.name = name;
+        this.number = number;
 
         this.sessions = [];
         for (var i = 0; i < SESSIONS_PER_WORKSHOP; i++) {
-            this.sessions.push(new Session(row, workshopData));
+            this.sessions.push(new Session(capacity));
         }
 
-        this.popularityScore = this.calculatePopularity();
-    };
+        this.popularityScore = 0;
+    }
 
     /**
-     * Calcuates the popularity of the workshop based on the students' survey responses.
+     * Increments the popularity of the workshop based on the students' preferences.
      */
-    this.calculatePopularity = function() {
-        var popularity = 0;
-        for (var i = 1; i < responseData.length; i++) {
-            // for every student i
-            for (var j = 0; j < PREFERENCES.length; j++) {
-                // for every student preference j
-                var preferredWorkshop = responseData[i][PREFERENCES[j]];
-                var workshopNum = parseFloat(
-                    preferredWorkshop.slice(
-                        preferredWorkshop.indexOf("(") + 1,
-                        preferredWorkshop.indexOf(")")
-                    )
-                );
-                if (workshopNum === this.number) {
-                    popularity += POPULARITY_POINTS[j];
-                }
-            }
-        }
-        return popularity;
-    };
+    this.incrementPopularity = function(index) {
+        this.popularityScore += POPULARITY_POINTS[index]
+    }
 
     /**
      * Calculates the total remaining capacity of the workshop.
      */
-    this.totalRemainingCapacity = function() {
+    this.totalRemainingCapacity = function(){
         var total = 0;
         for (var i = 0; i < this.sessions.length; i++) {
             total += this.sessions[i].remainingCapacity;
         }
         return total;
-    };
+    }
 
     this.init();
-};
+}
 
 /**
- * Returns an array of Workshop objects based on the workshop sheet and response sheets.
+ * Returns a dictionary of Workshop objects based on the workshop sheet and response sheet.
  */
-function makeWorkshopArray() {
+function makeWorkshopDict() {
     var responseSheet = SpreadsheetApp.getActiveSheet();
     var responseData = responseSheet.getDataRange().getValues();
 
     var workshopSheet = SpreadsheetApp.openById(WORKSHOP_SHEET_ID);
     var workshopData = workshopSheet.getDataRange().getValues();
 
-    var workshopArray = [];
+    var workshopDict = {};
 
     for (var i = 1; i < workshopData.length; i++) {
-        var newWorkshop = new Workshop(i, workshopData, responseData);
-        workshopArray.push(newWorkshop);
+        name = workshopData[i][COLUMN_WORKSHOP_NAME];
+        number = i;
+        capacity = workshopData[i][COLUMN_WORKSHOP_CAPACITY];
+
+        var newWorkshop = new Workshop(name, number, capacity);
+        workshopDict[i] = newWorkshop;
     }
-    return workshopArray;
+    return workshopDict;
 }
 
-/**
- * Used to compare two workshops based on their popularity scores.
- *
- * @param {workshop} a A workshop from the workshop class.
- * @param {workshop} b A workshop from the workshop class.
- */
-function morePopular(a, b) {
-    if (a.popularityScore < b.popularityScore) {
-        return -1;
-    } else if (a.popularityScore > b.popularityScore) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-// An array containing every workshop object, sorted from least to most popular
-var WORKSHOP_ARRAY = makeWorkshopArray().sort(morePopular);
+// A dictionary containing all the workshops that can be indexed by workshop number
+var WORKSHOP_DICT = makeWorkshopDict();
 
 /**
  * Student Class.
- *
+ * 
  * An object that contains all significant information about a single student.
+ * 
+ * @param {} firstName       The first name of the student.
+ * @param {} lastName        The last name of the student.
+ * @param {} preferenceArray The ordered array of the student's preferred workshops from most to least preferred
  */
-var Student = function(row, responseData) {
+var Student = function(firstName, lastName, preferenceArray) {
     this.init = function() {
-        this.firstName = responseData[row][COLUMN_FIRST_NAME];
-        this.lastName = responseData[row][COLUMN_LAST_NAME];
+        this.firstName = firstName;
+        this.lastName = lastName;
 
-        this.preferences = this.getPreferences();
+        this.preferences = preferenceArray;
+        this.updatePopularities();
 
         this.assignedWorkshops = [null, null, null];
-    };
+    }
 
-    this.getPreferences = function() {
-        var preferences = [];
-        for (var i = 0; i < PREFERENCES.length; i++) {
-            var preferredWorkshop = responseData[row][PREFERENCES[i]];
-            var workshopNum = parseFloat(
-                preferredWorkshop.slice(
-                    preferredWorkshop.indexOf("(") + 1,
-                    preferredWorkshop.indexOf(")")
-                )
-            );
-            for (var j = 0; j < WORKSHOP_ARRAY.length; j++) {
-                if (WORKSHOP_ARRAY[j].number === workshopNum) {
-                    preferences.push(WORKSHOP_ARRAY[j]);
-                }
-            }
+    this.updatePopularities = function() {
+        for (var i = 0; i <this.preferences.length; i++) {
+            this.preferences[i].incrementPopularity(i);
         }
-        return preferences;
-    };
+    }
 
     this.assignWorkshop = function(workshop, session) {
         workshop.sessions[session].addStudent();
         this.assignedWorkshops[session] = this.preferences[session];
-    };
+    }
 
     /**
      * Swaps the session times of two workshops the student is assigned to, or moves an assigned workshop from one session time to another empty one.
-     *
+     * 
      * @param {int} session1 the index of one of the workshops in the student's assigned workshops.
      * @param {int} session2 the index of one of the workshops in the student's assigned workshops.
      */
     this.swapWorkshops = function(session1, session2) {
         if (this.assignedWorkshops[session1] != null) {
-            this.assignedWorkshops[session1].sessions[
-                session1
-            ].subtractStudent();
+            this.assignedWorkshops[session1].sessions[session1].subtractStudent();
         }
         if (this.assignedWorkshops[session2] != null) {
-            this.assignedWorkshops[session2].sessions[
-                session2
-            ].subtractStudent();
+            this.assignedWorkshops[session2].sessions[session2].subtractStudent();
         }
 
         var temp = this.assignedWorkshops[session1];
         this.assignedWorkshops[session1] = this.assignedWorkshops[session2];
         this.assignedWorkshops[session2] = temp;
-
+        
         if (this.assignedWorkshops[session1] != null) {
             this.assignedWorkshops[session1].sessions[session1].addStudent();
         }
         if (this.assignedWorkshops[session2] != null) {
             this.assignedWorkshops[session2].sessions[session2].addStudent();
         }
-    };
+    }
 
     /**
      * Calculates and returns the number of workshops that the student has already been assigned to.
@@ -293,17 +242,35 @@ var Student = function(row, responseData) {
             }
         }
         return total;
-    };
+    }
 
     /**
      * Calculates and returns whether or not the student has been assigned a workshop in all 3 sessions.
      */
     this.fullyAssigned = function() {
-        return this.numberAssigned === SESSIONS_PER_WORKSHOP;
-    };
+        return (this.numberAssigned == SESSIONS_PER_WORKSHOP);
+    }
+
+    /**
+     * Calculates and returns whether or not the student has a full list of preferences.
+     */
+    this.hasAllPreferences = function() {
+        return (this.preferences.length >= PREFERENCES.length);
+    }
+
+    /**
+     * Appends a workshop to a student's list of preferences
+     * 
+     * @param {Workshop} workshop A workshop object to be appended onto the student's list of preferences
+     */
+    this.appendPreference = function(workshop) {
+        var thisIndex = this.preferences.length;
+        this.preferences.push(workshop);
+        workshop.incrementPopularity(thisIndex);
+    }
 
     this.init();
-};
+}
 
 /**
  * Returns an array of Student objects based on the response data.
@@ -314,13 +281,88 @@ function makeStudentArray() {
 
     var studentArray = [];
 
-    for (var i = 1; i < responseData.length; i++) {
-        studentArray.push(new Student(i, responseData));
+    for (var i = 1; i < responseData.length; i++) { // for all students i
+        firstName = responseData[i][COLUMN_FIRST_NAME];
+        lastName = responseData[i][COLUMN_LAST_NAME];
+        
+        var preferenceArray = [];
+
+        for (var j = 0; j < PREFERENCES.length; j++) { // for all student preferences j
+            var preferredWorkshop = responseData[i][PREFERENCES[j]];
+            var workshopNum = parseInt(preferredWorkshop.slice(preferredWorkshop.indexOf("(")+1, preferredWorkshop.indexOf(")")));
+            var workshopObject = WORKSHOP_DICT[workshopNum];
+
+            var uniquePreference = true; // make sure this preference is not a duplicate
+
+            for (var k = 0; k < preferenceArray.length; k++) { // for all already listed preferences k
+                if (workshopObject == preferenceArray[k]) {
+                    uniquePreference = false;
+                }
+            }
+
+            if (uniquePreference) {
+                preferenceArray.push(workshopObject);
+            }
+        }
+        studentArray.push(new Student(firstName, lastName, preferenceArray));
     }
     return studentArray;
 }
 
 var STUDENT_ARRAY = makeStudentArray();
+
+/**
+ * Used to compare two workshops based on their popularity scores.
+ * 
+ * @param {workshop} a A workshop from the workshop class.
+ * @param {workshop} b A workshop from the workshop class.
+ */
+function morePopular(a, b) {
+    if (a.popularityScore < b.popularityScore) {
+        return -1;
+    }
+    else if (a.popularityScore > b.popularityScore) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+/**
+ * Creates an array of all the workshop objects sorted by popularity
+ */
+function makeWorkshopArray() {
+    workshopArray = [];
+    var workshopDictKeys = Object.keys(WORKSHOP_DICT);
+    for (var i = 0; i < workshopDictKeys.length; i++) {
+        var dictKey = workshopDictKeys[i];
+        var thisWorkshop = WORKSHOP_DICT[dictKey];
+        workshopArray.push(thisWorkshop);
+    }
+    workshopArray.sort(morePopular);
+    
+    return workshopArray;
+}
+
+var WORKSHOP_ARRAY = makeWorkshopArray();
+
+/**
+ * Finds students who have fewer than the correct number of unique preferences and assigns them the least preferred workshops as preferences
+ */
+function fixStudentPreferences() {
+    for (var i = 0; i < STUDENT_ARRAY.length; i++) {
+        var thisStudent = STUDENT_ARRAY[i];
+        var addWorkshop = 0;
+        while (!(thisStudent.hasAllPreferences())) {
+            thisStudent.appendPreference(WORKSHOP_ARRAY[addWorkshop]);
+            addWorkshop += 1;
+        }
+    }
+}
+
+fixStudentPreferences();
+WORKSHOP_ARRAY.sort(morePopular);
 
 /**
  * The main algorithm that matches each girl with as many of her preferred workshops as possible.
@@ -341,14 +383,8 @@ function matchGirls() {
         var preference_1 = responseData[i][COLUMN_PREFERENCE_1];
         var preference_2 = responseData[i][COLUMN_PREFERENCE_2];
         var preference_3 = responseData[i][COLUMN_PREFERENCE_3];
-        outputSheet.appendRow([
-            firstName,
-            lastName,
-            preference_1,
-            preference_2,
-            preference_3
-        ]);
-    }
+        outputSheet.appendRow([firstName, lastName, preference_1, preference_2, preference_3]);
+    } 
 }
 
 /**
@@ -358,27 +394,21 @@ function scorer() {
     var score = 0;
     var responseSheet = SpreadsheetApp.getActiveSheet();
     var responseData = responseSheet.getDataRange().getValues();
-
+    
     var outputSheet = SpreadsheetApp.openById(OUTPUT_SHEET_ID);
     var outputData = outputSheet.getDataRange().getValues();
 
-    for (var i = 1; i < outputData.length; i++) {
-        // for every student i
+    for (var i = 1; i < outputData.length; i++) { // for every student i
         var studentMatches = [];
-        for (var j = 0; j < PREFERENCES.length; j++) {
-            // for every student's preference j
-            var tempScore = POINTS[j];
+        for (var j = 0; j < PREFERENCES.length; j++) { // for every student's preference j
+            tempScore = POINTS[j];
             var preferredWorkshop = responseData[i][PREFERENCES[j]];
             for (var k = 0; k < ENROLLED.length; k++) {
-                // for every student's assigned workshop k
-                var enrolledWorkshop = outputData[i][ENROLLED[k]];
-                if (enrolledWorkshop === preferredWorkshop) {
-                    if (
-                        studentMatches.length < 3 &&
-                        studentMatches.indexOf(PREFERENCES[j]) === -1
-                    ) {
+                var enrolledWorkshop = outputData[i][ENROLLED[k]]; // for every student's assigned workshop k
+                if (enrolledWorkshop == preferredWorkshop) {
+                    if ((studentMatches.length < 3) && (studentMatches.indexOf(PREFERENCES[j]) == -1)) {
                         studentMatches.push(PREFERENCES[j].toString());
-                        score += tempScore;
+                        score += tempScore
                     }
                 }
             }
@@ -389,7 +419,7 @@ function scorer() {
             score += UNPREFERRED_SCORE;
         }
     }
-    Logger.log("Score: " + score);
+    Logger.log('Score: ' + score);
 }
 
 /**
@@ -400,24 +430,18 @@ function scorer() {
 function checkMatches() {
     var responseSheet = SpreadsheetApp.getActiveSheet();
     var responseData = responseSheet.getDataRange().getValues();
-
+    
     var outputSheet = SpreadsheetApp.openById(OUTPUT_SHEET_ID);
     var outputData = outputSheet.getDataRange().getValues();
 
-    for (var i = 1; i < outputData.length; i++) {
-        // for every student i
+    for (var i = 1; i < outputData.length; i++) { // for every student i
         var studentMatches = [];
-        for (var j = 0; j < PREFERENCES.length; j++) {
-            // for every student's preference j
+        for (var j = 0; j < PREFERENCES.length; j++) { // for every student's preference j
             var preferredWorkshop = responseData[i][PREFERENCES[j]];
             for (var k = 0; k < ENROLLED.length; k++) {
-                // for every student's assigned workshop k
-                var enrolledWorkshop = outputData[i][ENROLLED[k]];
-                if (enrolledWorkshop === preferredWorkshop) {
-                    if (
-                        studentMatches.length < 3 &&
-                        studentMatches.indexOf(PREFERENCES[j]) === -1
-                    ) {
+                var enrolledWorkshop = outputData[i][ENROLLED[k]]; // for every student's assigned workshop k
+                if (enrolledWorkshop == preferredWorkshop) {
+                    if ((studentMatches.length < 3) && (studentMatches.indexOf(PREFERENCES[j]) == -1)) {
                         studentMatches.push(PREFERENCES[j].toString());
                     }
                 }
@@ -427,15 +451,16 @@ function checkMatches() {
         while (studentMatches.length < 3) {
             studentMatches.push("X");
         }
-
-        var matchCell = "F".concat((i + 1).toString());
-        var warningCell = "G".concat((i + 1).toString());
+        
+        var matchCell = "F".concat((i+1).toString());
+        var warningCell = "G".concat((i+1).toString());
 
         outputSheet.getRange(matchCell).setValue(studentMatches.toString());
 
-        if (studentMatches.toString() === ["X", "X", "X"].toString()) {
+        if (studentMatches.toString() == ["X", "X", "X"].toString()) {
             outputSheet.getRange(warningCell).setValue("NO MATCHES");
-        } else {
+        }
+        else {
             outputSheet.getRange(warningCell).setValue(null);
         }
     }
