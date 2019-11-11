@@ -58,7 +58,7 @@ function onOpen() {
  */
 var Session = function(capacity) {
     this.init = function() {
-        this.originalCapacity = capacity
+        this.originalCapacity = capacity;
         this.remainingCapacity = this.originalCapacity;
     };
 
@@ -66,7 +66,7 @@ var Session = function(capacity) {
      * Calculates and returns whether or not the session is completely full.
      */
     this.isFull = function() {
-        return (this.remainingCapacity === 0);
+        return this.remainingCapacity === 0;
     };
 
     /**
@@ -140,13 +140,13 @@ var Workshop = function(name, number, capacity) {
      * Increments the popularity of the workshop based on the students' preferences.
      */
     this.incrementPopularity = function(index) {
-        this.popularityScore += POPULARITY_POINTS[index]
+        this.popularityScore += POPULARITY_POINTS[index];
     };
 
     /**
      * Calculates the total remaining capacity of the workshop.
      */
-    this.totalRemainingCapacity = function(){
+    this.totalRemainingCapacity = function() {
         var total = 0;
         for (var i = 0; i < this.sessions.length; i++) {
             total += this.sessions[i].remainingCapacity;
@@ -170,15 +170,15 @@ function makeWorkshopDict() {
     var workshopDict = {};
 
     for (var i = 1; i < workshopData.length; i++) {
-        name = workshopData[i][COLUMN_WORKSHOP_NAME];
-        number = i;
-        capacity = workshopData[i][COLUMN_WORKSHOP_CAPACITY];
+        var name = workshopData[i][COLUMN_WORKSHOP_NAME];
+        var number = i;
+        var capacity = workshopData[i][COLUMN_WORKSHOP_CAPACITY];
 
         var newWorkshop = new Workshop(name, number, capacity);
         workshopDict[i] = newWorkshop;
     }
     return workshopDict;
-};
+}
 
 // A dictionary containing all the workshops that can be indexed by workshop number
 var WORKSHOP_DICT = makeWorkshopDict();
@@ -204,7 +204,7 @@ var Student = function(firstName, lastName, preferenceArray) {
     };
 
     this.updatePopularities = function() {
-        for (var i = 0; i <this.preferences.length; i++) {
+        for (var i = 0; i < this.preferences.length; i++) {
             this.preferences[i].incrementPopularity(i);
         }
     };
@@ -222,10 +222,14 @@ var Student = function(firstName, lastName, preferenceArray) {
      */
     this.swapWorkshops = function(session1, session2) {
         if (this.assignedWorkshops[session1] != null) {
-            this.assignedWorkshops[session1].sessions[session1].subtractStudent();
+            this.assignedWorkshops[session1].sessions[
+                session1
+            ].subtractStudent();
         }
         if (this.assignedWorkshops[session2] != null) {
-            this.assignedWorkshops[session2].sessions[session2].subtractStudent();
+            this.assignedWorkshops[session2].sessions[
+                session2
+            ].subtractStudent();
         }
 
         var temp = this.assignedWorkshops[session1];
@@ -257,14 +261,14 @@ var Student = function(firstName, lastName, preferenceArray) {
      * Calculates and returns whether or not the student has been assigned a workshop in all 3 sessions.
      */
     this.fullyAssigned = function() {
-        return (this.numberAssigned === SESSIONS_PER_WORKSHOP);
+        return this.numberAssigned === SESSIONS_PER_WORKSHOP;
     };
 
     /**
      * Calculates and returns whether or not the student has a full list of preferences.
      */
     this.hasAllPreferences = function() {
-        return (this.preferences.length >= PREFERENCES.length);
+        return this.preferences.length >= PREFERENCES.length;
     };
 
     /**
@@ -290,20 +294,28 @@ function makeStudentArray() {
 
     var studentArray = [];
 
-    for (var i = 1; i < responseData.length; i++) { // for all students i
-        firstName = responseData[i][COLUMN_FIRST_NAME];
-        lastName = responseData[i][COLUMN_LAST_NAME];
-        
+    for (var i = 1; i < responseData.length; i++) {
+        // for all students i
+        let firstName = responseData[i][COLUMN_FIRST_NAME];
+        let lastName = responseData[i][COLUMN_LAST_NAME];
+
         var preferenceArray = [];
 
-        for (var j = 0; j < PREFERENCES.length; j++) { // for all student preferences j
+        for (var j = 0; j < PREFERENCES.length; j++) {
+            // for all student preferences j
             var preferredWorkshop = responseData[i][PREFERENCES[j]];
-            var workshopNum = parseInt(preferredWorkshop.slice(preferredWorkshop.indexOf("(")+1, preferredWorkshop.indexOf(")")));
+            var workshopNum = parseInt(
+                preferredWorkshop.slice(
+                    preferredWorkshop.indexOf("(") + 1,
+                    preferredWorkshop.indexOf(")")
+                )
+            );
             var workshopObject = WORKSHOP_DICT[workshopNum];
 
             var uniquePreference = true; // make sure this preference is not a duplicate
 
-            for (var k = 0; k < preferenceArray.length; k++) { // for all already listed preferences k
+            for (var k = 0; k < preferenceArray.length; k++) {
+                // for all already listed preferences k
                 if (workshopObject === preferenceArray[k]) {
                     uniquePreference = false;
                 }
@@ -329,11 +341,9 @@ var STUDENT_ARRAY = makeStudentArray();
 function morePopular(a, b) {
     if (a.popularityScore < b.popularityScore) {
         return -1;
-    }
-    else if (a.popularityScore > b.popularityScore) {
+    } else if (a.popularityScore > b.popularityScore) {
         return 1;
-    }
-    else {
+    } else {
         return 0;
     }
 }
@@ -342,7 +352,7 @@ function morePopular(a, b) {
  * Creates an array of all the workshop objects sorted by popularity
  */
 function makeWorkshopArray() {
-    workshopArray = [];
+    let workshopArray = [];
     var workshopDictKeys = Object.keys(WORKSHOP_DICT);
     for (var i = 0; i < workshopDictKeys.length; i++) {
         var dictKey = workshopDictKeys[i];
@@ -350,7 +360,7 @@ function makeWorkshopArray() {
         workshopArray.push(thisWorkshop);
     }
     workshopArray.sort(morePopular);
-    
+
     return workshopArray;
 }
 
@@ -363,7 +373,7 @@ function fixStudentPreferences() {
     for (var i = 0; i < STUDENT_ARRAY.length; i++) {
         var thisStudent = STUDENT_ARRAY[i];
         var addWorkshop = 0;
-        while (!(thisStudent.hasAllPreferences())) {
+        while (!thisStudent.hasAllPreferences()) {
             thisStudent.appendPreference(WORKSHOP_ARRAY[addWorkshop]);
             addWorkshop += 1;
         }
