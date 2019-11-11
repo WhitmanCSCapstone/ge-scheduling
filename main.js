@@ -231,7 +231,7 @@ var Student = function(firstName, lastName, preferenceArray) {
         var temp = this.assignedWorkshops[session1];
         this.assignedWorkshops[session1] = this.assignedWorkshops[session2];
         this.assignedWorkshops[session2] = temp;
-        
+
         if (this.assignedWorkshops[session1] != null) {
             this.assignedWorkshops[session1].sessions[session1].addStudent();
         }
@@ -279,7 +279,7 @@ var Student = function(firstName, lastName, preferenceArray) {
     };
 
     this.init();
-}
+};
 
 /**
  * Returns an array of Student objects based on the response data.
