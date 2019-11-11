@@ -1,3 +1,5 @@
+/*globals SpreadsheetApp, Logger */
+
 var COLUMN_FIRST_NAME = 10;
 var COLUMN_LAST_NAME = 11;
 var COLUMN_PREFERENCE_1 = 1;
@@ -25,7 +27,13 @@ var ENROLLED = [2, 3, 4];
 // Points to be added for each workshop a student didn't want
 var UNPREFERRED_SCORE = 20;
 
-var HEADERS = ['First name', 'Last name', 'Session 1', 'Session 2', 'Session 3'];
+var HEADERS = [
+    "First name",
+    "Last name",
+    "Session 1",
+    "Session 2",
+    "Session 3"
+];
 
 var OUTPUT_SHEET_ID = "13K10UA0ZNjCDGTbVbO104CdW97DJgm3MaK2TZpiRytw";
 var WORKSHOP_SHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
@@ -35,8 +43,8 @@ Automatically runs when sheet is opened.
 */
 function onOpen() {
     SpreadsheetApp.getUi()
-        .createMenu('Great Explorations')
-        .addItem('Match Girls to Workshops', 'matchGirls')
+        .createMenu("Great Explorations")
+        .addItem("Match Girls to Workshops", "matchGirls")
         .addToUi();
 }
 
@@ -383,8 +391,14 @@ function matchGirls() {
         var preference_1 = responseData[i][COLUMN_PREFERENCE_1];
         var preference_2 = responseData[i][COLUMN_PREFERENCE_2];
         var preference_3 = responseData[i][COLUMN_PREFERENCE_3];
-        outputSheet.appendRow([firstName, lastName, preference_1, preference_2, preference_3]);
-    } 
+        outputSheet.appendRow([
+            firstName,
+            lastName,
+            preference_1,
+            preference_2,
+            preference_3
+        ]);
+    }
 }
 
 /**
@@ -394,21 +408,27 @@ function scorer() {
     var score = 0;
     var responseSheet = SpreadsheetApp.getActiveSheet();
     var responseData = responseSheet.getDataRange().getValues();
-    
+
     var outputSheet = SpreadsheetApp.openById(OUTPUT_SHEET_ID);
     var outputData = outputSheet.getDataRange().getValues();
 
-    for (var i = 1; i < outputData.length; i++) { // for every student i
+    for (var i = 1; i < outputData.length; i++) {
+        // for every student i
         var studentMatches = [];
-        for (var j = 0; j < PREFERENCES.length; j++) { // for every student's preference j
-            tempScore = POINTS[j];
+        for (var j = 0; j < PREFERENCES.length; j++) {
+            // for every student's preference j
+            var tempScore = POINTS[j];
             var preferredWorkshop = responseData[i][PREFERENCES[j]];
             for (var k = 0; k < ENROLLED.length; k++) {
-                var enrolledWorkshop = outputData[i][ENROLLED[k]]; // for every student's assigned workshop k
-                if (enrolledWorkshop == preferredWorkshop) {
-                    if ((studentMatches.length < 3) && (studentMatches.indexOf(PREFERENCES[j]) == -1)) {
+                // for every student's assigned workshop k
+                var enrolledWorkshop = outputData[i][ENROLLED[k]];
+                if (enrolledWorkshop === preferredWorkshop) {
+                    if (
+                        studentMatches.length < 3 &&
+                        studentMatches.indexOf(PREFERENCES[j]) === -1
+                    ) {
                         studentMatches.push(PREFERENCES[j].toString());
-                        score += tempScore
+                        score += tempScore;
                     }
                 }
             }
@@ -419,7 +439,7 @@ function scorer() {
             score += UNPREFERRED_SCORE;
         }
     }
-    Logger.log('Score: ' + score);
+    Logger.log("Score: " + score);
 }
 
 /**
@@ -430,18 +450,24 @@ function scorer() {
 function checkMatches() {
     var responseSheet = SpreadsheetApp.getActiveSheet();
     var responseData = responseSheet.getDataRange().getValues();
-    
+
     var outputSheet = SpreadsheetApp.openById(OUTPUT_SHEET_ID);
     var outputData = outputSheet.getDataRange().getValues();
 
-    for (var i = 1; i < outputData.length; i++) { // for every student i
+    for (var i = 1; i < outputData.length; i++) {
+        // for every student i
         var studentMatches = [];
-        for (var j = 0; j < PREFERENCES.length; j++) { // for every student's preference j
+        for (var j = 0; j < PREFERENCES.length; j++) {
+            // for every student's preference j
             var preferredWorkshop = responseData[i][PREFERENCES[j]];
             for (var k = 0; k < ENROLLED.length; k++) {
-                var enrolledWorkshop = outputData[i][ENROLLED[k]]; // for every student's assigned workshop k
-                if (enrolledWorkshop == preferredWorkshop) {
-                    if ((studentMatches.length < 3) && (studentMatches.indexOf(PREFERENCES[j]) == -1)) {
+                // for every student's assigned workshop k
+                var enrolledWorkshop = outputData[i][ENROLLED[k]];
+                if (enrolledWorkshop === preferredWorkshop) {
+                    if (
+                        studentMatches.length < 3 &&
+                        studentMatches.indexOf(PREFERENCES[j]) === -1
+                    ) {
                         studentMatches.push(PREFERENCES[j].toString());
                     }
                 }
@@ -451,16 +477,15 @@ function checkMatches() {
         while (studentMatches.length < 3) {
             studentMatches.push("X");
         }
-        
-        var matchCell = "F".concat((i+1).toString());
-        var warningCell = "G".concat((i+1).toString());
+
+        var matchCell = "F".concat((i + 1).toString());
+        var warningCell = "G".concat((i + 1).toString());
 
         outputSheet.getRange(matchCell).setValue(studentMatches.toString());
 
-        if (studentMatches.toString() == ["X", "X", "X"].toString()) {
+        if (studentMatches.toString() === ["X", "X", "X"].toString()) {
             outputSheet.getRange(warningCell).setValue("NO MATCHES");
-        }
-        else {
+        } else {
             outputSheet.getRange(warningCell).setValue(null);
         }
     }
