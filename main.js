@@ -296,8 +296,8 @@ function makeStudentArray() {
 
     for (var i = 1; i < responseData.length; i++) {
         // for all students i
-        let firstName = responseData[i][COLUMN_FIRST_NAME];
-        let lastName = responseData[i][COLUMN_LAST_NAME];
+        var firstName = responseData[i][COLUMN_FIRST_NAME];
+        var lastName = responseData[i][COLUMN_LAST_NAME];
 
         var preferenceArray = [];
 
@@ -352,7 +352,7 @@ function morePopular(a, b) {
  * Creates an array of all the workshop objects sorted by popularity
  */
 function makeWorkshopArray() {
-    let workshopArray = [];
+    var workshopArray = [];
     var workshopDictKeys = Object.keys(WORKSHOP_DICT);
     for (var i = 0; i < workshopDictKeys.length; i++) {
         var dictKey = workshopDictKeys[i];
