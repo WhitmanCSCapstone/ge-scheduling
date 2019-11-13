@@ -158,16 +158,16 @@ var Workshop = function(name, number, capacity) {
 };
 
 /**
- * Returns a dictionary of Workshop objects based on the workshop sheet and response sheet.
+ * Returns an object made of Workshop objects based on the workshop sheet and response sheet.
  */
-function makeWorkshopDict() {
+function makeAllWorkshops() {
     var responseSheet = SpreadsheetApp.getActiveSheet();
     var responseData = responseSheet.getDataRange().getValues();
 
     var workshopSheet = SpreadsheetApp.openById(WORKSHOP_SHEET_ID);
     var workshopData = workshopSheet.getDataRange().getValues();
 
-    var workshopDict = {};
+    var workshops = {};
 
     for (var i = 1; i < workshopData.length; i++) {
         var name = workshopData[i][COLUMN_WORKSHOP_NAME];
@@ -175,13 +175,13 @@ function makeWorkshopDict() {
         var capacity = workshopData[i][COLUMN_WORKSHOP_CAPACITY];
 
         var newWorkshop = new Workshop(name, number, capacity);
-        workshopDict[i] = newWorkshop;
+        workshops[i] = newWorkshop;
     }
-    return workshopDict;
+    return workshops;
 }
 
-// A dictionary containing all the workshops that can be indexed by workshop number
-var WORKSHOP_DICT = makeWorkshopDict();
+// An object containing all the workshops that can be indexed by workshop number
+var NUMBERED_WORKSHOPS = makeAllWorkshops();
 
 /**
  * Student Class.
@@ -310,7 +310,7 @@ function makeStudentArray() {
                     preferredWorkshop.indexOf(")")
                 )
             );
-            var workshopObject = WORKSHOP_DICT[workshopNum];
+            var workshopObject = NUMBERED_WORKSHOPS[workshopNum];
 
             var uniquePreference = true; // make sure this preference is not a duplicate
 
@@ -351,12 +351,12 @@ function morePopular(a, b) {
 /**
  * Creates an array of all the workshop objects sorted by popularity
  */
-function makeWorkshopArray() {
+function makePopularWorkshops() {
     var workshopArray = [];
-    var workshopDictKeys = Object.keys(WORKSHOP_DICT);
-    for (var i = 0; i < workshopDictKeys.length; i++) {
-        var dictKey = workshopDictKeys[i];
-        var thisWorkshop = WORKSHOP_DICT[dictKey];
+    var workshopKeys = Object.keys(NUMBERED_WORKSHOPS);
+    for (var i = 0; i < workshopKeys.length; i++) {
+        var key = workshopKeys[i];
+        var thisWorkshop = NUMBERED_WORKSHOPS[key];
         workshopArray.push(thisWorkshop);
     }
     workshopArray.sort(morePopular);
@@ -364,7 +364,7 @@ function makeWorkshopArray() {
     return workshopArray;
 }
 
-var WORKSHOP_ARRAY = makeWorkshopArray();
+var POPULAR_WORKSHOPS = makePopularWorkshops();
 
 /**
  * Finds students who have fewer than the correct number of unique preferences and assigns them the least preferred workshops as preferences
@@ -374,14 +374,14 @@ function fixStudentPreferences() {
         var thisStudent = STUDENT_ARRAY[i];
         var addWorkshop = 0;
         while (!thisStudent.hasAllPreferences()) {
-            thisStudent.appendPreference(WORKSHOP_ARRAY[addWorkshop]);
+            thisStudent.appendPreference(POPULAR_WORKSHOPS[addWorkshop]);
             addWorkshop += 1;
         }
     }
 }
 
 fixStudentPreferences();
-WORKSHOP_ARRAY.sort(morePopular);
+POPULAR_WORKSHOPS.sort(morePopular);
 
 /**
  * The main algorithm that matches each girl with as many of her preferred workshops as possible.
