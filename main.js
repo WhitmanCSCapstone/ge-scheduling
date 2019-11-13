@@ -54,12 +54,11 @@ function onOpen() {
  * An object that contains all significant information about a single session in a workshop.
  * This is meant to condense the workshop class's methods to avoid redundancy.
  *
- * @param {int}   row          The row number of the workshop as it appears in workshopData.
- * @param {array} workshopData The array containing the girls' responses about their workshop preferences.
+ * @param {int} capacity The number of students who can be assigned to this workshop session.
  */
-var Session = function(row, workshopData) {
+var Session = function(capacity) {
     this.init = function() {
-        this.originalCapacity = workshopData[row][COLUMN_WORKSHOP_CAPACITY];
+        this.originalCapacity = capacity;
         this.remainingCapacity = this.originalCapacity;
     };
 
@@ -120,45 +119,28 @@ var Session = function(row, workshopData) {
  *
  * An object that contains all significant information about a single workshop.
  *
- * @param {int}   row          The row number of the workshop as it appears in workshopData.
- * @param {array} workshopData The array containing all information about the workshops.
- * @param {array} responseData The array containing the girls' responses about their workshop preferences.
+ * @param {string} name     The name of the workshop.
+ * @param {int}    number   The number of the workshop as it appears in the workshop sheet.
+ * @param {int}    capacity The capacity of a single session of the workshop
  */
-var Workshop = function(row, workshopData, responseData) {
+var Workshop = function(name, number, capacity) {
     this.init = function() {
-        this.name = workshopData[row][COLUMN_WORKSHOP_NAME];
-        this.number = row;
+        this.name = name;
+        this.number = number;
 
         this.sessions = [];
         for (var i = 0; i < SESSIONS_PER_WORKSHOP; i++) {
-            this.sessions.push(new Session(row, workshopData));
+            this.sessions.push(new Session(capacity));
         }
 
-        this.popularityScore = this.calculatePopularity();
+        this.popularityScore = 0;
     };
 
     /**
-     * Calcuates the popularity of the workshop based on the students' survey responses.
+     * Increments the popularity of the workshop based on the students' preferences.
      */
-    this.calculatePopularity = function() {
-        var popularity = 0;
-        for (var i = 1; i < responseData.length; i++) {
-            // for every student i
-            for (var j = 0; j < PREFERENCES.length; j++) {
-                // for every student preference j
-                var preferredWorkshop = responseData[i][PREFERENCES[j]];
-                var workshopNum = parseFloat(
-                    preferredWorkshop.slice(
-                        preferredWorkshop.indexOf("(") + 1,
-                        preferredWorkshop.indexOf(")")
-                    )
-                );
-                if (workshopNum === this.number) {
-                    popularity += POPULARITY_POINTS[j];
-                }
-            }
-        }
-        return popularity;
+    this.incrementPopularity = function(index) {
+        this.popularityScore += POPULARITY_POINTS[index];
     };
 
     /**
@@ -176,75 +158,55 @@ var Workshop = function(row, workshopData, responseData) {
 };
 
 /**
- * Returns an array of Workshop objects based on the workshop sheet and response sheets.
+ * Returns an object made of Workshop objects based on the workshop sheet and response sheet.
  */
-function makeWorkshopArray() {
+function makeAllWorkshops() {
     var responseSheet = SpreadsheetApp.getActiveSheet();
     var responseData = responseSheet.getDataRange().getValues();
 
     var workshopSheet = SpreadsheetApp.openById(WORKSHOP_SHEET_ID);
     var workshopData = workshopSheet.getDataRange().getValues();
 
-    var workshopArray = [];
+    var workshops = {};
 
     for (var i = 1; i < workshopData.length; i++) {
-        var newWorkshop = new Workshop(i, workshopData, responseData);
-        workshopArray.push(newWorkshop);
+        var name = workshopData[i][COLUMN_WORKSHOP_NAME];
+        var number = i;
+        var capacity = workshopData[i][COLUMN_WORKSHOP_CAPACITY];
+
+        var newWorkshop = new Workshop(name, number, capacity);
+        workshops[i] = newWorkshop;
     }
-    return workshopArray;
+    return workshops;
 }
 
-/**
- * Used to compare two workshops based on their popularity scores.
- *
- * @param {workshop} a A workshop from the workshop class.
- * @param {workshop} b A workshop from the workshop class.
- */
-function morePopular(a, b) {
-    if (a.popularityScore < b.popularityScore) {
-        return -1;
-    } else if (a.popularityScore > b.popularityScore) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-// An array containing every workshop object, sorted from least to most popular
-var WORKSHOP_ARRAY = makeWorkshopArray().sort(morePopular);
+// An object containing all the workshops that can be indexed by workshop number
+var NUMBERED_WORKSHOPS = makeAllWorkshops();
 
 /**
  * Student Class.
  *
  * An object that contains all significant information about a single student.
+ *
+ * @param {} firstName       The first name of the student.
+ * @param {} lastName        The last name of the student.
+ * @param {} preferenceArray The ordered array of the student's preferred workshops from most to least preferred
  */
-var Student = function(row, responseData) {
+var Student = function(firstName, lastName, preferenceArray) {
     this.init = function() {
-        this.firstName = responseData[row][COLUMN_FIRST_NAME];
-        this.lastName = responseData[row][COLUMN_LAST_NAME];
+        this.firstName = firstName;
+        this.lastName = lastName;
 
-        this.preferences = this.getPreferences();
+        this.preferences = preferenceArray;
+        this.updatePopularities();
 
         this.assignedWorkshops = [null, null, null];
     };
 
-    this.getPreferences = function() {
-        var preferences = [];
-        for (var i = 0; i < PREFERENCES.length; i++) {
-            var preferredWorkshop = responseData[row][PREFERENCES[i]];
-            var workshopNum = parseFloat(
-                preferredWorkshop.slice(
-                    preferredWorkshop.indexOf("(") + 1,
-                    preferredWorkshop.indexOf(")")
-                )
-            );
-            for (var j = 0; j < WORKSHOP_ARRAY.length; j++) {
-                if (WORKSHOP_ARRAY[j].number === workshopNum) {
-                    preferences.push(WORKSHOP_ARRAY[j]);
-                }
-            }
+    this.updatePopularities = function() {
+        for (var i = 0; i < this.preferences.length; i++) {
+            this.preferences[i].incrementPopularity(i);
         }
-        return preferences;
     };
 
     this.assignWorkshop = function(workshop, session) {
@@ -302,6 +264,24 @@ var Student = function(row, responseData) {
         return this.numberAssigned === SESSIONS_PER_WORKSHOP;
     };
 
+    /**
+     * Calculates and returns whether or not the student has a full list of preferences.
+     */
+    this.hasAllPreferences = function() {
+        return this.preferences.length >= PREFERENCES.length;
+    };
+
+    /**
+     * Appends a workshop to a student's list of preferences
+     *
+     * @param {Workshop} workshop A workshop object to be appended onto the student's list of preferences
+     */
+    this.appendPreference = function(workshop) {
+        var thisIndex = this.preferences.length;
+        this.preferences.push(workshop);
+        workshop.incrementPopularity(thisIndex);
+    };
+
     this.init();
 };
 
@@ -315,12 +295,93 @@ function makeStudentArray() {
     var studentArray = [];
 
     for (var i = 1; i < responseData.length; i++) {
-        studentArray.push(new Student(i, responseData));
+        // for all students i
+        var firstName = responseData[i][COLUMN_FIRST_NAME];
+        var lastName = responseData[i][COLUMN_LAST_NAME];
+
+        var preferenceArray = [];
+
+        for (var j = 0; j < PREFERENCES.length; j++) {
+            // for all student preferences j
+            var preferredWorkshop = responseData[i][PREFERENCES[j]];
+            var workshopNum = parseInt(
+                preferredWorkshop.slice(
+                    preferredWorkshop.indexOf("(") + 1,
+                    preferredWorkshop.indexOf(")")
+                )
+            );
+            var workshopObject = NUMBERED_WORKSHOPS[workshopNum];
+
+            var uniquePreference = true; // make sure this preference is not a duplicate
+
+            for (var k = 0; k < preferenceArray.length; k++) {
+                // for all already listed preferences k
+                if (workshopObject === preferenceArray[k]) {
+                    uniquePreference = false;
+                }
+            }
+
+            if (uniquePreference) {
+                preferenceArray.push(workshopObject);
+            }
+        }
+        studentArray.push(new Student(firstName, lastName, preferenceArray));
     }
     return studentArray;
 }
 
 var STUDENT_ARRAY = makeStudentArray();
+
+/**
+ * Used to compare two workshops based on their popularity scores.
+ *
+ * @param {workshop} a A workshop from the workshop class.
+ * @param {workshop} b A workshop from the workshop class.
+ */
+function morePopular(a, b) {
+    if (a.popularityScore < b.popularityScore) {
+        return -1;
+    } else if (a.popularityScore > b.popularityScore) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+/**
+ * Creates an array of all the workshop objects sorted by popularity
+ */
+function makePopularWorkshops() {
+    var workshopArray = [];
+    var workshopKeys = Object.keys(NUMBERED_WORKSHOPS);
+    for (var i = 0; i < workshopKeys.length; i++) {
+        var key = workshopKeys[i];
+        var thisWorkshop = NUMBERED_WORKSHOPS[key];
+        workshopArray.push(thisWorkshop);
+    }
+    workshopArray.sort(morePopular);
+
+    return workshopArray;
+}
+
+var POPULAR_WORKSHOPS = makePopularWorkshops();
+
+/**
+ * Finds students who have fewer than the correct number of unique preferences and assigns them the least preferred workshops as preferences
+ */
+function fixStudentPreferences() {
+    for (var i = 0; i < STUDENT_ARRAY.length; i++) {
+        var thisStudent = STUDENT_ARRAY[i];
+        var addWorkshop = 0;
+        while (!thisStudent.hasAllPreferences()) {
+            thisStudent.appendPreference(POPULAR_WORKSHOPS[addWorkshop]);
+            addWorkshop += 1;
+        }
+    }
+}
+
+fixStudentPreferences();
+POPULAR_WORKSHOPS.sort(morePopular);
 
 /**
  * The main algorithm that matches each girl with as many of her preferred workshops as possible.
