@@ -49,115 +49,6 @@ function onOpen() {
 }
 
 /**
- * Workshop Session Class.
- *
- * An object that contains all significant information about a single session in a workshop.
- * This is meant to condense the workshop class's methods to avoid redundancy.
- *
- * @param {int} capacity The number of students who can be assigned to this workshop session.
- */
-var Session = function(capacity) {
-    this.init = function() {
-        this.originalCapacity = capacity;
-        this.remainingCapacity = this.originalCapacity;
-    };
-
-    /**
-     * Calculates and returns whether or not the session is completely full.
-     */
-    this.isFull = function() {
-        return this.remainingCapacity === 0;
-    };
-
-    /**
-     * Calculates and returns whether or not the session is "full enough" based on the MINIMUM_WORKSHOP_FILL variable.
-     */
-    this.hasReachedQuorum = function() {
-        return (
-            this.remainingCapacity <=
-            this.originalCapacity * (1 - MINIMUM_WORKSHOP_FILL)
-        );
-    };
-
-    /**
-     * Subtracts 1 from the session's remaining capacity.
-     */
-    this.addStudent = function() {
-        if (this.isFull()) {
-            throw new Error("Cannot add students to a full session");
-        } else {
-            this.remainingCapacity -= 1;
-        }
-    };
-
-    /**
-     * Adds 1 to the session's remaining capacity.
-     */
-    this.subtractStudent = function() {
-        if (this.remainingCapacity === this.originalCapacity) {
-            throw new Error("Cannot remove students from an empty session");
-        } else {
-            this.remainingCapacity += 1;
-        }
-    };
-
-    /**
-     * Manually sets a the session's original and remaining capacities to a discrete value.
-     *
-     * @param {int} value the new integer value for the session's remaining capacity.
-     */
-    this.setCapacity = function(value) {
-        this.originalCapacity = value;
-        this.remainingCapacity = value;
-    };
-
-    this.init();
-};
-
-/**
- * Workshop Class.
- *
- * An object that contains all significant information about a single workshop.
- *
- * @param {string} name     The name of the workshop.
- * @param {int}    number   The number of the workshop as it appears in the workshop sheet.
- * @param {int}    capacity The capacity of a single session of the workshop
- */
-var Workshop = function(name, number, capacity) {
-    this.init = function() {
-        this.name = name;
-        this.number = number;
-
-        this.sessions = [];
-        for (var i = 0; i < SESSIONS_PER_WORKSHOP; i++) {
-            this.sessions.push(new Session(capacity));
-        }
-
-        this.popularityScore = 0;
-    };
-
-    /**
-     * Increments the popularity of the workshop based on the students' preferences.
-     */
-    this.incrementPopularity = function(index) {
-        this.popularityScore += POPULARITY_POINTS[index];
-    };
-
-    /**
-     * Calculates the total remaining capacity of the workshop.
-     */
-    this.totalRemainingCapacity = function() {
-        var total = 0;
-        for (var i = 0; i < this.sessions.length; i++) {
-            total += this.sessions[i].remainingCapacity;
-        }
-        return total;
-    };
-
-    this.init();
-};
-
-/**
  * Returns an object made of Workshop objects based on the workshop sheet and response sheet.
  */
 function makeAllWorkshops() {
@@ -182,108 +73,6 @@ function makeAllWorkshops() {
 
 // An object containing all the workshops that can be indexed by workshop number
 var NUMBERED_WORKSHOPS = makeAllWorkshops();
-
-/**
- * Student Class.
- *
- * An object that contains all significant information about a single student.
- *
- * @param {} firstName       The first name of the student.
- * @param {} lastName        The last name of the student.
- * @param {} preferenceArray The ordered array of the student's preferred workshops from most to least preferred
- */
-var Student = function(firstName, lastName, preferenceArray) {
-    this.init = function() {
-        this.firstName = firstName;
-        this.lastName = lastName;
-
-        this.preferences = preferenceArray;
-        this.updatePopularities();
-
-        this.assignedWorkshops = [null, null, null];
-    };
-
-    this.updatePopularities = function() {
-        for (var i = 0; i < this.preferences.length; i++) {
-            this.preferences[i].incrementPopularity(i);
-        }
-    };
-
-    this.assignWorkshop = function(workshop, session) {
-        workshop.sessions[session].addStudent();
-        this.assignedWorkshops[session] = this.preferences[session];
-    };
-
-    /**
-     * Swaps the session times of two workshops the student is assigned to, or moves an assigned workshop from one session time to another empty one.
-     *
-     * @param {int} session1 the index of one of the workshops in the student's assigned workshops.
-     * @param {int} session2 the index of one of the workshops in the student's assigned workshops.
-     */
-    this.swapWorkshops = function(session1, session2) {
-        if (this.assignedWorkshops[session1] != null) {
-            this.assignedWorkshops[session1].sessions[
-                session1
-            ].subtractStudent();
-        }
-        if (this.assignedWorkshops[session2] != null) {
-            this.assignedWorkshops[session2].sessions[
-                session2
-            ].subtractStudent();
-        }
-
-        var temp = this.assignedWorkshops[session1];
-        this.assignedWorkshops[session1] = this.assignedWorkshops[session2];
-        this.assignedWorkshops[session2] = temp;
-
-        if (this.assignedWorkshops[session1] != null) {
-            this.assignedWorkshops[session1].sessions[session1].addStudent();
-        }
-        if (this.assignedWorkshops[session2] != null) {
-            this.assignedWorkshops[session2].sessions[session2].addStudent();
-        }
-    };
-
-    /**
-     * Calculates and returns the number of workshops that the student has already been assigned to.
-     */
-    this.numberAssigned = function() {
-        var total = 0;
-        for (var i = 0; i < this.assignedWorkshops.length; i++) {
-            if (this.assignedWorkshops[i] != null) {
-                total += 1;
-            }
-        }
-        return total;
-    };
-
-    /**
-     * Calculates and returns whether or not the student has been assigned a workshop in all 3 sessions.
-     */
-    this.fullyAssigned = function() {
-        return this.numberAssigned === SESSIONS_PER_WORKSHOP;
-    };
-
-    /**
-     * Calculates and returns whether or not the student has a full list of preferences.
-     */
-    this.hasAllPreferences = function() {
-        return this.preferences.length >= PREFERENCES.length;
-    };
-
-    /**
-     * Appends a workshop to a student's list of preferences
-     *
-     * @param {Workshop} workshop A workshop object to be appended onto the student's list of preferences
-     */
-    this.appendPreference = function(workshop) {
-        var thisIndex = this.preferences.length;
-        this.preferences.push(workshop);
-        workshop.incrementPopularity(thisIndex);
-    };
-
-    this.init();
-};
 
 /**
  * Returns an array of Student objects based on the response data.
@@ -330,6 +119,7 @@ function makeStudentArray() {
     return studentArray;
 }
 
+// An array containing Student objects representing every student who responded to the survey
 var STUDENT_ARRAY = makeStudentArray();
 
 /**
@@ -364,6 +154,7 @@ function makePopularWorkshops() {
     return workshopArray;
 }
 
+// An array of all the workshop objects ordered from least to most popular
 var POPULAR_WORKSHOPS = makePopularWorkshops();
 
 /**
