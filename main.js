@@ -114,7 +114,14 @@ function makeStudentArray() {
                 preferenceArray.push(workshopObject);
             }
         }
-        studentArray.push(new Student(firstName, lastName, preferenceArray));
+        studentArray.push(
+            new Student(
+                firstName,
+                lastName,
+                SESSIONS_PER_WORKSHOP,
+                preferenceArray
+            )
+        );
     }
     return studentArray;
 }
@@ -289,6 +296,30 @@ function checkMatches() {
             outputSheet.getRange(warningCell).setValue("NO MATCHES");
         } else {
             outputSheet.getRange(warningCell).setValue(null);
+        }
+    }
+}
+
+/**
+ * If a Workshop has room for all students who prefer it, assign them to it.
+ * Assumes that no students with preferences have been assigned to workshops.
+ */
+function matchUncommonPreferences() {
+    for (var i = 0; i < NUMBERED_WORKSHOPS.length; i++) {
+        // For each workshop,
+        var workshop = NUMBERED_WORKSHOPS[i];
+        // If it can fit all students who prefer it,
+        if (workshop.popularityScore < workshop.totalRemainingCapacity) {
+            // Assign all students with preferences
+            for (var j = 0; j < STUDENT_ARRAY.length; j++) {
+                var student = STUDENT_ARRAY[j];
+                if (
+                    student.preferences.includes(workshop) &&
+                    !student.assignedWorkshops.includes(workshop)
+                ) {
+                    student.assignWorkshop(workshop);
+                }
+            }
         }
     }
 }
