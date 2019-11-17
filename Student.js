@@ -1,3 +1,4 @@
+/*globals SESSIONS_PER_WORKSHOP, PREFERENCES */
 /**
  * Student Class.
  *
@@ -98,4 +99,4 @@ function Student(firstName, lastName, preferenceArray) {
     };
 
     this.init();
-};
+}

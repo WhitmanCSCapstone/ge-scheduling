@@ -1,3 +1,4 @@
+/*global MINIMUM_WORKSHOP_FILL */
 /**
  * Workshop Session Class.
  *
@@ -62,4 +63,4 @@ function Session(capacity) {
     };
 
     this.init();
-};
+}

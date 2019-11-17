@@ -1,3 +1,4 @@
+/*globals SESSIONS_PER_WORKSHOP, POPULARITY_POINTS, Session */
 /**
  * Workshop Class.
  *
@@ -39,4 +40,4 @@ function Workshop(name, number, capacity) {
     };
 
     this.init();
-};
+}

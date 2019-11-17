@@ -1,4 +1,4 @@
-/*globals SpreadsheetApp, Logger */
+/*globals SpreadsheetApp, Logger, Workshop, Student */
 
 var COLUMN_FIRST_NAME = 10;
 var COLUMN_LAST_NAME = 11;
