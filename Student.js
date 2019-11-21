@@ -1,4 +1,3 @@
-/*globals SESSIONS_PER_WORKSHOP, PREFERENCES */
 /**
  * Student Class.
  *
@@ -8,20 +7,24 @@
  * @param {} lastName        The last name of the student.
  * @param {} preferenceArray The ordered array of the student's preferred workshops from most to least preferred
  */
-function Student(firstName, lastName, preferenceArray) {
+function Student(firstName, lastName, preferenceArray, sessionsPerWorkshop) {
     this.init = function() {
         this.firstName = firstName;
         this.lastName = lastName;
 
         this.preferences = preferenceArray;
-        this.updatePopularities();
 
-        this.assignedWorkshops = [null, null, null];
+        this.assignedWorkshops = []; 
+        for (var i = 0; i < sessionsPerWorkshop; i++) {
+            this.assignedWorkshops.push(null);
+        }
+
+        this.studentScore = 0;
     };
 
-    this.updatePopularities = function() {
+    this.updatePopularities = function(popularityPoints) {
         for (var i = 0; i < this.preferences.length; i++) {
-            this.preferences[i].incrementPopularity(i);
+            this.preferences[i].incrementPopularity(popularityPoints[i]);
         }
     };
 
@@ -77,14 +80,14 @@ function Student(firstName, lastName, preferenceArray) {
      * Calculates and returns whether or not the student has been assigned a workshop in all 3 sessions.
      */
     this.fullyAssigned = function() {
-        return this.numberAssigned === SESSIONS_PER_WORKSHOP;
+        return this.numberAssigned === sessionsPerWorkshop;
     };
 
     /**
      * Calculates and returns whether or not the student has a full list of preferences.
      */
-    this.hasAllPreferences = function() {
-        return this.preferences.length >= PREFERENCES.length;
+    this.hasAllPreferences = function(numberOfPrefs) {
+        return this.preferences.length >= numberOfPrefs;
     };
 
     /**
@@ -95,8 +98,36 @@ function Student(firstName, lastName, preferenceArray) {
     this.appendPreference = function(workshop) {
         var thisIndex = this.preferences.length;
         this.preferences.push(workshop);
-        workshop.incrementPopularity(thisIndex);
+        return thisIndex;
     };
 
+    this.calculateScore = function(scorerPoints, unpreferredScore) {
+        for (var i = 0; i < this.assignedWorkshops.length; i++) {
+            // for each assigned workshop i
+            var unpreferred = true;
+            var assignedWorkshop = this.assignedWorkshops[i];
+            for (var j = 0; j < this.preferences.length; j++) {
+                // for each preferred workshop j
+                var thisPreference = this.preferences[j];
+                if (assignedWorkshop == thisPreference) {
+                    this.studentScore += scorerPoints[j];
+                    unpreferred = false;
+                }
+            }
+            if (unpreferred) {
+                this.studentScore += unpreferredScore;
+            }
+        }
+        return this.studentScore;
+    };
+
+    this.compareToScore = function(scoreToCheck) {
+        return scoreToCheck === this.studentScore;
+    }
+
+    this.fullName = function() {
+        return this.firstName.concat(" ", this.lastName);
+    }
+
     this.init();
-}
+};

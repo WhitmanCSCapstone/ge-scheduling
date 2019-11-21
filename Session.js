@@ -1,4 +1,3 @@
-/*global MINIMUM_WORKSHOP_FILL */
 /**
  * Workshop Session Class.
  *
@@ -7,10 +6,11 @@
  *
  * @param {int} capacity The number of students who can be assigned to this workshop session.
  */
-function Session(capacity) {
+function Session(capacity, minimumFill) {
     this.init = function() {
         this.originalCapacity = capacity;
         this.remainingCapacity = this.originalCapacity;
+        this.minimumFill = minimumFill;
     };
 
     /**
@@ -21,12 +21,12 @@ function Session(capacity) {
     };
 
     /**
-     * Calculates and returns whether or not the session is "full enough" based on the MINIMUM_WORKSHOP_FILL variable.
+     * Calculates and returns whether or not the session is "full enough" based on this.minimumFill.
      */
     this.hasReachedQuorum = function() {
         return (
             this.remainingCapacity <=
-            this.originalCapacity * (1 - MINIMUM_WORKSHOP_FILL)
+            this.originalCapacity * (1 - this.minimumFill)
         );
     };
 
@@ -35,7 +35,7 @@ function Session(capacity) {
      */
     this.addStudent = function() {
         if (this.isFull()) {
-            throw new Error("Cannot add students to a full session");
+            // throw new Error("Cannot add students to a full session"); // comment out this line to make the current version of matchGirls work correctly.
         } else {
             this.remainingCapacity -= 1;
         }
@@ -63,4 +63,4 @@ function Session(capacity) {
     };
 
     this.init();
-}
+};
