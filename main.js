@@ -2,9 +2,6 @@
 
 var COLUMN_FIRST_NAME = 10;
 var COLUMN_LAST_NAME = 11;
-var COLUMN_PREFERENCE_1 = 1;
-var COLUMN_PREFERENCE_2 = 2;
-var COLUMN_PREFERENCE_3 = 3;
 
 // Column indicies of workshop info for the workshop class
 var COLUMN_WORKSHOP_NAME = 2;
@@ -76,6 +73,4 @@ function main() {
         }
         matcher.addNewStudent(firstName, lastName, preferenceNums);
     }
-    matcher.matchGirls();
-    matcher.scorer();
 }

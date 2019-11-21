@@ -44,13 +44,6 @@ function Matcher() {
     };
 
     /**
-     * Returns the object full of workshops that can be indexed by workshop number
-     */
-    this.getAllWorkshops = function() {
-        return this.workshopsByNumber;
-    }
-
-    /**
      * Adds a new Student object into allStudents
      * 
      * @param {string} firstName      The first name of the student.
