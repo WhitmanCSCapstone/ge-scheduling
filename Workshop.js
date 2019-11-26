@@ -39,5 +39,12 @@ function Workshop(name, number, capacity) {
         return total;
     };
 
+    /**
+     * Returns a human-readable string that uniquely identifies the workshop.
+     */
+    this.toString = function() {
+        return "(" + this.number + ") " + this.name;
+    };
+
     this.init();
 }

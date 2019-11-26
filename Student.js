@@ -17,7 +17,10 @@ function Student(firstName, lastName, sessionCount, preferenceArray) {
         this.updatePopularities();
 
         // Initializes array as [null, null, null]
-        this.assignedWorkshops = new Array(sessionCount).fill(null);
+        this.assignedWorkshops = new Array(sessionCount);
+        for (var i = 0; i < sessionCount; i++) {
+            this.assignedWorkshops[i] = null;
+        }
     };
 
     this.updatePopularities = function() {

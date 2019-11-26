@@ -194,18 +194,20 @@ function matchGirls() {
     // Recreate headers
     outputSheet.appendRow(HEADERS);
 
-    for (var i = 1; i < responseData.length; i++) {
-        var firstName = responseData[i][COLUMN_FIRST_NAME];
-        var lastName = responseData[i][COLUMN_LAST_NAME];
-        var preference_1 = responseData[i][COLUMN_PREFERENCE_1];
-        var preference_2 = responseData[i][COLUMN_PREFERENCE_2];
-        var preference_3 = responseData[i][COLUMN_PREFERENCE_3];
+    // Assign students to workshop.
+    // Note that this uses preferences, not assignments!
+    for (var i = 0; i < STUDENT_ARRAY.length; i++) {
+        let student = STUDENT_ARRAY[i];
+        let preference0 = student.preferences[0];
+        let preference1 = student.preferences[1];
+        let preference2 = student.preferences[2];
+        let row = [student.firstName, student.lastName];
         outputSheet.appendRow([
-            firstName,
-            lastName,
-            preference_1,
-            preference_2,
-            preference_3
+            student.firstName,
+            student.lastName,
+            preference0.toString(),
+            preference1.toString(),
+            preference2.toString()
         ]);
     }
 }
