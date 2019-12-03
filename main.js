@@ -25,8 +25,8 @@ var OUTPUT_SHEET_ID = "13K10UA0ZNjCDGTbVbO104CdW97DJgm3MaK2TZpiRytw";
 var WORKSHOP_SHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
 
 /**
-Automatically runs when sheet is opened.
-*/
+ * Automatically runs when sheet is opened.
+ */
 function onOpen() {
     SpreadsheetApp.getUi()
         .createMenu("Great Explorations")
@@ -34,6 +34,9 @@ function onOpen() {
         .addToUi();
 }
 
+/**
+ * It's the main function, what more do you need to know.
+ */
 function main() {
     var workshopSheet = SpreadsheetApp.openById(WORKSHOP_SHEET_ID);
     var workshopData = workshopSheet.getDataRange().getValues();

@@ -6,11 +6,13 @@
  *
  * @param {int} capacity The number of students who can be assigned to this workshop session.
  */
-function Session(capacity, minimumFill) {
+function Session(capacity) {
     this.init = function() {
         this.originalCapacity = capacity;
         this.remainingCapacity = this.originalCapacity;
-        this.minimumFill = minimumFill;
+
+        // Minimum percentage that each workshop session needs to be filled
+        this.minimumWorkshopFill = 0.75;
     };
 
     /**
@@ -21,12 +23,12 @@ function Session(capacity, minimumFill) {
     };
 
     /**
-     * Calculates and returns whether or not the session is "full enough" based on this.minimumFill.
+     * Calculates and returns whether or not the session is "full enough" based on this.minimumWorkshopFill.
      */
     this.hasReachedQuorum = function() {
         return (
             this.remainingCapacity <=
-            this.originalCapacity * (1 - this.minimumFill)
+            this.originalCapacity * (1 - this.minimumWorkshopFill)
         );
     };
 
