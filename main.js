@@ -35,8 +35,32 @@ var HEADERS = [
     "Session 3"
 ];
 
-var OUTPUT_SHEET_ID = "13K10UA0ZNjCDGTbVbO104CdW97DJgm3MaK2TZpiRytw";
+
+// Formatting workshop variables
+
 var WORKSHOP_SHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
+var SS = SpreadsheetApp.getActiveSpreadsheet();
+
+// Response Data
+var responseSheet = SS.getSheets()[0];
+var responseData = responseSheet.getDataRange().getValues();
+
+// Workshop Sheet
+var workshopSheet = SpreadsheetApp.openById(WORKSHOP_SHEET_ID);
+var workshopData = workshopSheet.getDataRange().getValues();
+
+// Output Sheet
+var outputSheet = SS.getSheets()[1];
+outputSheet.getActiveSheet().clear();
+// Recreate headers
+outputSheet.appendRow(HEADERS);
+var outputData = outputSheet.getDataRange().getValues();
+
+//Pre-Assignment Sheet
+var preAssignmentSheet = SS.getSheets()[0];
+
+
+
 
 /**
 Automatically runs when sheet is opened.
@@ -52,12 +76,6 @@ function onOpen() {
  * Returns an object made of Workshop objects based on the workshop sheet and response sheet.
  */
 function makeAllWorkshops() {
-    var responseSheet = SpreadsheetApp.getActiveSheet();
-    var responseData = responseSheet.getDataRange().getValues();
-
-    var workshopSheet = SpreadsheetApp.openById(WORKSHOP_SHEET_ID);
-    var workshopData = workshopSheet.getDataRange().getValues();
-
     var workshops = {};
 
     for (var i = 1; i < workshopData.length; i++) {
@@ -78,8 +96,6 @@ var NUMBERED_WORKSHOPS = makeAllWorkshops();
  * Returns an array of Student objects based on the response data.
  */
 function makeStudentArray() {
-    var responseSheet = SpreadsheetApp.getActiveSheet();
-    var responseData = responseSheet.getDataRange().getValues();
 
     var studentArray = [];
 
@@ -178,15 +194,6 @@ POPULAR_WORKSHOPS.sort(morePopular);
  * The main algorithm that matches each girl with as many of her preferred workshops as possible.
  */
 function matchGirls() {
-    var responseSheet = SpreadsheetApp.getActiveSheet();
-    var responseData = responseSheet.getDataRange().getValues();
-
-    var outputSheet = SpreadsheetApp.openById(OUTPUT_SHEET_ID);
-    outputSheet.getActiveSheet().clear();
-
-    // Recreate headers
-    outputSheet.appendRow(HEADERS);
-
     for (var i = 1; i < responseData.length; i++) {
         var firstName = responseData[i][COLUMN_FIRST_NAME];
         var lastName = responseData[i][COLUMN_LAST_NAME];
@@ -208,11 +215,7 @@ function matchGirls() {
  */
 function scorer() {
     var score = 0;
-    var responseSheet = SpreadsheetApp.getActiveSheet();
-    var responseData = responseSheet.getDataRange().getValues();
 
-    var outputSheet = SpreadsheetApp.openById(OUTPUT_SHEET_ID);
-    var outputData = outputSheet.getDataRange().getValues();
 
     for (var i = 1; i < outputData.length; i++) {
         // for every student i
@@ -250,12 +253,6 @@ function scorer() {
  * Appends "NO MATCHES" to the row of each girl who did not receive any of her top 6 preferences.
  */
 function checkMatches() {
-    var responseSheet = SpreadsheetApp.getActiveSheet();
-    var responseData = responseSheet.getDataRange().getValues();
-
-    var outputSheet = SpreadsheetApp.openById(OUTPUT_SHEET_ID);
-    var outputData = outputSheet.getDataRange().getValues();
-
     for (var i = 1; i < outputData.length; i++) {
         // for every student i
         var studentMatches = [];
