@@ -54,7 +54,7 @@ var preAssignmentData = preAssignmentSheet.getDataRange().getValues();
  */
 function onOpen() {
     SpreadsheetApp.getUi()
-        .createMenu("Great Explorations")
+        .createMenu("Great Explorations")spreadsheet
         .addItem("Match Girls to Workshops", "matchGirls")
         .addToUi();
 }
