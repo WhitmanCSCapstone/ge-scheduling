@@ -1,4 +1,4 @@
-/*globals SpreadsheetApp, Logger */
+/*globals SpreadsheetApp, Logger, Matcher */
 
 var COLUMN_FIRST_NAME = 10;
 var COLUMN_LAST_NAME = 11;
@@ -47,6 +47,7 @@ function main() {
     var matcher = new Matcher();
 
     for (var i = 1; i < workshopData.length; i++) {
+        // for all workshops i
         var name = workshopData[i][COLUMN_WORKSHOP_NAME];
         var number = i;
         var capacity = workshopData[i][COLUMN_WORKSHOP_CAPACITY];
@@ -54,16 +55,16 @@ function main() {
         matcher.addNewWorkshop(name, number, capacity);
     }
 
-    for (var i = 1; i < responseData.length; i++) {
-        // for all students i
-        var firstName = responseData[i][COLUMN_FIRST_NAME];
-        var lastName = responseData[i][COLUMN_LAST_NAME];
+    for (var j = 1; j < responseData.length; j++) {
+        // for all students j
+        var firstName = responseData[j][COLUMN_FIRST_NAME];
+        var lastName = responseData[j][COLUMN_LAST_NAME];
 
         var preferenceNums = [];
 
-        for (var j = 0; j < PREFERENCE_COLUMNS.length; j++) {
-            // for all student preferences j
-            var preferredWorkshop = responseData[i][PREFERENCE_COLUMNS[j]];
+        for (var k = 0; k < PREFERENCE_COLUMNS.length; k++) {
+            // for all student preferences k
+            var preferredWorkshop = responseData[j][PREFERENCE_COLUMNS[k]];
             var workshopNum = parseInt(
                 preferredWorkshop.slice(
                     preferredWorkshop.indexOf("(") + 1,

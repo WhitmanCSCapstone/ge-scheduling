@@ -1,3 +1,5 @@
+/*globals Session */
+
 /**
  * Workshop Class.
  *
@@ -23,7 +25,7 @@ function Workshop(name, number, capacity, sessionsPerWorkshop) {
 
     /**
      * Increments the popularity of the workshop based on the students' preferences.
-     * 
+     *
      * @param {int} points The value with which the popularity of this workshop is incremented.
      */
     this.incrementPopularity = function(points) {
@@ -42,4 +44,4 @@ function Workshop(name, number, capacity, sessionsPerWorkshop) {
     };
 
     this.init();
-};
+}

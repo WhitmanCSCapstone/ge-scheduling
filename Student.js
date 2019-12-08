@@ -1,3 +1,5 @@
+/*globals Workshop */
+
 /**
  * Student Class.
  *
@@ -15,7 +17,7 @@ function Student(firstName, lastName, preferenceArray, sessionsPerWorkshop) {
 
         this.preferences = preferenceArray;
 
-        this.assignedWorkshops = []; 
+        this.assignedWorkshops = [];
         for (var i = 0; i < sessionsPerWorkshop; i++) {
             this.assignedWorkshops.push(null);
         }
@@ -43,7 +45,7 @@ function Student(firstName, lastName, preferenceArray, sessionsPerWorkshop) {
 
     /**
      * Adds the given workshop to the student's assigned workshops.
-     * 
+     *
      * @param {*} workshop The workshop to be added the student's assigned workshop array.
      * @param {*} session  The index where the workshop will be placed in the student's assigned workshop array.
      */
@@ -132,7 +134,7 @@ function Student(firstName, lastName, preferenceArray, sessionsPerWorkshop) {
             for (var j = 0; j < this.preferences.length; j++) {
                 // for each preferred workshop j
                 var thisPreference = this.preferences[j];
-                if (assignedWorkshop == thisPreference) {
+                if (assignedWorkshop === thisPreference) {
                     this.studentScore += this.scorerPoints[j];
                     unpreferred = false;
                 }
@@ -146,19 +148,19 @@ function Student(firstName, lastName, preferenceArray, sessionsPerWorkshop) {
 
     /**
      * Calculates and returns whether or not this student's score is equal to a given value.
-     * 
+     *
      * @param {int} scoreToCheck The value that is compared to this student's score.
      */
     this.compareToScore = function(scoreToCheck) {
         return scoreToCheck === this.studentScore;
-    }
+    };
 
     /**
      * Returns the full name of the student as a string.
      */
     this.fullName = function() {
         return this.firstName.concat(" ", this.lastName);
-    }
+    };
 
     this.init();
-};
+}
