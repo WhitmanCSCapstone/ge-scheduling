@@ -24,37 +24,37 @@ var HEADERS = [
 // Formatting workshop variables
 
 var WORKSHOP_SHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
-var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+var RESPONSE_SHEET_ID = "1YcO_lYO1hp9j3fBxWm-4AF_AfYCPExeuVyaJzw0Yktk";
+
+var RESPONSE_SPREADSHEET = SpreadsheetApp.openById(RESPONSE_SHEET_ID);
+
 
 
 // Response Data
-var responseSheet = spreadsheet.getSheets()[0];
+var responseSheet = RESPONSE_SPREADSHEET.getSheets()[0];
 var responseData = responseSheet.getDataRange().getValues();
-
 
 // Workshop Sheet
 var workshopSheet = SpreadsheetApp.openById(WORKSHOP_SHEET_ID);
 var workshopData = workshopSheet.getDataRange().getValues();
 
-
-// Output Sheet; Clears the sheet and reappends the header.
-var outputSheet = spreadsheet.getSheets()[1];
-outputSheet.clear();
-outputSheet.appendRow(HEADERS);
+// Output Sheet
+var outputSheet = RESPONSE_SPREADSHEET.getSheets()[1];
 var outputData = outputSheet.getDataRange().getValues();
-
+//outputSheet.getActiveSheet().clear();
+// Recreate headers
+//outputSheet.appendRow(HEADERS);
+//var outputData = outputSheet.getDataRange().getValues();
 
 //Pre-Assignment Sheet
-var preAssignmentSheet = spreadsheet.getSheets()[2];
+var preAssignmentSheet = RESPONSE_SPREADSHEET.getSheets()[2];
 var preAssignmentData = preAssignmentSheet.getDataRange().getValues();
-
-
 /**
  * Automatically runs when sheet is opened.
  */
 function onOpen() {
     SpreadsheetApp.getUi()
-        .createMenu("Great Explorations")spreadsheet
+        .createMenu("Great Explorations")
         .addItem("Match Girls to Workshops", "matchGirls")
         .addToUi();
 }
