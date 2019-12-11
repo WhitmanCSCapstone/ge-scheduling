@@ -40,11 +40,12 @@ var workshopData = workshopSheet.getDataRange().getValues();
 
 // Output Sheet
 var outputSheet = RESPONSE_SPREADSHEET.getSheets()[1];
-var outputData = outputSheet.getDataRange().getValues();
-//outputSheet.getActiveSheet().clear();
+//var outputData = outputSheet.getDataRange().getValues(); Only needed for reading data
+//Clear the current output sheet
+outputSheet.clear();
 // Recreate headers
-//outputSheet.appendRow(HEADERS);
-//var outputData = outputSheet.getDataRange().getValues();
+outputSheet.appendRow(HEADERS);
+
 
 //Pre-Assignment Sheet
 var preAssignmentSheet = RESPONSE_SPREADSHEET.getSheets()[2];
