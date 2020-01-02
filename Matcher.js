@@ -124,7 +124,10 @@ function Matcher() {
         for (var i = 0; i < this.allStudents.length; i++) {
             var thisStudent = this.allStudents[i];
             for (var j = 0; j < this.sessionsPerWorkshop; j++) {
-                thisStudent.assignWorkshop(thisStudent.preferences[j], j);
+                thisStudent.assignWorkshopSession(
+                    thisStudent.preferences[j],
+                    j
+                );
             }
         }
     };
