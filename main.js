@@ -24,10 +24,13 @@ var HEADERS = [
 // Formatting workshop variables
 
 var WORKSHOP_SHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
-var RESPONSE_SHEET_ID = "1YcO_lYO1hp9j3fBxWm-4AF_AfYCPExeuVyaJzw0Yktk";
 
+// Pull from global sheets Comment out these two lines if you want to pull from your sheet//
+var RESPONSE_SHEET_ID = "1YcO_lYO1hp9j3fBxWm-4AF_AfYCPExeuVyaJzw0Yktk"; //The Global Sheet on the Repository.
 var RESPONSE_SPREADSHEET = SpreadsheetApp.openById(RESPONSE_SHEET_ID);
 
+//Pull sheets from Active Sheet (Test environment spreadsheets) Comment out if you want to pull from global //
+// var RESPONSE_SHEET_ID = SpreadsheetApp.getActiveSpreadsheet();
 
 
 // Response Data
