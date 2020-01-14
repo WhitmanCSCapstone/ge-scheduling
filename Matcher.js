@@ -55,7 +55,9 @@ function Matcher() {
         // HANDLE DUPLICATES HERE (?)
 
         for (var i = 0; i < preferenceNums.length; i++) {
-            preferenceArray.push(this.workshopsByNumber[preferenceNums[i]]);
+            var preference = this.workshopsByNumber[preferenceNums[i]];
+
+            preferenceArray.push(preference);
         }
 
         var thisStudent = new Student(
@@ -105,13 +107,6 @@ function Matcher() {
                 var addedWorkshop = this.workshopsByPopularity[workshopToAdd];
                 thisStudent.appendPreference(addedWorkshop);
                 workshopToAdd += 1;
-                Logger.log(
-                    "Added workshop '" +
-                        addedWorkshop.name +
-                        "' to " +
-                        thisStudent.fullName() +
-                        "'s preferences"
-                );
             }
         }
         this.sortWorkshops();
@@ -142,7 +137,6 @@ function Matcher() {
             var thisStudent = this.allStudents[i];
             this.score += thisStudent.calculateScore();
         }
-        Logger.log(this.score);
     };
 
     /**
@@ -155,7 +149,6 @@ function Matcher() {
             var thisStudent = this.allStudents[i];
             var worstScore = this.unpreferredScore * this.sessionPerWorkshop;
             if (thisStudent.compareToScore(worstScore)) {
-                Logger.log(thisStudent.fullName());
                 numberOfFails += 1;
             }
         }
