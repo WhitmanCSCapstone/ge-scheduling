@@ -111,14 +111,14 @@ function populateSheet(outputSheet, matcher) {
     outputSheet.appendRow(HEADERS);
 
     for (var i = 0; i < matcher.allStudents.length; i++) {
-        student = matcher.allStudents[i];
+        var student = matcher.allStudents[i];
         var studentLine = [];
         studentLine.push(student.firstName);
         studentLine.push(student.lastName);
 
         // List the student's preferences in the row
-        for (j = 0; j < student.preferences; j++) {
-            workshop = student.preferences[j];
+        for (var j = 0; j < student.preferences; j++) {
+            var workshop = student.preferences[j];
             studentLine.push(workshop.toString());
         }
 
