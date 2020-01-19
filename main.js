@@ -21,28 +21,32 @@ var HEADERS = [
     "Session 3"
 ];
 
-// Formatting workshop variables
+//VARIABLES FOR RESPONSE SPREADSHEET INDICES
+var RESPONSE_SHEET_INDEX = 0;
+var OUTPUT_SHEET_INDEX = 1;
+var PREASSIGNMENT_SHEET_INDEX = 2;
 
-var WORKSHOP_SHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
+// Formattin workshop variables
+var WORKSHOP_SPREADSHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
 
 // Pull from global sheets Comment out these two lines if you want to pull from your sheet//
-var RESPONSE_SHEET_ID = "1YcO_lYO1hp9j3fBxWm-4AF_AfYCPExeuVyaJzw0Yktk"; //The Global Sheet on the Repository.
-var RESPONSE_SPREADSHEET = SpreadsheetApp.openById(RESPONSE_SHEET_ID);
+var RESPONSE_SPREADSHEET_ID = "1YcO_lYO1hp9j3fBxWm-4AF_AfYCPExeuVyaJzw0Yktk"; //The Global Sheet on the Repository.
+var RESPONSE_SPREADSHEET = SpreadsheetApp.openById(RESPONSE_SPREADSHEET_ID);
 
 //Pull sheets from Active Sheet (Test environment spreadsheets) Comment out if you want to pull from global //
 // var RESPONSE_SHEET_ID = SpreadsheetApp.getActiveSpreadsheet();
 
 
 // Response Data
-var responseSheet = RESPONSE_SPREADSHEET.getSheets()[0];
-var responseData = responseSheet.getDataRange().getValues();
+var RESPONSE_SHEET = RESPONSE_SPREADSHEET.getSheets()[RESPONSE_SHEET_INDEX];
+var responseData = RESPONSE_SHEET.getDataRange().getValues();
 
 // Workshop Sheet
-var workshopSheet = SpreadsheetApp.openById(WORKSHOP_SHEET_ID);
-var workshopData = workshopSheet.getDataRange().getValues();
+var WORKSHOP_SHEET = SpreadsheetApp.openById(WORKSHOP_SPREADSHEET_ID);
+var workshopData = WORKSHOP_SHEET.getDataRange().getValues();
 
 // Output Sheet
-var outputSheet = RESPONSE_SPREADSHEET.getSheets()[1];
+var outputSheet = RESPONSE_SPREADSHEET.getSheets()[OUTPUT_SHEET_INDEX];
 //var outputData = outputSheet.getDataRange().getValues(); Only needed for reading data
 //Clear the current output sheet
 outputSheet.clear();
@@ -51,7 +55,7 @@ outputSheet.appendRow(HEADERS);
 
 
 //Pre-Assignment Sheet
-var preAssignmentSheet = RESPONSE_SPREADSHEET.getSheets()[2];
+var preAssignmentSheet = RESPONSE_SPREADSHEET.getSheets()[PREASSIGNMENT_SHEET_INDEX];
 var preAssignmentData = preAssignmentSheet.getDataRange().getValues();
 /**
  * Automatically runs when sheet is opened.
