@@ -29,13 +29,7 @@ var PREASSIGNMENT_SHEET_INDEX = 2;
 // Formattin workshop variables
 var WORKSHOP_SPREADSHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
 
-// Pull from global sheets Comment out these two lines if you want to pull from your sheet//
-var RESPONSE_SPREADSHEET_ID = "1YcO_lYO1hp9j3fBxWm-4AF_AfYCPExeuVyaJzw0Yktk"; //The Global Sheet on the Repository.
-var RESPONSE_SPREADSHEET = SpreadsheetApp.openById(RESPONSE_SPREADSHEET_ID);
-
-//Pull sheets from Active Sheet (Test environment spreadsheets) Comment out if you want to pull from global //
-// var RESPONSE_SPREADSHEET = SpreadsheetApp.getActiveSpreadsheet();
-
+var RESPONSE_SPREADSHEET = SpreadsheetApp.getActiveSpreadsheet();
 
 // Response Data
 var RESPONSE_SHEET = RESPONSE_SPREADSHEET.getSheets()[RESPONSE_SHEET_INDEX];
@@ -53,9 +47,10 @@ outputSheet.clear();
 // Recreate headers
 outputSheet.appendRow(HEADERS);
 
-
 //Pre-Assignment Sheet
-var preAssignmentSheet = RESPONSE_SPREADSHEET.getSheets()[PREASSIGNMENT_SHEET_INDEX];
+var preAssignmentSheet = RESPONSE_SPREADSHEET.getSheets()[
+    PREASSIGNMENT_SHEET_INDEX
+];
 var preAssignmentData = preAssignmentSheet.getDataRange().getValues();
 /**
  * Automatically runs when sheet is opened.
@@ -71,7 +66,6 @@ function onOpen() {
  * It's the main function, what more do you need to know.
  */
 function main() {
-
     var matcher = new Matcher();
 
     for (var i = 1; i < workshopData.length; i++) {
