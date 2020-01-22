@@ -34,7 +34,7 @@ var RESPONSE_SPREADSHEET_ID = "1YcO_lYO1hp9j3fBxWm-4AF_AfYCPExeuVyaJzw0Yktk"; //
 var RESPONSE_SPREADSHEET = SpreadsheetApp.openById(RESPONSE_SPREADSHEET_ID);
 
 //Pull sheets from Active Sheet (Test environment spreadsheets) Comment out if you want to pull from global //
-// var RESPONSE_SHEET_ID = SpreadsheetApp.getActiveSpreadsheet();
+// var RESPONSE_SPREADSHEET = SpreadsheetApp.getActiveSpreadsheet();
 
 
 // Response Data
