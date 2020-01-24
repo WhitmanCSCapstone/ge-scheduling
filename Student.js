@@ -42,12 +42,7 @@ function Student(firstName, lastName, preferenceArray, sessionsPerWorkshop) {
      */
     this.updatePopularities = function() {
         for (var i = 0; i < this.preferences.length; i++) {
-            if (this.preferences[i]) {
-                // If the preference is defined,
-                this.preferences[i].incrementPopularity(
-                    this.popularityPoints[i]
-                );
-            }
+            this.preferences[i].incrementPopularity(this.popularityPoints[i]);
         }
     };
 
