@@ -107,6 +107,13 @@ function Matcher() {
                 var addedWorkshop = this.workshopsByPopularity[workshopToAdd];
                 thisStudent.appendPreference(addedWorkshop);
                 workshopToAdd += 1;
+                Logger.log(
+                    "Added workshop '" +
+                        addedWorkshop.name +
+                        "' to " +
+                        thisStudent.fullName() +
+                        "'s preferences"
+                );
             }
         }
         this.sortWorkshops();
