@@ -98,7 +98,10 @@ function main() {
             }
         }
         matcher.addNewStudent(firstName, lastName, preferenceNums);
-    }
+    }  
+  
+    Logger.log(matcher.allStudents[0].firstName);
+    Logger.log(matcher.allStudents[0].preferences[0].name);
 
     populateSheet(outputSheet, matcher);
 }
@@ -109,17 +112,22 @@ function main() {
 function populateSheet(outputSheet, matcher) {
     outputSheet.clear();
     outputSheet.appendRow(HEADERS);
+  
+    matcher.fixStudentPreferences();
+  
+    matcher.matchGirls();
 
     for (var i = 0; i < matcher.allStudents.length; i++) {
         var student = matcher.allStudents[i];
         var studentLine = [];
         studentLine.push(student.firstName);
         studentLine.push(student.lastName);
-
-        // List the student's preferences in the row
-        for (var j = 0; j < student.preferences; j++) {
-            var workshop = student.preferences[j];
+      
+        // List the student's assigned workshops in the row
+        for (var j = 0; j < student.assignedWorkshops.length; j++) {
+            var workshop = student.assignedWorkshops[j];
             studentLine.push(workshop.toString());
+            Logger.log(studentLine)
         }
 
         outputSheet.appendRow(studentLine);

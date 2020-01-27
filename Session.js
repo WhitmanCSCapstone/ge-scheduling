@@ -37,7 +37,7 @@ function Session(capacity) {
      */
     this.addStudent = function() {
         if (this.isFull()) {
-            throw new Error("Cannot add students to a full session"); // comment out this line to make the current version of matchGirls work correctly.
+            // throw new Error("Cannot add students to a full session"); // comment out this line to make the current version of matchGirls work correctly.
         } else {
             this.remainingCapacity -= 1;
         }
