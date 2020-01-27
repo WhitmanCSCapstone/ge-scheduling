@@ -65,4 +65,4 @@ function Session(capacity) {
     };
 
     this.init();
-};
+}
