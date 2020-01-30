@@ -43,5 +43,9 @@ function Workshop(name, number, capacity, sessionsPerWorkshop) {
         return total;
     };
 
+    this.toString = function() {
+        return "(" + this.number.toString() + ") " + this.name;
+    };
+
     this.init();
 }

@@ -35,7 +35,10 @@ function Student(firstName, lastName, preferenceArray, sessionsPerWorkshop) {
     };
 
     /**
-     * Increments the popularities of all the workshops in the student's preference list based on this.popularityPoints
+     * Increments the popularities of all the workshops in the student's
+     * preference list based on `this.popularityPoints`.
+     *
+     * Ignores null preferences.
      */
     this.updatePopularities = function() {
         for (var i = 0; i < this.preferences.length; i++) {
@@ -104,7 +107,7 @@ function Student(firstName, lastName, preferenceArray, sessionsPerWorkshop) {
      */
     this.assignWorkshopSession = function(workshop, session) {
         workshop.sessions[session].addStudent();
-        this.assignedWorkshops[session] = this.preferences[session];
+        this.assignedWorkshops[session] = workshop;
     };
 
     /**
@@ -213,6 +216,10 @@ function Student(firstName, lastName, preferenceArray, sessionsPerWorkshop) {
      */
     this.fullName = function() {
         return this.firstName.concat(" ", this.lastName);
+    };
+
+    this.toString = function() {
+        return this.fullName();
     };
 
     this.init();
