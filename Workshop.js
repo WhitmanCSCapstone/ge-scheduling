@@ -16,9 +16,13 @@ function Workshop(name, number, capacity, sessionsPerWorkshop) {
         this.number = number;
 
         this.sessions = [];
+        this.totalBaseCapacity = 0;
         for (var i = 0; i < sessionsPerWorkshop; i++) {
             this.sessions.push(new Session(capacity));
+            this.totalBaseCapacity += capacity;
         }
+
+        this.minimumFill = totalBaseCapacity * 0.75;
 
         this.popularityScore = 0;
     };
@@ -41,6 +45,10 @@ function Workshop(name, number, capacity, sessionsPerWorkshop) {
             total += this.sessions[i].remainingCapacity;
         }
         return total;
+    };
+
+    this.toString = function() {
+        return "(" + this.number.toString() + ") " + this.name;
     };
 
     this.init();

@@ -19,6 +19,9 @@ function Matcher() {
         // An array containing all workshop objects sorted from least to most popular
         this.workshopsByPopularity = [];
 
+        // An array containing all the workshops that aren't popular enough to be filled by people that list them as preferences
+        this.unpopularWorkshops = [];
+
         // A number representing the quality of the final matches. The lower the score the better
         this.score = 0;
     };
@@ -55,7 +58,9 @@ function Matcher() {
         // HANDLE DUPLICATES HERE (?)
 
         for (var i = 0; i < preferenceNums.length; i++) {
-            preferenceArray.push(this.workshopsByNumber[preferenceNums[i]]);
+            var preference = this.workshopsByNumber[preferenceNums[i]];
+
+            preferenceArray.push(preference);
         }
 
         var thisStudent = new Student(
@@ -118,13 +123,44 @@ function Matcher() {
     };
 
     /**
+     * Fills the unpopularWorkshops array with workshops where the popularity score is below the minimum fill for that workshop.
+     */
+    this.findUnpopular = function() {
+        for (var i = 0;  i < workshopsByPopularity.length; i++) {
+            var tempWorkshop = workshopsByPopularity[i];
+            if (tempWorkshop.popularityScore < tempWorkshop.minimumFill) {
+                this.unpopularWorkshops.push(tempWorkshop);
+            }
+        }
+        this.unpopularWorkshops.sort(morePopular);
+    }
+
+    /**
+     * Assigns students who prefer the unpopular workshops to those workshops, starting with the least popular.
+     */
+    this.assignToUnpopular = function() {
+        for (var i = 0; i < unpopularWorkshops.length; i++) {
+            tempWorkshop = unpopularWorkshops[i];
+            for (var j = 0; j < allStudents.length; j++) {
+                tempStudent = allStudents[j];
+                if (tempStudent.preferences.indexOf(workshopNum) != -1 && !tempStudent.fullyAssigned) {
+                    tempStudent.assignWorkshop(tempWorkshop);
+                }
+            }
+        }
+    }
+
+    /**
      * Assigns every student to workshops according to their preferences.
      */
     this.matchGirls = function() {
         for (var i = 0; i < this.allStudents.length; i++) {
             var thisStudent = this.allStudents[i];
             for (var j = 0; j < this.sessionsPerWorkshop; j++) {
-                thisStudent.assignWorkshop(thisStudent.preferences[j], j);
+                thisStudent.assignWorkshopSession(
+                    thisStudent.preferences[j],
+                    j
+                );
             }
         }
     };
@@ -139,7 +175,6 @@ function Matcher() {
             var thisStudent = this.allStudents[i];
             this.score += thisStudent.calculateScore();
         }
-        Logger.log(this.score);
     };
 
     /**
@@ -152,7 +187,6 @@ function Matcher() {
             var thisStudent = this.allStudents[i];
             var worstScore = this.unpreferredScore * this.sessionPerWorkshop;
             if (thisStudent.compareToScore(worstScore)) {
-                Logger.log(thisStudent.fullName());
                 numberOfFails += 1;
             }
         }

@@ -21,9 +21,37 @@ var HEADERS = [
     "Session 3"
 ];
 
-var OUTPUT_SHEET_ID = "13K10UA0ZNjCDGTbVbO104CdW97DJgm3MaK2TZpiRytw";
-var WORKSHOP_SHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
+//VARIABLES FOR RESPONSE SPREADSHEET INDICES
+var RESPONSE_SHEET_INDEX = 0;
+var OUTPUT_SHEET_INDEX = 1;
+var PREASSIGNMENT_SHEET_INDEX = 2;
 
+// Formattin workshop variables
+var WORKSHOP_SPREADSHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
+
+var RESPONSE_SPREADSHEET = SpreadsheetApp.getActiveSpreadsheet();
+
+// Response Data
+var RESPONSE_SHEET = RESPONSE_SPREADSHEET.getSheets()[RESPONSE_SHEET_INDEX];
+var responseData = RESPONSE_SHEET.getDataRange().getValues();
+
+// Workshop Sheet
+var WORKSHOP_SHEET = SpreadsheetApp.openById(WORKSHOP_SPREADSHEET_ID);
+var workshopData = WORKSHOP_SHEET.getDataRange().getValues();
+
+// Output Sheet
+var outputSheet = RESPONSE_SPREADSHEET.getSheets()[OUTPUT_SHEET_INDEX];
+//var outputData = outputSheet.getDataRange().getValues(); Only needed for reading data
+//Clear the current output sheet
+outputSheet.clear();
+// Recreate headers
+outputSheet.appendRow(HEADERS);
+
+//Pre-Assignment Sheet
+var preAssignmentSheet = RESPONSE_SPREADSHEET.getSheets()[
+    PREASSIGNMENT_SHEET_INDEX
+];
+var preAssignmentData = preAssignmentSheet.getDataRange().getValues();
 /**
  * Automatically runs when sheet is opened.
  */
@@ -38,12 +66,6 @@ function onOpen() {
  * It's the main function, what more do you need to know.
  */
 function main() {
-    var workshopSheet = SpreadsheetApp.openById(WORKSHOP_SHEET_ID);
-    var workshopData = workshopSheet.getDataRange().getValues();
-
-    var responseSheet = SpreadsheetApp.getActiveSheet();
-    var responseData = responseSheet.getDataRange().getValues();
-
     var matcher = new Matcher();
 
     for (var i = 1; i < workshopData.length; i++) {
@@ -76,5 +98,38 @@ function main() {
             }
         }
         matcher.addNewStudent(firstName, lastName, preferenceNums);
+    }  
+  
+    Logger.log(matcher.allStudents[0].firstName);
+    Logger.log(matcher.allStudents[0].preferences[0].name);
+
+    populateSheet(outputSheet, matcher);
+}
+
+/**
+ * Output the results of the matcher to the given sheet.
+ */
+function populateSheet(outputSheet, matcher) {
+    outputSheet.clear();
+    outputSheet.appendRow(HEADERS);
+  
+    matcher.fixStudentPreferences();
+  
+    matcher.matchGirls();
+
+    for (var i = 0; i < matcher.allStudents.length; i++) {
+        var student = matcher.allStudents[i];
+        var studentLine = [];
+        studentLine.push(student.firstName);
+        studentLine.push(student.lastName);
+      
+        // List the student's assigned workshops in the row
+        for (var j = 0; j < student.assignedWorkshops.length; j++) {
+            var workshop = student.assignedWorkshops[j];
+            studentLine.push(workshop.toString());
+            Logger.log(studentLine)
+        }
+
+        outputSheet.appendRow(studentLine);
     }
 }
