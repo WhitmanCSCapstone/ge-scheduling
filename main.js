@@ -2,10 +2,13 @@
 
 var COLUMN_FIRST_NAME = 10;
 var COLUMN_LAST_NAME = 11;
+var COLUMN_GRADE = 17;
 
 // Column indicies of workshop info for the workshop class
 var COLUMN_WORKSHOP_NAME = 2;
 var COLUMN_WORKSHOP_CAPACITY = 6;
+var COLUMN_WORKSHOP_BUILDING = 4;
+var COLUMN_WORKSHOP_ROOM = 5;
 
 // Column indices of student preferences in order from most preferred to least
 var PREFERENCE_COLUMNS = [1, 2, 3, 4, 5, 6];
@@ -16,9 +19,16 @@ var ENROLLED = [2, 3, 4];
 var HEADERS = [
     "First name",
     "Last name",
-    "Session 1",
-    "Session 2",
-    "Session 3"
+    "Grade",
+    "Workshop #",
+    "Workshop Name",
+    "Workshop Location",
+    "Workshop #",
+    "Workshop Name",
+    "Workshop Location",
+    "Workshop #",
+    "Workshop Name",
+    "Workshop Location"
 ];
 
 //VARIABLES FOR RESPONSE SPREADSHEET INDICES
@@ -42,8 +52,6 @@ var workshopData = WORKSHOP_SHEET.getDataRange().getValues();
 // Output Sheet
 var outputSheet = RESPONSE_SPREADSHEET.getSheets()[OUTPUT_SHEET_INDEX];
 //var outputData = outputSheet.getDataRange().getValues(); Only needed for reading data
-//Clear the current output sheet
-outputSheet.clear();
 // Recreate headers
 outputSheet.appendRow(HEADERS);
 
@@ -73,6 +81,7 @@ function main() {
         var name = workshopData[i][COLUMN_WORKSHOP_NAME];
         var number = i;
         var capacity = workshopData[i][COLUMN_WORKSHOP_CAPACITY];
+        var location = workshopData[i][COLUMN_WORKSHOP_BUILDING] + " " + workshopData[i][COLUMN_WORKSHOP_ROOM];
         
         //Checks name, number, and capacity, for valid inputs.//
         
@@ -82,17 +91,18 @@ function main() {
         if (typeof(capacity) != "number"){
             throw "Invalid input at row " + i + " column " + COLUMN_WORKSHOP_CAPACITY;
         }
-      
+
         
         
 
-        matcher.addNewWorkshop(name, number, capacity);
+        matcher.addNewWorkshop(name, number, capacity, location);
     }
 
     for (var j = 1; j < responseData.length; j++) {
         // for all students j
         var firstName = responseData[j][COLUMN_FIRST_NAME];
         var lastName = responseData[j][COLUMN_LAST_NAME];
+        var grade = responseData[j][COLUMN_GRADE];
 
         var preferenceNums = [];
 
@@ -106,7 +116,7 @@ function main() {
                 )
             );
           
-          //Checks firstName, lastName, workshopNum for valid inputs//
+          //Checks firstName, lastName, for valid inputs//
           
         if (typeof(firstName) != "string"){
             throw "Invalid input at row " + j + " column " + COLUMN_FIRST_NAME;      
@@ -117,6 +127,9 @@ function main() {
         if (typeof(workshopNum) != "number"){
             throw "Invalid input at row " + j + " column " + PREFERENCE_COLUMNS[k];
         }
+        if (typeof(grade) != "string"){
+            throw "Invalid input at row " + j + " column " + COLUMN_GRADE;
+        }
           
           
           
@@ -126,7 +139,7 @@ function main() {
                 preferenceNums.push(workshopNum);
             }
         }
-        matcher.addNewStudent(firstName, lastName, preferenceNums);
+        matcher.addNewStudent(firstName, lastName, preferenceNums, grade);
     }
 
     Logger.log(matcher.allStudents[0].firstName);
@@ -151,12 +164,16 @@ function populateSheet(outputSheet, matcher) {
         var studentLine = [];
         studentLine.push(student.firstName);
         studentLine.push(student.lastName);
+        studentLine.push(student.grade);
 
         // List the student's assigned workshops in the row
         for (var j = 0; j < student.assignedWorkshops.length; j++) {
             var workshop = student.assignedWorkshops[j];
-            studentLine.push(workshop.toString());
-            Logger.log(studentLine);
+            studentLine.push(workshop.number);
+            studentLine.push(workshop.name);
+            studentLine.push(workshop.location);
+            //studentLine.push(workshop.toString());
+            //Logger.log(studentLine);
         }
 
         outputSheet.appendRow(studentLine);
