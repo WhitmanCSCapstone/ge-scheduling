@@ -10,10 +10,11 @@
  * @param {int}    capacity            The capacity of a single session of the workshop.
  * @param {int}    sessionsPerWorkshop The number of sessions in a workshop.
  */
-function Workshop(name, number, capacity, sessionsPerWorkshop) {
+function Workshop(name, number, capacity, location, sessionsPerWorkshop) {
     this.init = function() {
         this.name = name;
         this.number = number;
+        this.location = location;
 
         this.sessions = [];
         for (var i = 0; i < sessionsPerWorkshop; i++) {
