@@ -51,15 +51,16 @@ var workshopData = WORKSHOP_SHEET.getDataRange().getValues();
 
 // Output Sheet
 var outputSheet = RESPONSE_SPREADSHEET.getSheets()[OUTPUT_SHEET_INDEX];
-//var outputData = outputSheet.getDataRange().getValues(); Only needed for reading data
+
 // Recreate headers
 outputSheet.appendRow(HEADERS);
 
-//Pre-Assignment Sheet
+// Pre-Assignment Sheet
 var preAssignmentSheet = RESPONSE_SPREADSHEET.getSheets()[
     PREASSIGNMENT_SHEET_INDEX
 ];
 var preAssignmentData = preAssignmentSheet.getDataRange().getValues();
+
 /**
  * Automatically runs when sheet is opened.
  */
@@ -81,19 +82,25 @@ function main() {
         var name = workshopData[i][COLUMN_WORKSHOP_NAME];
         var number = i;
         var capacity = workshopData[i][COLUMN_WORKSHOP_CAPACITY];
-        var location = workshopData[i][COLUMN_WORKSHOP_BUILDING] + " " + workshopData[i][COLUMN_WORKSHOP_ROOM];
-        
-        //Checks name, number, and capacity, for valid inputs.//
-        
-        if (typeof(name) != "string"){
-            throw "Invalid input at row " + i + " column " + COLUMN_WORKSHOP_NAME;      
-        }
-        if (typeof(capacity) != "number"){
-            throw "Invalid input at row " + i + " column " + COLUMN_WORKSHOP_CAPACITY;
-        }
+        var location =
+            workshopData[i][COLUMN_WORKSHOP_BUILDING] +
+            " " +
+            workshopData[i][COLUMN_WORKSHOP_ROOM];
 
-        
-        
+        // Checks name, number, and capacity, for valid inputs.
+
+        if (typeof name != "string") {
+            throw "Invalid input at row " +
+                i +
+                " column " +
+                COLUMN_WORKSHOP_NAME;
+        }
+        if (typeof capacity != "number") {
+            throw "Invalid input at row " +
+                i +
+                " column " +
+                COLUMN_WORKSHOP_CAPACITY;
+        }
 
         matcher.addNewWorkshop(name, number, capacity, location);
     }
@@ -115,26 +122,31 @@ function main() {
                     preferredWorkshop.indexOf(")")
                 )
             );
-          
-          //Checks firstName, lastName, for valid inputs//
-          
-        if (typeof(firstName) != "string"){
-            throw "Invalid input at row " + j + " column " + COLUMN_FIRST_NAME;      
-        }
-        if (typeof(lastName) != "string"){
-            throw "Invalid input at row " + j + " column " + COLUMN_LAST_NAME;
-        }
-        if (typeof(workshopNum) != "number"){
-            throw "Invalid input at row " + j + " column " + PREFERENCE_COLUMNS[k];
-        }
-        if (typeof(grade) != "string"){
-            throw "Invalid input at row " + j + " column " + COLUMN_GRADE;
-        }
-          
-          
-          
-          
-          
+
+            // Checks firstName, lastName, for valid inputs
+
+            if (typeof firstName != "string") {
+                throw "Invalid input at row " +
+                    j +
+                    " column " +
+                    COLUMN_FIRST_NAME;
+            }
+            if (typeof lastName != "string") {
+                throw "Invalid input at row " +
+                    j +
+                    " column " +
+                    COLUMN_LAST_NAME;
+            }
+            if (typeof workshopNum != "number") {
+                throw "Invalid input at row " +
+                    j +
+                    " column " +
+                    PREFERENCE_COLUMNS[k];
+            }
+            if (typeof grade != "string") {
+                throw "Invalid input at row " + j + " column " + COLUMN_GRADE;
+            }
+
             if (preferenceNums.indexOf(workshopNum) === -1) {
                 preferenceNums.push(workshopNum);
             }
@@ -172,8 +184,6 @@ function populateSheet(outputSheet, matcher) {
             studentLine.push(workshop.number);
             studentLine.push(workshop.name);
             studentLine.push(workshop.location);
-            //studentLine.push(workshop.toString());
-            //Logger.log(studentLine);
         }
 
         outputSheet.appendRow(studentLine);
