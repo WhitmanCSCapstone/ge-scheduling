@@ -24,6 +24,9 @@ function Matcher() {
 
         // A number representing the quality of the final matches. The lower the score the better
         this.score = 0;
+        
+        // The minimum percentage that each workshop must be filled to
+        this.minimumWorkshopFill = 0.75;
     };
 
     /**
@@ -38,7 +41,8 @@ function Matcher() {
             name,
             number,
             capacity,
-            this.sessionsPerWorkshop
+            this.sessionsPerWorkshop,
+            this.minimumWorkshopFill
         );
 
         this.workshopsByNumber[number] = thisWorkshop;
@@ -126,44 +130,97 @@ function Matcher() {
      * Fills the unpopularWorkshops array with workshops where the popularity score is below the minimum fill for that workshop.
      */
     this.findUnpopular = function() {
-        for (var i = 0;  i < workshopsByPopularity.length; i++) {
-            var tempWorkshop = workshopsByPopularity[i];
+        for (var i = 0;  i < this.workshopsByPopularity.length; i++) {
+            var tempWorkshop = this.workshopsByPopularity[i];
             if (tempWorkshop.popularityScore < tempWorkshop.minimumFill) {
                 this.unpopularWorkshops.push(tempWorkshop);
             }
         }
-        this.unpopularWorkshops.sort(morePopular);
     }
 
     /**
      * Assigns students who prefer the unpopular workshops to those workshops, starting with the least popular.
      */
     this.assignToUnpopular = function() {
-        for (var i = 0; i < unpopularWorkshops.length; i++) {
-            tempWorkshop = unpopularWorkshops[i];
-            for (var j = 0; j < allStudents.length; j++) {
-                tempStudent = allStudents[j];
-                if (tempStudent.preferences.indexOf(workshopNum) != -1 && !tempStudent.fullyAssigned) {
-                    tempStudent.assignWorkshop(tempWorkshop);
+        for (var i = 0; i < this.allStudents.length; i++) {
+            tempStudent = this.allStudents[i];
+            for (var j = 0; j < tempStudent.preferences.length; j++) {
+                tempPreference = tempStudent.preferences[j];
+                if (this.unpopularWorkshops.indexOf(tempPreference) !== -1 && !tempStudent.fullyAssigned()) {
+                    tempStudent.assignWorkshop(tempPreference);
                 }
             }
         }
     }
 
     /**
+     * Divides all the students into ones who haven't been assigned any workshops and ones who have.
+     */
+    this.divideByAssignment = function() {
+        this.assignedSomething = [];
+        this.assignedNothing = [];
+        for (var i = 0; i < this.allStudents.length; i++) {
+            if (this.allStudents[i].numberAssigned() === 0) {
+                this.assignedNothing.push(this.allStudents[i]);
+                Logger.log("a student went to assignedNothing");
+            }
+            else {
+                this.assignedSomething.push(this.allStudents[i]);
+            }
+        }
+    }
+
+    /**
+     * Randomly chooses students to fill the least popular workshops, and also gives them their first choice.
+     */
+    this.fillUnpopular = function() {
+        this.divideByAssignment();
+        this.firstIsFull = []; // Students whose first choice workshop is full
+        this.givenFiller = []; // Students given a filler slot and their first choice workshop
+        while (this.unpopularWorkshops.length) {
+            if (this.unpopularWorkshops[0].hasReachedQuorum()) { // If the workshop has reached its minimum, remove it from the array and iterate again.
+                this.unpopularWorkshops.shift();
+                Logger.log("An unpopular workshop was filled!");
+                continue;
+            }
+            
+            if (!this.assignedNothing.length) { // If there are no more students with no assignments, stop the loop
+                Logger.log("There are no viable remaining students with zero assignments");
+                break;
+            }
+
+            var mostUnpopular = this.unpopularWorkshops[0];
+//            Logger.log(mostUnpopular.name);
+            var randomStudent = this.assignedNothing[Math.floor(Math.random() * this.assignedNothing.length)];
+//            Logger.log(randomStudent.fullName());
+            if (randomStudent.preferences[0].isFull()) { // The student's first choice is full already
+                this.firstIsFull.push(randomStudent);
+            }
+            else { // Give the student the filler workshop and their first choice workshop
+                randomStudent.assignWorkshop(mostUnpopular);
+                randomStudent.assignWorkshop(randomStudent.preferences[0]);
+                this.givenFiller.push(randomStudent);
+            }
+            this.assignedNothing.splice(this.assignedNothing.indexOf(randomStudent), 1);   
+        }
+    }
+
+    /**
+     * Wrapper function to fully handle the most unpopular workshops.
+     */
+    this.handleUnpopular = function() {
+        this.findUnpopular();
+        this.assignToUnpopular();
+        this.fillUnpopular();
+    }
+
+    /**
      * Assigns every student to workshops according to their preferences.
      */
     this.matchGirls = function() {
-        for (var i = 0; i < this.allStudents.length; i++) {
-            var thisStudent = this.allStudents[i];
-            for (var j = 0; j < this.sessionsPerWorkshop; j++) {
-                thisStudent.assignWorkshopSession(
-                    thisStudent.preferences[j],
-                    j
-                );
-            }
-        }
-    };
+        this.fixStudentPreferences();
+        this.handleUnpopular();
+    }
 
     /**
      * Give a score to the final matches based on how many students received their preferences.
