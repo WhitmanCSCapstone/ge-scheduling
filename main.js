@@ -73,10 +73,10 @@ function onOpen() {
 ///// Functions that check the inputs for valid types can be extended to check for other params//////
 function workshop_input_checker(name, capacity, location, i){
   
-        if (typeof(name) != "string"){
+        if (typeof(name) !== "string"){
             throw "Invalid input at row " + i + " column " + COLUMN_WORKSHOP_NAME;      
         }
-        if (typeof(capacity) != "number"){
+        if (typeof(capacity) !== "number"){
             throw "Invalid input at row " + i + " column " + COLUMN_WORKSHOP_CAPACITY;
         }
 }
@@ -84,19 +84,19 @@ function workshop_input_checker(name, capacity, location, i){
   
 function student_input_checker(firstName, lastName, grade, workshopNum, j){
   
-        if (typeof(firstName) != "string"){
+        if (typeof(firstName) !== "string"){
             throw "Invalid input at row " + j + " column " + COLUMN_FIRST_NAME;      
         }
-        if (typeof(lastName) != "string"){
+        if (typeof(lastName) !== "string"){
             throw "Invalid input at row " + j + " column " + COLUMN_LAST_NAME;
         }
-        if (typeof(grade) != "string"){
+        if (typeof(grade) !== "string"){
             throw "Invalid input at row " + j + " column " + COLUMN_GRADE;
         }
 }
 
 function preference_input_checker(workshopNum, j){
-          if (typeof(workshopNum) != "number"){
+          if (typeof(workshopNum) !== "number"){
             throw "Invalid input at row " + j + " column " + PREFERENCE_COLUMNS[k];
         }
 }
