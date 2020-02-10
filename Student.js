@@ -74,12 +74,12 @@ function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorksho
      * @param {int} session2 The index of one of the workshops in the student's assigned workshops.
      */
     this.swapWorkshops = function(session1, session2) {
-        if (this.assignedWorkshops[session1] != null) {
+        if (this.assignedWorkshops[session1] !== null) {
             this.assignedWorkshops[session1].sessions[
                 session1
             ].subtractStudent();
         }
-        if (this.assignedWorkshops[session2] != null) {
+        if (this.assignedWorkshops[session2] !== null) {
             this.assignedWorkshops[session2].sessions[
                 session2
             ].subtractStudent();
@@ -89,10 +89,10 @@ function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorksho
         this.assignedWorkshops[session1] = this.assignedWorkshops[session2];
         this.assignedWorkshops[session2] = temp;
 
-        if (this.assignedWorkshops[session1] != null) {
+        if (this.assignedWorkshops[session1] !== null) {
             this.assignedWorkshops[session1].sessions[session1].addStudent();
         }
-        if (this.assignedWorkshops[session2] != null) {
+        if (this.assignedWorkshops[session2] !== null) {
             this.assignedWorkshops[session2].sessions[session2].addStudent();
         }
     };
@@ -103,7 +103,7 @@ function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorksho
     this.numberAssigned = function() {
         var total = 0;
         for (var i = 0; i < this.assignedWorkshops.length; i++) {
-            if (this.assignedWorkshops[i] != null) {
+            if (this.assignedWorkshops[i] !== null) {
                 total += 1;
             }
         }
@@ -137,7 +137,7 @@ function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorksho
 
     this.givenFirstPreference = function() {
         var firstPreference = this.preferences[0];
-        return (this.assignedWorkshops.indexOf(firstPreference) != -1);
+        return (this.assignedWorkshops.indexOf(firstPreference) !== -1);
     }
 
     /**
