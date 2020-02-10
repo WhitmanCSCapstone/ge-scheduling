@@ -10,10 +10,11 @@
  * @param {array}  preferenceArray     The ordered array of the student's preferred workshops from most to least preferred.
  * @param {int}    sessionsPerWorkshop The number of sessions in a workshop.
  */
-function Student(firstName, lastName, preferenceArray, sessionsPerWorkshop) {
+function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorkshop) {
     this.init = function() {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.grade = grade;
 
         this.preferences = preferenceArray;
 

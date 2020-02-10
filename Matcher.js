@@ -36,11 +36,12 @@ function Matcher() {
      * @param {int}    number   The number of the workshop.
      * @param {int}    capacity The capacity of each session of the workshop.
      */
-    this.addNewWorkshop = function(name, number, capacity) {
+    this.addNewWorkshop = function(name, number, capacity, location) {
         var thisWorkshop = new Workshop(
             name,
             number,
             capacity,
+            location,
             this.sessionsPerWorkshop,
             this.minimumWorkshopFill
         );
@@ -56,10 +57,8 @@ function Matcher() {
      * @param {string} lastName       The last name of the student.
      * @param {array}  preferenceNums The student's preferences as an array of integers.
      */
-    this.addNewStudent = function(firstName, lastName, preferenceNums) {
+    this.addNewStudent = function(firstName, lastName, preferenceNums, grade) {
         var preferenceArray = [];
-
-        // HANDLE DUPLICATES HERE (?)
 
         for (var i = 0; i < preferenceNums.length; i++) {
             var preference = this.workshopsByNumber[preferenceNums[i]];
@@ -71,6 +70,7 @@ function Matcher() {
             firstName,
             lastName,
             preferenceArray,
+            grade,
             this.sessionsPerWorkshop
         );
 
