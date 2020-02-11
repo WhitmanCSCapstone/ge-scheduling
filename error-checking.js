@@ -2,13 +2,17 @@
  * COLUMN_LAST_NAME, COLUMN_GRADE, PREFERENCE_COLUMNS, Logger */
 // Functions that check the inputs for valid types can be extended to check for other params
 
+//Current Version only checks if the correct type in the correct column. Really only makes sure that integers//
+// are where they should be and gives row and column of incorrect input. In order to test put a string where an //
+//integer should be in the spreadsheet //
+
 function workshop_input_checker(name, capacity, location, i) {
     if (typeof name !== "string") {
         throw new Error(
             "Invalid input at row " + i + " column " + COLUMN_WORKSHOP_NAME
         );
     }
-    if ((typeof capacity !== "number") || (typeof capcity == NaN)) {
+    if ((typeof capacity !== "number") || (capcity == NaN)) {
         throw new Error(
             "Invalid input at row " + i + " column " + COLUMN_WORKSHOP_CAPACITY
         );
@@ -35,7 +39,7 @@ function student_input_checker(firstName, lastName, grade, workshopNum, j) {
 
 function preference_input_checker(workshopNum, j, k) {
     Logger.log("Checking preferred workshop with type " + typeof workshopNum);
-    if ((typeof workshopNum !== "number") || (typeof workshopNum == NaN) {
+    if ((typeof workshopNum !== "number") || (workshopNum == NaN) {
         throw new Error(
             "Invalid input at row " + j + " column " + PREFERENCE_COLUMNS[k]
         );
