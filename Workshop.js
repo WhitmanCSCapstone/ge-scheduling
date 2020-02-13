@@ -28,7 +28,7 @@ function Workshop(name, number, capacity, location, sessionsPerWorkshop, minimum
         
         this.slotsFilled = 0;
 
-        this.minimumFill = this.totalBaseCapacity * minimumFill;
+        this.minimumFill = Math.floor(this.totalBaseCapacity * minimumFill);
 
         this.popularityScore = 0;
     };

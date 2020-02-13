@@ -56,6 +56,10 @@ function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorksho
      */
     this.assignWorkshop = function(workshop) {
         if (this.fullyAssigned()) {
+            for (var i = 0; i < this.assignedWorkshops.length; i++) {
+                Logger.log(this.assignedWorkshops[i].name);
+            }
+            Logger.log(workshop.name);
             throw new Error(this.fullName() + " cannot be assigned any more workshops");
         }
         for (var i = 0; i < this.assignedWorkshops.length; i++) {
@@ -114,7 +118,7 @@ function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorksho
      * Calculates and returns whether or not the student has been assigned a workshop in all 3 sessions.
      */
     this.fullyAssigned = function() {
-        return this.numberAssigned === sessionsPerWorkshop;
+        return this.numberAssigned() === sessionsPerWorkshop;
     };
 
     /**
@@ -123,6 +127,13 @@ function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorksho
     this.hasAllPreferences = function() {
         return this.preferences.length >= this.scorerPoints.length;
     };
+
+    /**
+     * Returns true if the student has already been assigned the listed workshop, false if not.
+     */
+    this.isAssigned = function(workshop) {
+        return (this.assignedWorkshops.indexOf(workshop) !== -1);
+    }
 
     /**
      * Appends a workshop to a student's list of preferences.

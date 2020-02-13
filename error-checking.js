@@ -34,7 +34,7 @@ function student_input_checker(firstName, lastName, grade, workshopNum, j) {
 }
 
 function preference_input_checker(workshopNum, j, k) {
-    Logger.log("Checking preferred workshop with type " + typeof workshopNum);
+    //Logger.log("Checking preferred workshop with type " + typeof workshopNum);
     if (typeof workshopNum !== "number") {
         throw new Error(
             "Invalid input at row " + j + " column " + PREFERENCE_COLUMNS[k]

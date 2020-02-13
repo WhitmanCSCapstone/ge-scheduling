@@ -22,13 +22,13 @@ var HEADERS = [
     "Last name",
     "Grade",
     "Workshop #",
-    "Workshop Name",
+    "Workshop Section A",
     "Workshop Location",
     "Workshop #",
-    "Workshop Name",
+    "Workshop Section B",
     "Workshop Location",
     "Workshop #",
-    "Workshop Name",
+    "Workshop Section C",
     "Workshop Location"
 ];
 
@@ -52,8 +52,6 @@ var workshopData = WORKSHOP_SHEET.getDataRange().getValues();
 
 // Output Sheet
 var outputSheet = RESPONSE_SPREADSHEET.getSheets()[OUTPUT_SHEET_INDEX];
-// Recreate headers
-outputSheet.appendRow(HEADERS);
 
 //Pre-Assignment Sheet
 var preAssignmentSheet = RESPONSE_SPREADSHEET.getSheets()[
@@ -66,7 +64,7 @@ var preAssignmentData = preAssignmentSheet.getDataRange().getValues();
 function onOpen() {
     SpreadsheetApp.getUi()
         .createMenu("Great Explorations")
-        .addItem("Match Girls to Workshops", "matchGirls")
+        .addItem("Match Girls to Workshops", "main")
         .addToUi();
 }
 
@@ -130,6 +128,7 @@ function main() {
 function populateSheet(outputSheet, matcher) {
     outputSheet.clear();
     outputSheet.appendRow(HEADERS);
+    outputSheet.setFrozenRows(1);
   
     matcher.fixStudentPreferences();
   

@@ -25,8 +25,10 @@ function Matcher() {
         // A number representing the quality of the final matches. The lower the score the better
         this.score = 0;
         
-        // The minimum percentage that each workshop must be filled to
-        this.minimumWorkshopFill = 0.75;
+        // The minimum percentage that each workshop must be filled to. SET THIS TO ZERO TO CALCULATE AUTOMATICALLY
+        this.minimumWorkshopFill = 0.7;
+
+        this.numberOfPreferences = 6;
     };
 
     /**
@@ -125,93 +127,106 @@ function Matcher() {
         }
         this.sortWorkshops();
     };
-
-    /**
-     * Fills the unpopularWorkshops array with workshops where the popularity score is below the minimum fill for that workshop.
-     */
-    this.findUnpopular = function() {
-        for (var i = 0;  i < this.workshopsByPopularity.length; i++) {
-            var tempWorkshop = this.workshopsByPopularity[i];
-            if (tempWorkshop.popularityScore < tempWorkshop.minimumFill) {
-                this.unpopularWorkshops.push(tempWorkshop);
-            }
+    
+    this.calculateMinPercent = function() {
+        var totalSlots = 0;
+        for (var i = 0; i < this.workshopsByPopularity.length; i++) {
+            totalSlots += this.workshopsByPopularity[i].totalBaseCapacity;
         }
+        var minPercent = (this.allStudents.length * this.sessionsPerWorkshop) / totalSlots;
+        Logger.log("minimum possible average fill: " + minPercent);
     }
 
     /**
-     * Assigns students who prefer the unpopular workshops to those workshops, starting with the least popular.
+     * Chooses random students to fill a workshop that hasn't been filled and gives them their highest possible preferences as compensation
+     * 
+     * @param workshop the workshop that needs to be filled to Quorum
      */
-    this.assignToUnpopular = function() {
+    this.fillOneWorkshop = function(workshop) {
+        var eligibleStudents = [];
         for (var i = 0; i < this.allStudents.length; i++) {
             tempStudent = this.allStudents[i];
-            for (var j = 0; j < tempStudent.preferences.length; j++) {
-                tempPreference = tempStudent.preferences[j];
-                if (this.unpopularWorkshops.indexOf(tempPreference) !== -1 && !tempStudent.fullyAssigned()) {
-                    tempStudent.assignWorkshop(tempPreference);
+            if (tempStudent.numberAssigned() < 2 && !tempStudent.isAssigned(workshop)) {
+                eligibleStudents.push(tempStudent);
+            }
+        }
+
+        for (var j = 0; j < this.numberOfPreferences; j++) { // first preference first, etc
+            var currentStage = eligibleStudents.slice();
+            while (currentStage.length > 0) {
+                var randomIndex = Math.floor(Math.random() * currentStage.length)
+                var randomStudent = currentStage[randomIndex];
+                var currentPreference = randomStudent.preferences[j];
+                if (randomStudent.isAssigned(currentPreference)) {
+                    randomStudent.assignWorkshop(workshop);
+                }
+                else if (!currentPreference.isFull()) {
+                    randomStudent.assignWorkshop(workshop);
+                    randomStudent.assignWorkshop(currentPreference);
+                }
+                currentStage.splice(randomIndex, 1);
+                if (workshop.hasReachedQuorum()) {
+                    return;
+                }
+            }
+        }
+        Logger.log("Unable to fill workshop " + workshop.name);
+        Logger.log("Slots filled: " + workshop.slotsFilled + "/" + workshop.minimumFill);
+        Logger.log("Base Popularity: " + workshop.popularityScore);
+        throw new Error("Was unable to fill workshop " + workshop.name); // will handle this differently if it happens, EXTREMELY unlikely
+    }
+
+    this.reachMinimumForAll = function() {
+        this.fullEnough = [];
+        this.notFullEnough = [];
+        
+        for (var i = 0; i < this.workshopsByPopularity.length; i++) { // for each workshop i
+            currentWorkshop = this.workshopsByPopularity[i]
+            if (currentWorkshop.hasReachedQuorum()) {
+                this.fullEnough.push();
+                continue;
+            }
+            else { //BROKEN, ASSIGNS WORKSHOPS TO STUDENTS WHO ARE FULL, FIX THIS
+                Loop1:
+                for (var j = 0; j < this.numberOfPreferences; j++) { // for each preference rank j
+                    for (var k = 0; k < this.allStudents.length; k++) { // for each student k
+                        currentStudent = this.allStudents[k];
+                        if (currentStudent.isAssigned(currentWorkshop) || currentStudent.fullyAssigned()) {
+                            continue;
+                        }
+                        else if (currentStudent.preferences[j] === currentWorkshop) {
+                            currentStudent.assignWorkshop(currentWorkshop);
+                            if (currentWorkshop.hasReachedQuorum()) {
+                                break Loop1;
+                            }
+                        }
+                    }
+                }
+                if (!currentWorkshop.hasReachedQuorum()) {
+                    this.fillOneWorkshop(currentWorkshop);
                 }
             }
         }
     }
-
-    /**
-     * Divides all the students into ones who haven't been assigned any workshops and ones who have.
-     */
-    this.divideByAssignment = function() {
-        this.assignedSomething = [];
-        this.assignedNothing = [];
-        for (var i = 0; i < this.allStudents.length; i++) {
-            if (this.allStudents[i].numberAssigned() === 0) {
-                this.assignedNothing.push(this.allStudents[i]);
-                Logger.log("a student went to assignedNothing");
+    
+    this.finalMatches = function() {
+        for (var i = 0; i < this.allStudents.length; i++) { // for every student i
+            currentStudent = this.allStudents[i];
+            if (!currentStudent.fullyAssigned()) { // if the student still has empty slots
+                for (var j = 0; j < currentStudent.preferences.length; j++) { // for each student preference j
+                    currentPreference = currentStudent.preferences[j];
+                    if (!currentStudent.isAssigned(currentPreference) && !currentPreference.isFull()) { //if the student is not already assigned to the workshop AND the workshop has slots left
+                        currentStudent.assignWorkshop(currentPreference);
+                        if (currentStudent.fullyAssigned()) {
+                            break;
+                        }
+                    }
+                }
             }
-            else {
-                this.assignedSomething.push(this.allStudents[i]);
+            if (!currentStudent.fullyAssigned()) {
+                throw new Error("Could not give " + currentStudent.fullName() + " one of their remaining preferences.");
             }
         }
-    }
-
-    /**
-     * Randomly chooses students to fill the least popular workshops, and also gives them their first choice.
-     */
-    this.fillUnpopular = function() {
-        this.divideByAssignment();
-        this.firstIsFull = []; // Students whose first choice workshop is full
-        this.givenFiller = []; // Students given a filler slot and their first choice workshop
-        while (this.unpopularWorkshops.length) {
-            if (this.unpopularWorkshops[0].hasReachedQuorum()) { // If the workshop has reached its minimum, remove it from the array and iterate again.
-                this.unpopularWorkshops.shift();
-                Logger.log("An unpopular workshop was filled!");
-                continue;
-            }
-            
-            if (!this.assignedNothing.length) { // If there are no more students with no assignments, stop the loop
-                Logger.log("There are no viable remaining students with zero assignments");
-                break;
-            }
-
-            var mostUnpopular = this.unpopularWorkshops[0];
-//            Logger.log(mostUnpopular.name);
-            var randomStudent = this.assignedNothing[Math.floor(Math.random() * this.assignedNothing.length)];
-//            Logger.log(randomStudent.fullName());
-            if (randomStudent.preferences[0].isFull()) { // The student's first choice is full already
-                this.firstIsFull.push(randomStudent);
-            }
-            else { // Give the student the filler workshop and their first choice workshop
-                randomStudent.assignWorkshop(mostUnpopular);
-                randomStudent.assignWorkshop(randomStudent.preferences[0]);
-                this.givenFiller.push(randomStudent);
-            }
-            this.assignedNothing.splice(this.assignedNothing.indexOf(randomStudent), 1);   
-        }
-    }
-
-    /**
-     * Wrapper function to fully handle the most unpopular workshops.
-     */
-    this.handleUnpopular = function() {
-        this.findUnpopular();
-        this.assignToUnpopular();
-        this.fillUnpopular();
     }
 
     /**
@@ -219,7 +234,8 @@ function Matcher() {
      */
     this.matchGirls = function() {
         this.fixStudentPreferences();
-        this.handleUnpopular();
+        this.reachMinimumForAll();
+        this.finalMatches();
     }
 
     /**
