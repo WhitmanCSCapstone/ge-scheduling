@@ -12,7 +12,7 @@ function workshop_input_checker(name, capacity, location, i) {
             "Invalid input at row " + i + " column " + COLUMN_WORKSHOP_NAME
         );
     }
-    if ((typeof capacity !== "number") || (capcity == NaN)) {
+    if (typeof capacity !== "number" || isNaN(capacity)) {
         throw new Error(
             "Invalid input at row " + i + " column " + COLUMN_WORKSHOP_CAPACITY
         );
@@ -39,7 +39,7 @@ function student_input_checker(firstName, lastName, grade, workshopNum, j) {
 
 function preference_input_checker(workshopNum, j, k) {
     Logger.log("Checking preferred workshop with type " + typeof workshopNum);
-    if ((typeof workshopNum !== "number") || (workshopNum == NaN) {
+    if (typeof workshopNum !== "number" || isNaN(workshopNum)) {
         throw new Error(
             "Invalid input at row " + j + " column " + PREFERENCE_COLUMNS[k]
         );
