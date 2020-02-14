@@ -1,5 +1,5 @@
-/*globals SpreadsheetApp, Logger, Matcher, workshop_input_checker,
- * student_input_checker, preference_input_checker */
+/*globals SpreadsheetApp, Logger, Matcher, workshopInputChecker,
+ * studentInputChecker, preferenceInputChecker */
 
 var COLUMN_FIRST_NAME = 10;
 var COLUMN_LAST_NAME = 11;
@@ -87,7 +87,7 @@ function main() {
             " " +
             workshopData[i][COLUMN_WORKSHOP_ROOM];
 
-        workshop_input_checker(name, capacity, location, i);
+        workshopInputChecker(name, capacity, location, i);
 
         matcher.addNewWorkshop(name, number, capacity, location);
     }
@@ -97,7 +97,7 @@ function main() {
         var firstName = responseData[j][COLUMN_FIRST_NAME];
         var lastName = responseData[j][COLUMN_LAST_NAME];
         var grade = responseData[j][COLUMN_GRADE];
-        student_input_checker(firstName, lastName, grade, j);
+        studentInputChecker(firstName, lastName, grade, j);
 
         var preferenceNums = [];
 
@@ -110,7 +110,7 @@ function main() {
                     preferredWorkshop.indexOf(")")
                 )
             );
-            preference_input_checker(workshopNum, j, k);
+            preferenceInputChecker(workshopNum, j, k);
 
             if (preferenceNums.indexOf(workshopNum) === -1) {
                 preferenceNums.push(workshopNum);

@@ -1,46 +1,66 @@
 /*globals COLUMN_WORKSHOP_NAME, COLUMN_WORKSHOP_CAPACITY, COLUMN_FIRST_NAME,
  * COLUMN_LAST_NAME, COLUMN_GRADE, PREFERENCE_COLUMNS, Logger */
-// Functions that check the inputs for valid types can be extended to check for other params
+// Functions that check the inputs for valid types. Can be extended to check
+// for other params.
 
 // Current version only checks if the correct type in the correct column.
 // Really only makes sure that integers are where they should be and gives row
 // and column of incorrect input.
 
-function workshop_input_checker(name, capacity, location, i) {
+function workshopInputChecker(name, capacity, location, row) {
+    // Increment the row number to make it match the sheet's row numbers
+    row++;
+
     if (typeof name !== "string") {
         throw new Error(
-            "Invalid input at row " + i + " column " + COLUMN_WORKSHOP_NAME
+            "Invalid workshop at row " +
+                row +
+                " column " +
+                COLUMN_WORKSHOP_NAME +
+                " in workshop sheet"
         );
     }
     if (typeof capacity !== "number" || isNaN(capacity)) {
         throw new Error(
-            "Invalid input at row " + i + " column " + COLUMN_WORKSHOP_CAPACITY
+            "Invalid workshop capacity at row " +
+                row +
+                " column " +
+                COLUMN_WORKSHOP_CAPACITY +
+                " in workshop sheet"
         );
     }
 }
 
-function student_input_checker(firstName, lastName, grade, j) {
+function studentInputChecker(firstName, lastName, grade, row) {
+    // Increment the row number to make it match the sheet's row numbers
+    row++;
+
     if (typeof firstName !== "string") {
         throw new Error(
-            "Invalid input at row " + j + " column " + COLUMN_FIRST_NAME
+            "Invalid first name at row " + row + " column " + COLUMN_FIRST_NAME
         );
     }
     if (typeof lastName !== "string") {
         throw new Error(
-            "Invalid input at row " + j + " column " + COLUMN_LAST_NAME
+            "Invalid last name at row " + row + " column " + COLUMN_LAST_NAME
         );
     }
     if (typeof grade !== "string") {
         throw new Error(
-            "Invalid input at row " + j + " column " + COLUMN_GRADE
+            "Invalid grade at row " + row + " column " + COLUMN_GRADE
         );
     }
 }
 
-function preference_input_checker(workshopNum, j, k) {
+function preferenceInputChecker(workshopNum, row, preferenceNumber) {
+    // Increment the row number to make it match the sheet's row numbers
+    row++;
+
     if (typeof workshopNum !== "number" || isNaN(workshopNum)) {
+        var columnLetterCodepoint = 65 + PREFERENCE_COLUMNS[preferenceNumber];
+        var columnLetter = String.fromCharCode(columnLetterCodepoint);
         throw new Error(
-            "Invalid input at row " + j + " column " + PREFERENCE_COLUMNS[k]
+            "Invalid workshop number at row " + row + " column " + columnLetter
         );
     }
 }
