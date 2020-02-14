@@ -19,7 +19,7 @@ function workshop_input_checker(name, capacity, location, i) {
     }
 }
 
-function student_input_checker(firstName, lastName, grade, workshopNum, j) {
+function student_input_checker(firstName, lastName, grade, j) {
     if (typeof firstName !== "string") {
         throw new Error(
             "Invalid input at row " + j + " column " + COLUMN_FIRST_NAME
