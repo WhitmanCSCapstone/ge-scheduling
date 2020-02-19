@@ -7,7 +7,7 @@
  */
 function Matcher() {
     this.init = function() {
-        // The number of sessions that an individual workshop has
+        // The number bfghjklmnv;,./of sessions that an individual workshop has
         this.sessionsPerWorkshop = 3; // maybe could be moved to a subclass
 
         // An object containing all the workshops that can be indexed by workshop number
@@ -24,11 +24,13 @@ function Matcher() {
 
         // A number representing the quality of the final matches. The lower the score the better
         this.score = 0;
-        
+
         // The minimum percentage that each workshop must be filled to. SET THIS TO ZERO TO CALCULATE AUTOMATICALLY
         this.minimumWorkshopFill = 0.7;
 
+        // The number of preferences each student should have
         this.numberOfPreferences = 6;
+
     };
 
     /**
@@ -105,29 +107,20 @@ function Matcher() {
 
     /**
      * Appends the least popular workshops to the preferences of all students who don't have a full list of preferences.
+     * MAKE A DUMMY WORKSHOP OBJECT THAT HAS NAME = NULL and do NOT assign students to it
      */
     this.fixStudentPreferences = function() {
         for (var i = 0; i < this.allStudents.length; i++) {
-            this.sortWorkshops();
-
             var thisStudent = this.allStudents[i];
-            var workshopToAdd = 0;
             while (!thisStudent.hasAllPreferences()) {
-                var addedWorkshop = this.workshopsByPopularity[workshopToAdd];
-                thisStudent.appendPreference(addedWorkshop);
-                workshopToAdd += 1;
-                Logger.log(
-                    "Added workshop '" +
-                        addedWorkshop.name +
-                        "' to " +
-                        thisStudent.fullName() +
-                        "'s preferences"
-                );
+                thisStudent.preferences.push(null);
             }
         }
-        this.sortWorkshops();
     };
-    
+
+    /**
+     * Calculates the absolute maximum percentage that every workshop can be filled to. this.minimumWorkshopFill can NOT be above this number.
+     */
     this.calculateMinPercent = function() {
         var totalSlots = 0;
         for (var i = 0; i < this.workshopsByPopularity.length; i++) {
@@ -139,10 +132,14 @@ function Matcher() {
 
     /**
      * Chooses random students to fill a workshop that hasn't been filled and gives them their highest possible preferences as compensation
-     * 
+     *
      * @param workshop the workshop that needs to be filled to Quorum
      */
     this.fillOneWorkshop = function(workshop) {
+        /*
+         * This portion of the function checks for students who are "eligible" for being given filler workshops, in other words,
+         * Students who still have two available workshop slots (one for the filler workshop, and one for their highest preference)
+         */
         var eligibleStudents = [];
         for (var i = 0; i < this.allStudents.length; i++) {
             tempStudent = this.allStudents[i];
@@ -151,12 +148,21 @@ function Matcher() {
             }
         }
 
+        /*
+         * This portion of the function iterates through preferences 1 through 6 and assigns random students who have that preference
+         * open to the workshop until it reaches its quorum. If the preference for that student is full, then they are temporarily
+         * removed from the list of "eligible" students until the next preference iteration.
+         */
         for (var j = 0; j < this.numberOfPreferences; j++) { // first preference first, etc
             var currentStage = eligibleStudents.slice();
             while (currentStage.length > 0) {
                 var randomIndex = Math.floor(Math.random() * currentStage.length)
                 var randomStudent = currentStage[randomIndex];
                 var currentPreference = randomStudent.preferences[j];
+                if (currentPreference === null) {
+                    currentStage.splice(randomIndex, 1);
+                    continue;
+                }
                 if (randomStudent.isAssigned(currentPreference)) {
                     randomStudent.assignWorkshop(workshop);
                 }
@@ -176,17 +182,26 @@ function Matcher() {
         throw new Error("Was unable to fill workshop " + workshop.name); // will handle this differently if it happens, EXTREMELY unlikely
     }
 
+    /**
+     * The main matching algorithm, fills every workshop to its minimum with the students who prefer that workshop the most
+     */
     this.reachMinimumForAll = function() {
         this.fullEnough = [];
         this.notFullEnough = [];
-        
+
+        /*
+         * Iterates through the workshops from least to most popular, filling each one with students who have it listed as their first
+         * preference, then those who have it listed as the second, etc. If the workshop is not filled by the time the end of all the
+         * preferences is reached, then the fillOneWorkshop() function is called to fill the remaining slots of the workshop until it
+         * reaches its minimum viable fill.
+         */
         for (var i = 0; i < this.workshopsByPopularity.length; i++) { // for each workshop i
             currentWorkshop = this.workshopsByPopularity[i]
             if (currentWorkshop.hasReachedQuorum()) {
                 this.fullEnough.push();
                 continue;
             }
-            else { //BROKEN, ASSIGNS WORKSHOPS TO STUDENTS WHO ARE FULL, FIX THIS
+            else {
                 Loop1:
                 for (var j = 0; j < this.numberOfPreferences; j++) { // for each preference rank j
                     for (var k = 0; k < this.allStudents.length; k++) { // for each student k
@@ -208,14 +223,20 @@ function Matcher() {
             }
         }
     }
-    
+
+    /**
+     * The final portion of the matching algorithm, gives the students their highest possible preferences who are not already assigned to max workshops
+     */
     this.finalMatches = function() {
         for (var i = 0; i < this.allStudents.length; i++) { // for every student i
             currentStudent = this.allStudents[i];
             if (!currentStudent.fullyAssigned()) { // if the student still has empty slots
                 for (var j = 0; j < currentStudent.preferences.length; j++) { // for each student preference j
                     currentPreference = currentStudent.preferences[j];
-                    if (!currentStudent.isAssigned(currentPreference) && !currentPreference.isFull()) { //if the student is not already assigned to the workshop AND the workshop has slots left
+                    if (currentPreference === null) {
+                        continue;
+                    }
+                    else if (!currentStudent.isAssigned(currentPreference) && !currentPreference.isFull()) { //if the student is not already assigned to the workshop AND the workshop has slots left
                         currentStudent.assignWorkshop(currentPreference);
                         if (currentStudent.fullyAssigned()) {
                             break;
@@ -233,6 +254,7 @@ function Matcher() {
      * Assigns every student to workshops according to their preferences.
      */
     this.matchGirls = function() {
+        this.sortWorkshops();
         this.fixStudentPreferences();
         this.reachMinimumForAll();
         this.finalMatches();

@@ -29,7 +29,7 @@ function Session(capacity, minimumFill) {
     };
 
     /**
-     * Subtracts 1 from the session's remaining capacity.
+     * Adds 1 to the number of slots filled in the session.
      */
     this.addStudent = function() {
         if (this.isFull()) {
@@ -39,6 +39,6 @@ function Session(capacity, minimumFill) {
             this.slotsFilled += 1
         }
     };
-    
+
     this.init();
 };

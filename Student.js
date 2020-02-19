@@ -62,6 +62,13 @@ function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorksho
             Logger.log(workshop.name);
             throw new Error(this.fullName() + " cannot be assigned any more workshops");
         }
+
+        if (this.isAssigned(workshop)) {
+            throw new Error("duplicate match")
+        }
+
+
+
         for (var i = 0; i < this.assignedWorkshops.length; i++) {
             if (this.assignedWorkshops[i] === null) {
                 this.assignedWorkshops[i] = workshop;
@@ -134,17 +141,6 @@ function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorksho
     this.isAssigned = function(workshop) {
         return (this.assignedWorkshops.indexOf(workshop) !== -1);
     }
-
-    /**
-     * Appends a workshop to a student's list of preferences.
-     *
-     * @param {Workshop} workshop A workshop object to be appended onto the student's list of preferences.
-     */
-    this.appendPreference = function(workshop) {
-        var thisIndex = this.preferences.length;
-        this.preferences.push(workshop);
-        workshop.incrementPopularity(this.popularityPoints[thisIndex]);
-    };
 
     this.givenFirstPreference = function() {
         var firstPreference = this.preferences[0];

@@ -17,15 +17,15 @@ function Workshop(name, number, capacity, location, sessionsPerWorkshop, minimum
         this.location = location;
 
         this.sessions = [];
-        
+
         this.studentsAssigned = [];
-        
+
         this.totalBaseCapacity = 0;
         for (var i = 0; i < sessionsPerWorkshop; i++) {
             this.sessions.push(new Session(capacity, minimumFill));
             this.totalBaseCapacity += capacity;
         }
-        
+
         this.slotsFilled = 0;
 
         this.minimumFill = Math.floor(this.totalBaseCapacity * minimumFill);
@@ -45,7 +45,7 @@ function Workshop(name, number, capacity, location, sessionsPerWorkshop, minimum
     this.isFull = function() {
         return (this.slotsFilled === this.totalBaseCapacity);
     }
-    
+
     this.addStudent = function(student) {
         if (this.isFull()) {
             throw new Error("Cannot add students to a full workshop");

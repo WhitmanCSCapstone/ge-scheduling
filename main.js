@@ -145,7 +145,7 @@ function populateSheet(outputSheet, matcher) {
         for (var j = 0; j < student.assignedWorkshops.length; j++) {
             var workshop = student.assignedWorkshops[j];
             if (workshop === null) {
-                studentLine.push("");
+                studentLine.push("", "", "");
             }
             else {
                 studentLine.push(workshop.number);
