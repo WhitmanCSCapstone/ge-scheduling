@@ -67,8 +67,6 @@ function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorksho
             throw new Error("duplicate match")
         }
 
-
-
         for (var i = 0; i < this.assignedWorkshops.length; i++) {
             if (this.assignedWorkshops[i] === null) {
                 this.assignedWorkshops[i] = workshop;
@@ -77,36 +75,7 @@ function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorksho
             }
         }
     }
-
-    /**
-     * Swaps the session times of two workshops the student is assigned to, or moves an assigned workshop from one session time to another empty one.
-     *
-     * @param {int} session1 The index of one of the workshops in the student's assigned workshops.
-     * @param {int} session2 The index of one of the workshops in the student's assigned workshops.
-     */
-    this.swapWorkshops = function(session1, session2) {
-        if (this.assignedWorkshops[session1] !== null) {
-            this.assignedWorkshops[session1].sessions[
-                session1
-            ].subtractStudent();
-        }
-        if (this.assignedWorkshops[session2] !== null) {
-            this.assignedWorkshops[session2].sessions[
-                session2
-            ].subtractStudent();
-        }
-
-        var temp = this.assignedWorkshops[session1];
-        this.assignedWorkshops[session1] = this.assignedWorkshops[session2];
-        this.assignedWorkshops[session2] = temp;
-
-        if (this.assignedWorkshops[session1] !== null) {
-            this.assignedWorkshops[session1].sessions[session1].addStudent();
-        }
-        if (this.assignedWorkshops[session2] !== null) {
-            this.assignedWorkshops[session2].sessions[session2].addStudent();
-        }
-    };
+    
 
     /**
      * Calculates and returns the number of workshops to which the student has been assigned.

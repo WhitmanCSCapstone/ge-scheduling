@@ -7,7 +7,7 @@
  */
 function Matcher() {
     this.init = function() {
-        // The number bfghjklmnv;,./of sessions that an individual workshop has
+        // The number of sessions that an individual workshop has
         this.sessionsPerWorkshop = 3; // maybe could be moved to a subclass
 
         // An object containing all the workshops that can be indexed by workshop number
@@ -25,7 +25,7 @@ function Matcher() {
         // A number representing the quality of the final matches. The lower the score the better
         this.score = 0;
 
-        // The minimum percentage that each workshop must be filled to. SET THIS TO ZERO TO CALCULATE AUTOMATICALLY
+        // The minimum percentage that each workshop must be filled to
         this.minimumWorkshopFill = 0.7;
 
         // The number of preferences each student should have
@@ -106,8 +106,7 @@ function Matcher() {
     };
 
     /**
-     * Appends the least popular workshops to the preferences of all students who don't have a full list of preferences.
-     * MAKE A DUMMY WORKSHOP OBJECT THAT HAS NAME = NULL and do NOT assign students to it
+     * Appends "null" to a student's preference list if they have fewer than the correct number of preferences
      */
     this.fixStudentPreferences = function() {
         for (var i = 0; i < this.allStudents.length; i++) {
@@ -142,7 +141,7 @@ function Matcher() {
          */
         var eligibleStudents = [];
         for (var i = 0; i < this.allStudents.length; i++) {
-            tempStudent = this.allStudents[i];
+            var tempStudent = this.allStudents[i];
             if (tempStudent.numberAssigned() < 2 && !tempStudent.isAssigned(workshop)) {
                 eligibleStudents.push(tempStudent);
             }
@@ -196,7 +195,7 @@ function Matcher() {
          * reaches its minimum viable fill.
          */
         for (var i = 0; i < this.workshopsByPopularity.length; i++) { // for each workshop i
-            currentWorkshop = this.workshopsByPopularity[i]
+            var currentWorkshop = this.workshopsByPopularity[i]
             if (currentWorkshop.hasReachedQuorum()) {
                 this.fullEnough.push();
                 continue;
@@ -205,7 +204,7 @@ function Matcher() {
                 Loop1:
                 for (var j = 0; j < this.numberOfPreferences; j++) { // for each preference rank j
                     for (var k = 0; k < this.allStudents.length; k++) { // for each student k
-                        currentStudent = this.allStudents[k];
+                        var currentStudent = this.allStudents[k];
                         if (currentStudent.isAssigned(currentWorkshop) || currentStudent.fullyAssigned()) {
                             continue;
                         }
@@ -229,10 +228,10 @@ function Matcher() {
      */
     this.finalMatches = function() {
         for (var i = 0; i < this.allStudents.length; i++) { // for every student i
-            currentStudent = this.allStudents[i];
+            var currentStudent = this.allStudents[i];
             if (!currentStudent.fullyAssigned()) { // if the student still has empty slots
                 for (var j = 0; j < currentStudent.preferences.length; j++) { // for each student preference j
-                    currentPreference = currentStudent.preferences[j];
+                    var currentPreference = currentStudent.preferences[j];
                     if (currentPreference === null) {
                         continue;
                     }
