@@ -1,5 +1,5 @@
-/*globals SpreadsheetApp, Logger, Matcher, workshop_input_checker,
- * student_input_checker, preference_input_checker */
+/*globals SpreadsheetApp, Logger, Matcher, workshopInputChecker,
+ * studentInputChecker, preferenceInputChecker */
 
 var COLUMN_FIRST_NAME = 10;
 var COLUMN_LAST_NAME = 11;
@@ -52,6 +52,7 @@ var workshopData = WORKSHOP_SHEET.getDataRange().getValues();
 
 // Output Sheet
 var outputSheet = RESPONSE_SPREADSHEET.getSheets()[OUTPUT_SHEET_INDEX];
+
 
 //Pre-Assignment Sheet
 var preAssignmentSheet = RESPONSE_SPREADSHEET.getSheets()[
@@ -114,8 +115,8 @@ function main() {
             }
         }
         matcher.addNewStudent(firstName, lastName, preferenceNums, grade);
-    }  
-  
+    }
+
     Logger.log(matcher.allStudents[0].firstName);
     Logger.log(matcher.allStudents[0].preferences[0].name);
 
@@ -131,7 +132,7 @@ function populateSheet(outputSheet, matcher) {
     outputSheet.setFrozenRows(1);
   
     matcher.fixStudentPreferences();
-  
+
     matcher.matchGirls();
 
     for (var i = 0; i < matcher.allStudents.length; i++) {

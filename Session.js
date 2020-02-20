@@ -41,4 +41,4 @@ function Session(capacity, minimumFill) {
     };
 
     this.init();
-};
+}

@@ -60,5 +60,9 @@ function Workshop(name, number, capacity, location, sessionsPerWorkshop, minimum
         return (this.slotsFilled >= this.minimumFill);
     }
 
+    this.toString = function() {
+        return "(" + this.number.toString() + ") " + this.name;
+    };
+
     this.init();
 }

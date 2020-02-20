@@ -1,3 +1,4 @@
+
 /*globals Logger, Workshop, Student */
 
 /**
