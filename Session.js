@@ -6,62 +6,38 @@
  *
  * @param {int} capacity The number of students who can be assigned to this workshop session.
  */
-function Session(capacity) {
+function Session(capacity, minimumFill) {
     this.init = function() {
-        this.originalCapacity = capacity;
-        this.remainingCapacity = this.originalCapacity;
+        this.slotsFilled = 0;
 
-        // Minimum percentage that each workshop session needs to be filled
-        this.minimumWorkshopFill = 0.75;
+        // Minimum number of slots that need to be filled in this workshop
+        this.minimumFill = capacity * minimumFill;
     };
 
     /**
      * Calculates and returns whether or not the session is completely full.
      */
     this.isFull = function() {
-        return this.remainingCapacity === 0;
+        return this.slotsFilled === capacity;
     };
 
     /**
      * Calculates and returns whether or not the session is "full enough" based on this.minimumWorkshopFill.
      */
     this.hasReachedQuorum = function() {
-        return (
-            this.remainingCapacity <=
-            this.originalCapacity * (1 - this.minimumWorkshopFill)
-        );
+        return this.slotsFilled >= this.minimumFill;
     };
 
     /**
-     * Subtracts 1 from the session's remaining capacity.
+     * Adds 1 to the number of slots filled in the session.
      */
     this.addStudent = function() {
         if (this.isFull()) {
-            // throw new Error("Cannot add students to a full session"); // comment out this line to make the current version of matchGirls work correctly.
-        } else {
-            this.remainingCapacity -= 1;
+            throw new Error("Cannot add students to a full session");
         }
-    };
-
-    /**
-     * Adds 1 to the session's remaining capacity.
-     */
-    this.subtractStudent = function() {
-        if (this.remainingCapacity === this.originalCapacity) {
-            throw new Error("Cannot remove students from an empty session");
-        } else {
-            this.remainingCapacity += 1;
+        else {
+            this.slotsFilled += 1
         }
-    };
-
-    /**
-     * Manually sets a the session's original and remaining capacities to a discrete value.
-     *
-     * @param {int} value the new integer value for the session's remaining capacity.
-     */
-    this.setCapacity = function(value) {
-        this.originalCapacity = value;
-        this.remainingCapacity = value;
     };
 
     this.init();
