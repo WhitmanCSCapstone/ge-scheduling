@@ -62,10 +62,6 @@ function Student(
      */
     this.assignWorkshop = function(workshop) {
         if (this.fullyAssigned()) {
-            for (var i = 0; i < this.assignedWorkshops.length; i++) {
-                Logger.log(this.assignedWorkshops[i].name);
-            }
-            Logger.log(workshop.name);
             throw new Error(
                 this.fullName() + " cannot be assigned any more workshops"
             );
