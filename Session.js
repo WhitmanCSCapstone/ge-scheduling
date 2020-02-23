@@ -10,6 +10,8 @@ function Session(capacity, minimumFill) {
     this.init = function() {
         this.slotsFilled = 0;
 
+        this.capacity = capacity;
+
         // Minimum number of slots that need to be filled in this workshop
         this.minimumFill = capacity * minimumFill;
     };
@@ -18,7 +20,7 @@ function Session(capacity, minimumFill) {
      * Calculates and returns whether or not the session is completely full.
      */
     this.isFull = function() {
-        return this.slotsFilled === capacity;
+        return this.slotsFilled === this.capacity;
     };
 
     /**
@@ -34,9 +36,8 @@ function Session(capacity, minimumFill) {
     this.addStudent = function() {
         if (this.isFull()) {
             throw new Error("Cannot add students to a full session");
-        }
-        else {
-            this.slotsFilled += 1
+        } else {
+            this.slotsFilled += 1;
         }
     };
 
