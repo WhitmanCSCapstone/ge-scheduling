@@ -98,6 +98,16 @@ function Matcher() {
         }
     };
 
+    this.mostFilled = function(workshopA, workshopB) {
+        if (workshopA.slotsFilled > workshopB.slotsFilled) {
+            return -1;
+        } else if (workshopA.slotsFilled < workshopB.slotsFilled) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
     /**
      * Sorts the workshopsByPopularity array from least to most popular.
      */
@@ -257,6 +267,33 @@ function Matcher() {
         this.fixStudentPreferences();
         this.reachMinimumForAll();
         this.finalMatches();
+    }
+
+    /**
+     * Hard copies an array and shuffles its contents randomly
+     * 
+     * @param {array} array The array that will be hard copied and shuffled
+     */
+    this.shuffle = function(array) {
+        var tempArray = array.slice();
+        var returnArray = [];
+        while (tempArray.length) {
+            var randomIndex = Math.floor(Math.random() * tempArray.length);
+            returnArray.push(tempArray[randomIndex]);
+            tempArray.splice(randomIndex, 1);
+        }
+        return returnArray;
+    }
+
+    /**
+     * "schedules" the students randomly into workshop sessions
+     */
+    this.schedule = function() {
+        for (var i = 0; i < this.allStudents.length; i++) {
+            var currentStudent = this.allStudents[i];
+            var assignments = currentStudent.assignedWorkshops;
+            currentStudent.assignedWorkshops = this.shuffle(assignments);
+        }
     }
 
     /**

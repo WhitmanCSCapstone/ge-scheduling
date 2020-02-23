@@ -134,6 +134,7 @@ function populateSheet(outputSheet, matcher) {
     matcher.fixStudentPreferences();
 
     matcher.matchGirls();
+    matcher.schedule();
 
     for (var i = 0; i < matcher.allStudents.length; i++) {
         var student = matcher.allStudents[i];

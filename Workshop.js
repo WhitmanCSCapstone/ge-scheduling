@@ -18,13 +18,13 @@ function Workshop(name, number, capacity, location, sessionsPerWorkshop, minimum
 
         this.sessions = [];
 
-        this.studentsAssigned = [];
-
         this.totalBaseCapacity = 0;
         for (var i = 0; i < sessionsPerWorkshop; i++) {
             this.sessions.push(new Session(capacity, minimumFill));
             this.totalBaseCapacity += capacity;
         }
+
+        this.studentsAssigned = [];
 
         this.slotsFilled = 0;
 
@@ -59,10 +59,6 @@ function Workshop(name, number, capacity, location, sessionsPerWorkshop, minimum
     this.hasReachedQuorum = function() {
         return (this.slotsFilled >= this.minimumFill);
     }
-
-    this.toString = function() {
-        return "(" + this.number.toString() + ") " + this.name;
-    };
 
     this.init();
 }

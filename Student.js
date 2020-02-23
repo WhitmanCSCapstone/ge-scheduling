@@ -23,6 +23,11 @@ function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorksho
             this.assignedWorkshops.push(null);
         }
 
+        this.orderedWorkshops = [];
+        for (var i = 0; i < sessionsPerWorkshop; i++) {
+            this.orderedWorkshops.push(null);
+        }
+
         this.studentScore = 0;
 
         // Points given for workshop assignments from most preferred to least preferred
