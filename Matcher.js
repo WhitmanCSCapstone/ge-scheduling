@@ -1,4 +1,3 @@
-
 /*globals Logger, Workshop, Student */
 
 /**
@@ -6,8 +5,8 @@
  *
  * An object used to simulate a complete set of students and workshops, used to create the matches for each student with workshops.
  */
-function Matcher() {
-    this.init = function() {
+class Matcher {
+    constructor() {
         // The number of sessions that an individual workshop has
         this.sessionsPerWorkshop = 3; // maybe could be moved to a subclass
 
@@ -22,7 +21,7 @@ function Matcher() {
 
         // A number representing the quality of the final matches. The lower the score the better
         this.score = 0;
-    };
+    }
 
     /**
      * Adds a new Workshop into workshopsByNumber and workshopsByPopularity
@@ -31,8 +30,8 @@ function Matcher() {
      * @param {int}    number   The number of the workshop.
      * @param {int}    capacity The capacity of each session of the workshop.
      */
-    this.addNewWorkshop = function(name, number, capacity, location) {
-        var thisWorkshop = new Workshop(
+    addNewWorkshop(name, number, capacity, location) {
+        const thisWorkshop = new Workshop(
             name,
             number,
             capacity,
@@ -42,7 +41,7 @@ function Matcher() {
 
         this.workshopsByNumber[number] = thisWorkshop;
         this.workshopsByPopularity.push(thisWorkshop);
-    };
+    }
 
     /**
      * Adds a new Student object into allStudents
@@ -51,18 +50,17 @@ function Matcher() {
      * @param {string} lastName       The last name of the student.
      * @param {array}  preferenceNums The student's preferences as an array of integers.
      */
-    this.addNewStudent = function(firstName, lastName, preferenceNums, grade) {
-        var preferenceArray = [];
+    addNewStudent(firstName, lastName, preferenceNums, grade) {
+        const preferenceArray = [];
 
         // HANDLE DUPLICATES HERE (?)
 
-        for (var i = 0; i < preferenceNums.length; i++) {
-            var preference = this.workshopsByNumber[preferenceNums[i]];
-
+        for (const n in preferenceNums) {
+            const preference = this.workshopsByNumber[preferenceNums[n]];
             preferenceArray.push(preference);
         }
 
-        var thisStudent = new Student(
+        const student = new Student(
             firstName,
             lastName,
             preferenceArray,
@@ -70,9 +68,9 @@ function Matcher() {
             this.sessionsPerWorkshop
         );
 
-        this.allStudents.push(thisStudent);
-        thisStudent.updatePopularities();
-    };
+        this.allStudents.push(student);
+        student.updatePopularities();
+    }
 
     /**
      * Helper function for sorting that compares two workshops by their popularity.
@@ -80,7 +78,7 @@ function Matcher() {
      * @param {Workshop} workshopA A workshop to have its popularity compared to workshopB.
      * @param {Workshop} workshopB A workshop to have its popularity compared to workshopA.
      */
-    this.morePopular = function(workshopA, workshopB) {
+    morePopular(workshopA, workshopB) {
         if (workshopA.popularityScore < workshopB.popularityScore) {
             return -1;
         } else if (workshopA.popularityScore > workshopB.popularityScore) {
@@ -88,77 +86,70 @@ function Matcher() {
         } else {
             return 0;
         }
-    };
+    }
 
     /**
      * Sorts the workshopsByPopularity array from least to most popular.
      */
-    this.sortWorkshops = function() {
+    sortWorkshops() {
         this.workshopsByPopularity.sort(this.morePopular);
-    };
+    }
 
     /**
      * Appends the least popular workshops to the preferences of all students who don't have a full list of preferences.
      */
-    this.fixStudentPreferences = function() {
-        for (var i = 0; i < this.allStudents.length; i++) {
+    fixStudentPreferences() {
+        for (const student of this.allStudents) {
             this.sortWorkshops();
 
-            var thisStudent = this.allStudents[i];
-            var workshopToAdd = 0;
-            while (!thisStudent.hasAllPreferences()) {
-                var addedWorkshop = this.workshopsByPopularity[workshopToAdd];
-                thisStudent.appendPreference(addedWorkshop);
+            let workshopToAdd = 0;
+            while (!student.hasAllPreferences()) {
+                const addedWorkshop = this.workshopsByPopularity[workshopToAdd];
+                student.appendPreference(addedWorkshop);
                 workshopToAdd += 1;
                 Logger.log(
                     "Added workshop '" +
                         addedWorkshop.name +
                         "' to " +
-                        thisStudent.fullName() +
+                        student.fullName() +
                         "'s preferences"
                 );
             }
         }
         this.sortWorkshops();
-    };
+    }
 
     /**
      * Assigns every student to workshops according to their preferences.
      */
-    this.matchGirls = function() {
-        for (var i = 0; i < this.allStudents.length; i++) {
-            var thisStudent = this.allStudents[i];
-            for (var j = 0; j < this.sessionsPerWorkshop; j++) {
-                thisStudent.assignWorkshopSession(
-                    thisStudent.preferences[j],
-                    j
-                );
+    matchGirls() {
+        for (const student of this.allStudents) {
+            for (let j = 0; j < this.sessionsPerWorkshop; j++) {
+                student.assignWorkshopSession(student.preferences[j], j);
             }
         }
-    };
+    }
 
     /**
      * Give a score to the final matches based on how many students received their preferences.
      */
-    this.scorer = function() {
+    scorer() {
         this.score = 0;
-        for (var i = 0; i < this.allStudents.length; i++) {
+        for (const student of this.allStudents) {
             // For each student i
-            var thisStudent = this.allStudents[i];
-            this.score += thisStudent.calculateScore();
+            this.score += student.calculateScore();
         }
-    };
+    }
 
     /**
      * Logs the names of all students who received none of their preferred workshops.
      */
-    this.checkMatches = function() {
-        var numberOfFails = 0;
-        for (var i = 0; i < this.allStudents.length; i++) {
+    checkMatches() {
+        let numberOfFails = 0;
+        for (const student of this.allStudents) {
             // For each student i
-            var thisStudent = this.allStudents[i];
-            var worstScore = this.unpreferredScore * this.sessionPerWorkshop;
-            if (thisStudent.compareToScore(worstScore)) {
+            const worstScore = this.unpreferredScore * this.sessionPerWorkshop;
+            if (student.compareToScore(worstScore)) {
                 numberOfFails += 1;
             }
         }
@@ -171,7 +162,5 @@ function Matcher() {
         } else {
             Logger.log("Every student got at least one preference");
         }
-    };
-
-    this.init();
+    }
 }

@@ -1,23 +1,23 @@
 /*globals SpreadsheetApp, Logger, Matcher, workshopInputChecker,
- * studentInputChecker, preferenceInputChecker */
+studentInputChecker, preferenceInputChecker */
 
-var COLUMN_FIRST_NAME = 10;
-var COLUMN_LAST_NAME = 11;
-var COLUMN_GRADE = 17;
+const COLUMN_FIRST_NAME = 10;
+const COLUMN_LAST_NAME = 11;
+const COLUMN_GRADE = 17;
 
 // Column indicies of workshop info for the workshop class
-var COLUMN_WORKSHOP_NAME = 2;
-var COLUMN_WORKSHOP_CAPACITY = 6;
-var COLUMN_WORKSHOP_BUILDING = 4;
-var COLUMN_WORKSHOP_ROOM = 5;
+const COLUMN_WORKSHOP_NAME = 2;
+const COLUMN_WORKSHOP_CAPACITY = 6;
+const COLUMN_WORKSHOP_BUILDING = 4;
+const COLUMN_WORKSHOP_ROOM = 5;
 
 // Column indices of student preferences in order from most preferred to least
-var PREFERENCE_COLUMNS = [1, 2, 3, 4, 5, 6];
+const PREFERENCE_COLUMNS = [1, 2, 3, 4, 5, 6];
 
 // Column indices of student enrollments in order of session time
-var ENROLLED = [2, 3, 4];
+const ENROLLED = [2, 3, 4];
 
-var HEADERS = [
+const HEADERS = [
     "First name",
     "Last name",
     "Grade",
@@ -32,35 +32,36 @@ var HEADERS = [
     "Workshop Location"
 ];
 
-//VARIABLES FOR RESPONSE SPREADSHEET INDICES
-var RESPONSE_SHEET_INDEX = 0;
-var OUTPUT_SHEET_INDEX = 1;
-var PREASSIGNMENT_SHEET_INDEX = 2;
+// Variables for response spreadsheet indices
+const RESPONSE_SHEET_INDEX = 0;
+const OUTPUT_SHEET_INDEX = 1;
+const PREASSIGNMENT_SHEET_INDEX = 2;
 
 // Formattin workshop variables
-var WORKSHOP_SPREADSHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
+const WORKSHOP_SPREADSHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
 
-var RESPONSE_SPREADSHEET = SpreadsheetApp.getActiveSpreadsheet();
+const RESPONSE_SPREADSHEET = SpreadsheetApp.getActiveSpreadsheet();
 
 // Response Data
-var RESPONSE_SHEET = RESPONSE_SPREADSHEET.getSheets()[RESPONSE_SHEET_INDEX];
-var responseData = RESPONSE_SHEET.getDataRange().getValues();
+const RESPONSE_SHEET = RESPONSE_SPREADSHEET.getSheets()[RESPONSE_SHEET_INDEX];
+const RESPONSE_DATA = RESPONSE_SHEET.getDataRange().getValues();
 
 // Workshop Sheet
-var WORKSHOP_SHEET = SpreadsheetApp.openById(WORKSHOP_SPREADSHEET_ID);
-var workshopData = WORKSHOP_SHEET.getDataRange().getValues();
+const WORKSHOP_SHEET = SpreadsheetApp.openById(WORKSHOP_SPREADSHEET_ID);
+const WORKSHOP_DATA = WORKSHOP_SHEET.getDataRange().getValues();
 
 // Output Sheet
-var outputSheet = RESPONSE_SPREADSHEET.getSheets()[OUTPUT_SHEET_INDEX];
-//var outputData = outputSheet.getDataRange().getValues(); Only needed for reading data
-// Recreate headers
-outputSheet.appendRow(HEADERS);
+const outputSheet = RESPONSE_SPREADSHEET.getSheets()[OUTPUT_SHEET_INDEX];
 
-//Pre-Assignment Sheet
-var preAssignmentSheet = RESPONSE_SPREADSHEET.getSheets()[
+// Recreate headers
+outputSheet.appendRow(HEADERS); // TODO This doesn't belong here!
+
+// Pre-Assignment Sheet
+const PRE_ASSIGNMENT_SHEET = RESPONSE_SPREADSHEET.getSheets()[
     PREASSIGNMENT_SHEET_INDEX
 ];
-var preAssignmentData = preAssignmentSheet.getDataRange().getValues();
+const PRE_ASSIGNMENT_DATA = PRE_ASSIGNMENT_SHEET.getDataRange().getValues();
+
 /**
  * Automatically runs when sheet is opened.
  */
@@ -75,40 +76,41 @@ function onOpen() {
  * It's the main function, what more do you need to know.
  */
 function main() {
-    var matcher = new Matcher();
+    const matcher = new Matcher();
 
-    for (var i = 1; i < workshopData.length; i++) {
+    for (let i = 1; i < WORKSHOP_DATA.length; i++) {
         // for all workshops i
-        var name = workshopData[i][COLUMN_WORKSHOP_NAME];
-        var number = i;
-        var capacity = workshopData[i][COLUMN_WORKSHOP_CAPACITY];
-        var location =
-            workshopData[i][COLUMN_WORKSHOP_BUILDING] +
+        const name = WORKSHOP_DATA[i][COLUMN_WORKSHOP_NAME];
+        const number = i;
+        const capacity = WORKSHOP_DATA[i][COLUMN_WORKSHOP_CAPACITY];
+        const location =
+            WORKSHOP_DATA[i][COLUMN_WORKSHOP_BUILDING] +
             " " +
-            workshopData[i][COLUMN_WORKSHOP_ROOM];
+            WORKSHOP_DATA[i][COLUMN_WORKSHOP_ROOM];
 
         workshopInputChecker(name, capacity, location, i);
 
         matcher.addNewWorkshop(name, number, capacity, location);
     }
 
-    for (var j = 1; j < responseData.length; j++) {
+    for (let j = 1; j < RESPONSE_DATA.length; j++) {
         // for all students j
-        var firstName = responseData[j][COLUMN_FIRST_NAME];
-        var lastName = responseData[j][COLUMN_LAST_NAME];
-        var grade = responseData[j][COLUMN_GRADE];
+        const firstName = RESPONSE_DATA[j][COLUMN_FIRST_NAME];
+        const lastName = RESPONSE_DATA[j][COLUMN_LAST_NAME];
+        const grade = RESPONSE_DATA[j][COLUMN_GRADE];
         studentInputChecker(firstName, lastName, grade, j);
 
-        var preferenceNums = [];
+        const preferenceNums = [];
 
-        for (var k = 0; k < PREFERENCE_COLUMNS.length; k++) {
+        for (let k = 0; k < PREFERENCE_COLUMNS.length; k++) {
             // for all student preferences k
-            var preferredWorkshop = responseData[j][PREFERENCE_COLUMNS[k]];
-            var workshopNum = parseInt(
+            const preferredWorkshop = RESPONSE_DATA[j][PREFERENCE_COLUMNS[k]];
+            const workshopNum = parseInt(
                 preferredWorkshop.slice(
                     preferredWorkshop.indexOf("(") + 1,
                     preferredWorkshop.indexOf(")")
-                )
+                ),
+                10 // base 10
             );
             preferenceInputChecker(workshopNum, j, k);
 
@@ -136,21 +138,17 @@ function populateSheet(outputSheet, matcher) {
 
     matcher.matchGirls();
 
-    for (var i = 0; i < matcher.allStudents.length; i++) {
-        var student = matcher.allStudents[i];
-        var studentLine = [];
+    for (const student of matcher.allStudents) {
+        const studentLine = [];
         studentLine.push(student.firstName);
         studentLine.push(student.lastName);
         studentLine.push(student.grade);
 
         // List the student's assigned workshops in the row
-        for (var j = 0; j < student.assignedWorkshops.length; j++) {
-            var workshop = student.assignedWorkshops[j];
+        for (const workshop of student.assignedWorkshops) {
             studentLine.push(workshop.number);
             studentLine.push(workshop.name);
             studentLine.push(workshop.location);
-            //studentLine.push(workshop.toString());
-            //Logger.log(studentLine);
         }
 
         outputSheet.appendRow(studentLine);
