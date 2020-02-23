@@ -53,7 +53,6 @@ var workshopData = WORKSHOP_SHEET.getDataRange().getValues();
 // Output Sheet
 var outputSheet = RESPONSE_SPREADSHEET.getSheets()[OUTPUT_SHEET_INDEX];
 
-
 //Pre-Assignment Sheet
 var preAssignmentSheet = RESPONSE_SPREADSHEET.getSheets()[
     PREASSIGNMENT_SHEET_INDEX
@@ -130,7 +129,7 @@ function populateSheet(outputSheet, matcher) {
     outputSheet.clear();
     outputSheet.appendRow(HEADERS);
     outputSheet.setFrozenRows(1);
-  
+
     matcher.fixStudentPreferences();
 
     matcher.matchGirls();
@@ -141,14 +140,13 @@ function populateSheet(outputSheet, matcher) {
         studentLine.push(student.firstName);
         studentLine.push(student.lastName);
         studentLine.push(student.grade);
-      
+
         // List the student's assigned workshops in the row
         for (var j = 0; j < student.assignedWorkshops.length; j++) {
             var workshop = student.assignedWorkshops[j];
             if (workshop === null) {
                 studentLine.push("", "", "");
-            }
-            else {
+            } else {
                 studentLine.push(workshop.number);
                 studentLine.push(workshop.name);
                 studentLine.push(workshop.location);
