@@ -22,13 +22,13 @@ var HEADERS = [
     "Last name",
     "Grade",
     "Workshop #",
-    "Workshop Name",
+    "Workshop Section A",
     "Workshop Location",
     "Workshop #",
-    "Workshop Name",
+    "Workshop Section B",
     "Workshop Location",
     "Workshop #",
-    "Workshop Name",
+    "Workshop Section C",
     "Workshop Location"
 ];
 
@@ -52,9 +52,6 @@ var workshopData = WORKSHOP_SHEET.getDataRange().getValues();
 
 // Output Sheet
 var outputSheet = RESPONSE_SPREADSHEET.getSheets()[OUTPUT_SHEET_INDEX];
-//var outputData = outputSheet.getDataRange().getValues(); Only needed for reading data
-// Recreate headers
-outputSheet.appendRow(HEADERS);
 
 //Pre-Assignment Sheet
 var preAssignmentSheet = RESPONSE_SPREADSHEET.getSheets()[
@@ -67,7 +64,7 @@ var preAssignmentData = preAssignmentSheet.getDataRange().getValues();
 function onOpen() {
     SpreadsheetApp.getUi()
         .createMenu("Great Explorations")
-        .addItem("Match Girls to Workshops", "matchGirls")
+        .addItem("Match Girls to Workshops", "main")
         .addToUi();
 }
 
@@ -131,6 +128,7 @@ function main() {
 function populateSheet(outputSheet, matcher) {
     outputSheet.clear();
     outputSheet.appendRow(HEADERS);
+    outputSheet.setFrozenRows(1);
 
     matcher.fixStudentPreferences();
 
@@ -146,11 +144,13 @@ function populateSheet(outputSheet, matcher) {
         // List the student's assigned workshops in the row
         for (var j = 0; j < student.assignedWorkshops.length; j++) {
             var workshop = student.assignedWorkshops[j];
-            studentLine.push(workshop.number);
-            studentLine.push(workshop.name);
-            studentLine.push(workshop.location);
-            //studentLine.push(workshop.toString());
-            //Logger.log(studentLine);
+            if (workshop === null) {
+                studentLine.push("", "", "");
+            } else {
+                studentLine.push(workshop.number);
+                studentLine.push(workshop.name);
+                studentLine.push(workshop.location);
+            }
         }
 
         outputSheet.appendRow(studentLine);

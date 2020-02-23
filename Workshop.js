@@ -10,16 +10,32 @@
  * @param {int}    capacity            The capacity of a single session of the workshop.
  * @param {int}    sessionsPerWorkshop The number of sessions in a workshop.
  */
-function Workshop(name, number, capacity, location, sessionsPerWorkshop) {
+function Workshop(
+    name,
+    number,
+    capacity,
+    location,
+    sessionsPerWorkshop,
+    minimumFill
+) {
     this.init = function() {
         this.name = name;
         this.number = number;
         this.location = location;
 
         this.sessions = [];
+
+        this.studentsAssigned = [];
+
+        this.totalBaseCapacity = 0;
         for (var i = 0; i < sessionsPerWorkshop; i++) {
-            this.sessions.push(new Session(capacity));
+            this.sessions.push(new Session(capacity, minimumFill));
+            this.totalBaseCapacity += capacity;
         }
+
+        this.slotsFilled = 0;
+
+        this.minimumFill = Math.floor(this.totalBaseCapacity * minimumFill);
 
         this.popularityScore = 0;
     };
@@ -33,15 +49,21 @@ function Workshop(name, number, capacity, location, sessionsPerWorkshop) {
         this.popularityScore += points;
     };
 
-    /**
-     * Calculates the total remaining capacity of the workshop.
-     */
-    this.totalRemainingCapacity = function() {
-        var total = 0;
-        for (var i = 0; i < this.sessions.length; i++) {
-            total += this.sessions[i].remainingCapacity;
+    this.isFull = function() {
+        return this.slotsFilled === this.totalBaseCapacity;
+    };
+
+    this.addStudent = function(student) {
+        if (this.isFull()) {
+            throw new Error("Cannot add students to a full workshop");
+        } else {
+            this.slotsFilled += 1;
+            this.studentsAssigned.push(student);
         }
-        return total;
+    };
+
+    this.hasReachedQuorum = function() {
+        return this.slotsFilled >= this.minimumFill;
     };
 
     this.toString = function() {
