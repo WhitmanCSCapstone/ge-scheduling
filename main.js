@@ -11,6 +11,13 @@ var COLUMN_WORKSHOP_CAPACITY = 6;
 var COLUMN_WORKSHOP_BUILDING = 4;
 var COLUMN_WORKSHOP_ROOM = 5;
 
+
+//Column indicies for the Data Sheet
+
+var COLUMN_WORKSHOP_NUMBER = 1;
+var COLUMN_SLOTS_TAKEN = 2;
+var COLUMN_TOTAL_SLOTS = 3;
+
 // Column indices of student preferences in order from most preferred to least
 var PREFERENCE_COLUMNS = [1, 2, 3, 4, 5, 6];
 
@@ -32,10 +39,34 @@ var HEADERS = [
     "Workshop Location"
 ];
 
+var DATA_SHEET_HEADER1 =[
+    "Workshop Name",
+    "WorkShop Number",
+    "Slots taken",
+    "Total Slots",
+    "Does this work?"
+    
+
+];
+
+
+var DATA_SHEET_HEADER2 = [
+    "# of First Preferences",
+    "# of Second Preferences",
+    "# of Third Preferences",
+    "# of Fourth Preferences",
+    "# of Fifth Preferences",
+    "# of Sixth Preferences",
+    "# of Not Preferenced"
+  
+  
+  ]
+
 //VARIABLES FOR RESPONSE SPREADSHEET INDICES
 var RESPONSE_SHEET_INDEX = 0;
 var OUTPUT_SHEET_INDEX = 1;
 var PREASSIGNMENT_SHEET_INDEX = 2;
+var DATA_SHEET_INDEX = 3;
 
 // Formattin workshop variables
 var WORKSHOP_SPREADSHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
@@ -58,6 +89,12 @@ var preAssignmentSheet = RESPONSE_SPREADSHEET.getSheets()[
     PREASSIGNMENT_SHEET_INDEX
 ];
 var preAssignmentData = preAssignmentSheet.getDataRange().getValues();
+
+
+//Assignment Data Sheet
+var dataSheet = RESPONSE_SPREADSHEET.getSheets()[DATA_SHEET_INDEX];
+
+
 /**
  * Automatically runs when sheet is opened.
  */
@@ -119,23 +156,45 @@ function main() {
     Logger.log(matcher.allStudents[0].firstName);
     Logger.log(matcher.allStudents[0].preferences[0].name);
 
-    populateSheet(outputSheet, matcher);
+    populateSheet(outputSheet, dataSheet, matcher);
 }
 
 /**
  * Output the results of the matcher to the given sheet.
  */
-function populateSheet(outputSheet, matcher) {
+/**
+ * Output the results of the matcher to the given sheet.
+ */
+function populateSheet(outputSheet, dataSheet, matcher) {
+  
+  
+  
+    //Formats the sheets before writing to them.
     outputSheet.clear();
-    outputSheet.appendRow(HEADERS);
-    outputSheet.setFrozenRows(1);
+    outputSheet.appendRow(OUTPUT_SHEET_HEADERS);
+    dataSheet.clear();
+    dataSheet.appendRow(DATA_SHEET_HEADER1);
+  
 
+  
     matcher.fixStudentPreferences();
-
     matcher.matchGirls();
+  
+  
+    var results = [0,0,0,0,0,0,0]
+  
 
     for (var i = 0; i < matcher.allStudents.length; i++) {
         var student = matcher.allStudents[i];
+        var prefnums = student.checkPreferenceNumbers()
+        Logger.log(prefnums);
+      //For loop records the the number of times a student has # preference in his preference list
+      for(var z = 0; z < prefnums.length; z++){
+      results[prefnums[z]] = results[prefnums[z]] +1; 
+      }
+   
+      
+      
         var studentLine = [];
         studentLine.push(student.firstName);
         studentLine.push(student.lastName);
@@ -143,16 +202,36 @@ function populateSheet(outputSheet, matcher) {
 
         // List the student's assigned workshops in the row
         for (var j = 0; j < student.assignedWorkshops.length; j++) {
-            var workshop = student.assignedWorkshops[j];
-            if (workshop === null) {
-                studentLine.push("", "", "");
-            } else {
-                studentLine.push(workshop.number);
-                studentLine.push(workshop.name);
-                studentLine.push(workshop.location);
-            }
+            var assignedWorkshop = student.assignedWorkshops[j];
+            studentLine.push(assignedWorkshop.number);
+            studentLine.push(assignedWorkshop.name);
+            studentLine.push(assignedWorkshop.location);
+            //studentLine.push(workshop.toString());
+            //Logger.log(studentLine);
         }
 
         outputSheet.appendRow(studentLine);
     }
+  
+  for (var k = 0; k < matcher.workshopsByPopularity.length; k++) {
+    
+    Logger.log(matcher.workshopsByPopularity.length);
+    var dataInfo = [];
+    var workshopData = matcher.workshopsByPopularity[k];
+
+    dataInfo.push(workshopData.name);
+    dataInfo.push(workshopData.number);
+    dataInfo.push(workshopData.sessions.originalCapacity);
+    dataInfo.push(workshopData.sessions.remainingCapacity);
+    dataSheet.appendRow(dataInfo);
+    
+    
+  }
+  
+   dataSheet.appendRow(DATA_SHEET_HEADER2);
+   dataSheet.appendRow(results);
+    
+        
 }
+
+       
