@@ -162,6 +162,23 @@ function Student(
     this.toString = function() {
         return this.fullName();
     };
+        
+        
+           
+  this.checkPreferenceNumbers = function(){
+      var preferencearray = []
+      for (var i = 0; i < this.assignedWorkshops.length; i++){
+        var assignedWorkshop = this.assignedWorkshops[i];
+        if (this.preferences.indexOf(assignedWorkshop) === -1){
+            preferencearray[i] = this.preferences.length + 1;
+           }
+        else{
+            preferencearray[i] = this.preferences.indexOf(assignedWorkshop);
+           }
+        }
+       return preferencearray
+  }
+
 
     this.init();
 }
