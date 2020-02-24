@@ -221,8 +221,8 @@ function populateSheet(outputSheet, dataSheet, matcher) {
 
     dataInfo.push(workshopData.name);
     dataInfo.push(workshopData.number);
-    dataInfo.push(workshopData.sessions.originalCapacity);
-    dataInfo.push(workshopData.sessions.remainingCapacity);
+    dataInfo.push(workshopData.slotsFilled);
+    dataInfo.push(workshopData.totalBaseCapacity);
     dataSheet.appendRow(dataInfo);
     
     
