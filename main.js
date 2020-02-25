@@ -150,9 +150,7 @@ function main() {
     populateSheet(outputSheet, dataSheet, matcher);
 }
 
-/**
- * Output the results of the matcher to the given sheet.
- */
+
 /**
  * Output the results of the matcher to the given sheet.
  */
