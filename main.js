@@ -11,7 +11,6 @@ var COLUMN_WORKSHOP_CAPACITY = 6;
 var COLUMN_WORKSHOP_BUILDING = 4;
 var COLUMN_WORKSHOP_ROOM = 5;
 
-
 //Column indicies for the Data Sheet
 
 var COLUMN_WORKSHOP_NUMBER = 1;
@@ -24,7 +23,7 @@ var PREFERENCE_COLUMNS = [1, 2, 3, 4, 5, 6];
 // Column indices of student enrollments in order of session time
 var ENROLLED = [2, 3, 4];
 
-var HEADERS = [
+var OUTPUT_SHEET_HEADERS = [
     "First name",
     "Last name",
     "Grade",
@@ -39,16 +38,13 @@ var HEADERS = [
     "Workshop Location"
 ];
 
-var DATA_SHEET_HEADER1 =[
+var DATA_SHEET_HEADER1 = [
     "Workshop Name",
     "WorkShop Number",
     "Slots taken",
     "Total Slots",
     "Does this work?"
-    
-
 ];
-
 
 var DATA_SHEET_HEADER2 = [
     "# of First Preferences",
@@ -58,9 +54,7 @@ var DATA_SHEET_HEADER2 = [
     "# of Fifth Preferences",
     "# of Sixth Preferences",
     "# of Not Preferenced"
-  
-  
-  ]
+];
 
 //VARIABLES FOR RESPONSE SPREADSHEET INDICES
 var RESPONSE_SHEET_INDEX = 0;
@@ -90,10 +84,8 @@ var preAssignmentSheet = RESPONSE_SPREADSHEET.getSheets()[
 ];
 var preAssignmentData = preAssignmentSheet.getDataRange().getValues();
 
-
 //Assignment Data Sheet
 var dataSheet = RESPONSE_SPREADSHEET.getSheets()[DATA_SHEET_INDEX];
-
 
 /**
  * Automatically runs when sheet is opened.
@@ -166,35 +158,27 @@ function main() {
  * Output the results of the matcher to the given sheet.
  */
 function populateSheet(outputSheet, dataSheet, matcher) {
-  
-  
-  
     //Formats the sheets before writing to them.
     outputSheet.clear();
     outputSheet.appendRow(OUTPUT_SHEET_HEADERS);
     dataSheet.clear();
     dataSheet.appendRow(DATA_SHEET_HEADER1);
-  
 
-  
     matcher.fixStudentPreferences();
     matcher.matchGirls();
-  
-  
-    var results = [0,0,0,0,0,0,0]
-  
+
+    var results = [0, 0, 0, 0, 0, 0, 0];
 
     for (var i = 0; i < matcher.allStudents.length; i++) {
         var student = matcher.allStudents[i];
-        var prefnums = student.checkPreferenceNumbers()
+        var prefnums = student.checkPreferenceNumbers();
+        Logger.log(results);
         Logger.log(prefnums);
-      //For loop records the the number of times a student has # preference in his preference list
-      for(var z = 0; z < prefnums.length; z++){
-      results[prefnums[z]] = results[prefnums[z]] +1; 
-      }
-   
-      
-      
+        //For loop records the the number of times a student has # preference in his preference list
+        for (var z = 0; z < prefnums.length; z++) {
+            results[prefnums[z]] = results[prefnums[z]] + 1;
+        }
+
         var studentLine = [];
         studentLine.push(student.firstName);
         studentLine.push(student.lastName);
@@ -212,26 +196,19 @@ function populateSheet(outputSheet, dataSheet, matcher) {
 
         outputSheet.appendRow(studentLine);
     }
-  
-  for (var k = 0; k < matcher.workshopsByPopularity.length; k++) {
-    
-    Logger.log(matcher.workshopsByPopularity.length);
-    var dataInfo = [];
-    var workshopData = matcher.workshopsByPopularity[k];
 
-    dataInfo.push(workshopData.name);
-    dataInfo.push(workshopData.number);
-    dataInfo.push(workshopData.slotsFilled);
-    dataInfo.push(workshopData.totalBaseCapacity);
-    dataSheet.appendRow(dataInfo);
-    
-    
-  }
-  
-   dataSheet.appendRow(DATA_SHEET_HEADER2);
-   dataSheet.appendRow(results);
-    
-        
+    for (var k = 0; k < matcher.workshopsByPopularity.length; k++) {
+        Logger.log(matcher.workshopsByPopularity.length);
+        var dataInfo = [];
+        var workshopData = matcher.workshopsByPopularity[k];
+
+        dataInfo.push(workshopData.name);
+        dataInfo.push(workshopData.number);
+        dataInfo.push(workshopData.slotsFilled);
+        dataInfo.push(workshopData.totalBaseCapacity);
+        dataSheet.appendRow(dataInfo);
+    }
+
+    dataSheet.appendRow(DATA_SHEET_HEADER2);
+    dataSheet.appendRow(results);
 }
-
-       
