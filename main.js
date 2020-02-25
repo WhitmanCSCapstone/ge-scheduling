@@ -42,8 +42,7 @@ var DATA_SHEET_HEADER1 = [
     "Workshop Name",
     "WorkShop Number",
     "Slots taken",
-    "Total Slots",
-    "Does this work?"
+    "Total Slots"
 ];
 
 var DATA_SHEET_HEADER2 = [
