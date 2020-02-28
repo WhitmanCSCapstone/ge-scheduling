@@ -134,8 +134,8 @@ function populateSheet(outputSheet, matcher) {
 
     matcher.matchGirls();
 
-    //array to hold all student lines to output
-    var studentLines = []
+    // All student lines to output
+    var studentLines = [];
 
     for (var i = 0; i < matcher.allStudents.length; i++) {
         var student = matcher.allStudents[i];
@@ -153,8 +153,10 @@ function populateSheet(outputSheet, matcher) {
         }
         studentLines.push(studentLine);
     }
-  
-    var rowLen = studentLines.length;
-    var columnLen = studentLines[0].length
-    outputSheet.getRange(outputSheet.getLastRow()+1, 1, rowLen, columnLen).setValues(studentLines)
-}    
+
+    var rowCount = studentLines.length;
+    var columnCount = studentLines[0].length;
+    outputSheet
+        .getRange(outputSheet.getLastRow() + 1, 1, rowCount, columnCount)
+        .setValues(studentLines);
+}
