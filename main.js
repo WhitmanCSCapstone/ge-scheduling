@@ -147,9 +147,13 @@ function populateSheet(outputSheet, matcher) {
         // List the student's assigned workshops in the row
         for (var j = 0; j < student.assignedWorkshops.length; j++) {
             var workshop = student.assignedWorkshops[j];
-            studentLine.push(workshop.number);
-            studentLine.push(workshop.name);
-            studentLine.push(workshop.location);
+            if (workshop === null) {
+                studentLine.push("", "", "");
+            } else {
+                studentLine.push(workshop.number);
+                studentLine.push(workshop.name);
+                studentLine.push(workshop.location);
+            }
         }
         studentLines.push(studentLine);
     }
