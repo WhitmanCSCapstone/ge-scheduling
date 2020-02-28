@@ -17,7 +17,7 @@ const PREFERENCE_COLUMNS = [1, 2, 3, 4, 5, 6];
 // Column indices of student enrollments in order of session time
 const ENROLLED = [2, 3, 4];
 
-var OUTPUT_SHEET_HEADERS = [
+const OUTPUT_SHEET_HEADERS = [
     "First name",
     "Last name",
     "Grade",
@@ -137,11 +137,10 @@ function populateSheet(outputSheet, matcher) {
     matcher.matchGirls();
 
     // All student lines to output
-    var studentLines = [];
+    const studentLines = [];
 
-    for (var i = 0; i < matcher.allStudents.length; i++) {
-        var student = matcher.allStudents[i];
-        var studentLine = [];
+    for (const student of matcher.allStudents) {
+        const studentLine = [];
         studentLine.push(student.firstName);
         studentLine.push(student.lastName);
         studentLine.push(student.grade);
@@ -159,8 +158,8 @@ function populateSheet(outputSheet, matcher) {
         studentLines.push(studentLine);
     }
 
-    var rowCount = studentLines.length;
-    var columnCount = studentLines[0].length;
+    const rowCount = studentLines.length;
+    const columnCount = studentLines[0].length;
     outputSheet
         .getRange(outputSheet.getLastRow() + 1, 1, rowCount, columnCount)
         .setValues(studentLines);
