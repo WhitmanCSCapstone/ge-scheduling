@@ -17,7 +17,7 @@ var PREFERENCE_COLUMNS = [1, 2, 3, 4, 5, 6];
 // Column indices of student enrollments in order of session time
 var ENROLLED = [2, 3, 4];
 
-var HEADERS = [
+var OUTPUT_SHEET_HEADERS = [
     "First name",
     "Last name",
     "Grade",
@@ -127,7 +127,7 @@ function main() {
  */
 function populateSheet(outputSheet, matcher) {
     outputSheet.clear();
-    outputSheet.appendRow(HEADERS);
+    outputSheet.appendRow(OUTPUT_SHEET_HEADERS);
     outputSheet.setFrozenRows(1);
 
     matcher.fixStudentPreferences();
