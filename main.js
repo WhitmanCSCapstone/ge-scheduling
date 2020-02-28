@@ -134,6 +134,9 @@ function populateSheet(outputSheet, matcher) {
 
     matcher.matchGirls();
 
+    //array to hold all student lines to output
+    var studentLines = []
+
     for (var i = 0; i < matcher.allStudents.length; i++) {
         var student = matcher.allStudents[i];
         var studentLine = [];
@@ -144,15 +147,27 @@ function populateSheet(outputSheet, matcher) {
         // List the student's assigned workshops in the row
         for (var j = 0; j < student.assignedWorkshops.length; j++) {
             var workshop = student.assignedWorkshops[j];
-            if (workshop === null) {
-                studentLine.push("", "", "");
-            } else {
-                studentLine.push(workshop.number);
-                studentLine.push(workshop.name);
-                studentLine.push(workshop.location);
-            }
+            studentLine.push(workshop.number);
+            studentLine.push(workshop.name);
+            studentLine.push(workshop.location);
         }
-
-        outputSheet.appendRow(studentLine);
+        studentLines.push(studentLine);
     }
-}
+  
+    var rowLen = studentLines.length;
+    var columnLen = studentLines[0].length
+    outputSheet.getRange(outputSheet.getLastRow()+1, 1, rowLen, columnLen).setValues(studentLines)
+  
+  for (var k = 0; k < matcher.workshopsByNumber.length; k++) {
+    Logger.log(matcher.workshopsByNumber.length);
+    Logger.log(k);
+    var dataInfo = [];
+    var workshop = matcher.workshopsByNumber[k];
+    Logger.log(workshop.name);
+    dataInfo.push(workshop.name);
+    dataInfo.push(workshop.number);
+    dataInfo.push(workshop.sessions.originalCapacity);
+    dataInfo.push(workshop.sessions.remainingCapacity);
+    dataSheet.appendRow(dataInfo);
+  }     
+}    
