@@ -17,7 +17,7 @@ const PREFERENCE_COLUMNS = [1, 2, 3, 4, 5, 6];
 // Column indices of student enrollments in order of session time
 const ENROLLED = [2, 3, 4];
 
-const HEADERS = [
+var OUTPUT_SHEET_HEADERS = [
     "First name",
     "Last name",
     "Grade",
@@ -129,15 +129,19 @@ function main() {
  */
 function populateSheet(outputSheet, matcher) {
     outputSheet.clear();
-    outputSheet.appendRow(HEADERS);
+    outputSheet.appendRow(OUTPUT_SHEET_HEADERS);
     outputSheet.setFrozenRows(1);
 
     matcher.fixStudentPreferences();
 
     matcher.matchGirls();
 
-    for (const student of matcher.allStudents) {
-        const studentLine = [];
+    // All student lines to output
+    var studentLines = [];
+
+    for (var i = 0; i < matcher.allStudents.length; i++) {
+        var student = matcher.allStudents[i];
+        var studentLine = [];
         studentLine.push(student.firstName);
         studentLine.push(student.lastName);
         studentLine.push(student.grade);
@@ -152,7 +156,12 @@ function populateSheet(outputSheet, matcher) {
                 studentLine.push(workshop.location);
             }
         }
-
-        outputSheet.appendRow(studentLine);
+        studentLines.push(studentLine);
     }
+
+    var rowCount = studentLines.length;
+    var columnCount = studentLines[0].length;
+    outputSheet
+        .getRange(outputSheet.getLastRow() + 1, 1, rowCount, columnCount)
+        .setValues(studentLines);
 }
