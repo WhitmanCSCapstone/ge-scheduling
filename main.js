@@ -157,17 +157,4 @@ function populateSheet(outputSheet, matcher) {
     var rowLen = studentLines.length;
     var columnLen = studentLines[0].length
     outputSheet.getRange(outputSheet.getLastRow()+1, 1, rowLen, columnLen).setValues(studentLines)
-  
-  for (var k = 0; k < matcher.workshopsByNumber.length; k++) {
-    Logger.log(matcher.workshopsByNumber.length);
-    Logger.log(k);
-    var dataInfo = [];
-    var workshop = matcher.workshopsByNumber[k];
-    Logger.log(workshop.name);
-    dataInfo.push(workshop.name);
-    dataInfo.push(workshop.number);
-    dataInfo.push(workshop.sessions.originalCapacity);
-    dataInfo.push(workshop.sessions.remainingCapacity);
-    dataSheet.appendRow(dataInfo);
-  }     
 }    
