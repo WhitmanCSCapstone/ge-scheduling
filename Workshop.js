@@ -11,15 +11,31 @@
  * @param {int}    sessionsPerWorkshop The number of sessions in a workshop.
  */
 class Workshop {
-    constructor(name, number, capacity, location, sessionsPerWorkshop) {
+    constructor(
+        name,
+        number,
+        capacity,
+        location,
+        sessionsPerWorkshop,
+        minimumFill
+    ) {
         this.name = name;
         this.number = number;
         this.location = location;
 
         this.sessions = [];
+
+        this.studentsAssigned = [];
+
+        this.totalBaseCapacity = 0;
         for (let i = 0; i < sessionsPerWorkshop; i++) {
-            this.sessions.push(new Session(capacity));
+            this.sessions.push(new Session(capacity, minimumFill));
+            this.totalBaseCapacity += capacity;
         }
+
+        this.slotsFilled = 0;
+
+        this.minimumFill = Math.floor(this.totalBaseCapacity * minimumFill);
 
         this.popularityScore = 0;
     }
@@ -33,15 +49,21 @@ class Workshop {
         this.popularityScore += points;
     }
 
-    /**
-     * Calculates the total remaining capacity of the workshop.
-     */
-    totalRemainingCapacity() {
-        let total = 0;
-        for (const session of this.sessions) {
-            total += session.remainingCapacity;
+    isFull() {
+        return this.slotsFilled === this.totalBaseCapacity;
+    }
+
+    addStudent(student) {
+        if (this.isFull()) {
+            throw new Error("Cannot add students to a full workshop");
+        } else {
+            this.slotsFilled += 1;
+            this.studentsAssigned.push(student);
         }
-        return total;
+    }
+
+    hasReachedQuorum() {
+        return this.slotsFilled >= this.minimumFill;
     }
 
     toString() {

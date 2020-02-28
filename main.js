@@ -22,13 +22,13 @@ const HEADERS = [
     "Last name",
     "Grade",
     "Workshop #",
-    "Workshop Name",
+    "Workshop Section A",
     "Workshop Location",
     "Workshop #",
-    "Workshop Name",
+    "Workshop Section B",
     "Workshop Location",
     "Workshop #",
-    "Workshop Name",
+    "Workshop Section C",
     "Workshop Location"
 ];
 
@@ -53,9 +53,6 @@ const WORKSHOP_DATA = WORKSHOP_SHEET.getDataRange().getValues();
 // Output Sheet
 const outputSheet = RESPONSE_SPREADSHEET.getSheets()[OUTPUT_SHEET_INDEX];
 
-// Recreate headers
-outputSheet.appendRow(HEADERS); // TODO This doesn't belong here!
-
 // Pre-Assignment Sheet
 const PRE_ASSIGNMENT_SHEET = RESPONSE_SPREADSHEET.getSheets()[
     PREASSIGNMENT_SHEET_INDEX
@@ -68,7 +65,7 @@ const PRE_ASSIGNMENT_DATA = PRE_ASSIGNMENT_SHEET.getDataRange().getValues();
 function onOpen() {
     SpreadsheetApp.getUi()
         .createMenu("Great Explorations")
-        .addItem("Match Girls to Workshops", "matchGirls")
+        .addItem("Match Girls to Workshops", "main")
         .addToUi();
 }
 
@@ -133,6 +130,7 @@ function main() {
 function populateSheet(outputSheet, matcher) {
     outputSheet.clear();
     outputSheet.appendRow(HEADERS);
+    outputSheet.setFrozenRows(1);
 
     matcher.fixStudentPreferences();
 
@@ -146,9 +144,13 @@ function populateSheet(outputSheet, matcher) {
 
         // List the student's assigned workshops in the row
         for (const workshop of student.assignedWorkshops) {
-            studentLine.push(workshop.number);
-            studentLine.push(workshop.name);
-            studentLine.push(workshop.location);
+            if (workshop === null) {
+                studentLine.push("", "", "");
+            } else {
+                studentLine.push(workshop.number);
+                studentLine.push(workshop.name);
+                studentLine.push(workshop.location);
+            }
         }
 
         outputSheet.appendRow(studentLine);

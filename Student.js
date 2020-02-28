@@ -1,4 +1,4 @@
-/*globals Workshop */
+/*globals Workshop, Logger*/
 
 /**
  * Student Class.
@@ -55,96 +55,29 @@ class Student {
     }
 
     /**
-     * Assigns this student to a workshop.
+     * Assigns this student to a workshop in the student's first available slot.
      *
-     * Uses the first slot that both the student and the workshop have
-     * available.
+     * @param {workshop} workshop The workshop to add the student to.
      *
-     * @param {workshop}    The workshop to add the student to.
-     *
-     * @throws an error if the student and workshop have no common slot.
+     * @throws an error if the student already has workshops in each slot.
      */
     assignWorkshop(workshop) {
-        // If the student has an open slot that matches the workshop,
-        // assign the student to a session that works for them.
-        const slotNumber = this.findAvailableSession(workshop);
-        if (slotNumber !== null) {
-            this.assignWorkshopSession(workshop, slotNumber);
-        } else {
+        if (this.fullyAssigned()) {
             throw new Error(
-                "Could not find open session slot to add student " +
-                    this.firstName +
-                    " " +
-                    this.lastName +
-                    " to workshop " +
-                    workshop.name
+                this.fullName() + " cannot be assigned any more workshops"
             );
         }
-    }
 
-    /**
-     * Finds an open slot in both the student and workshop.
-     *
-     * @param {Workshop}    workshop    A workshop to put this student in.
-     *
-     * @returns {int}   A viable slot, or null if none is found
-     */
-    findAvailableSession(workshop) {
-        // Check through the times this student is available.
-        for (let i = 0; i < this.assignedWorkshops.length; i++) {
-            const slot = this.assignedWorkshops[i];
-            const session = workshop.sessions[i];
+        if (this.isAssigned(workshop)) {
+            throw new Error("duplicate match");
+        }
 
-            if (slot === null) {
-                // Then check the corresponding session.
-                // If there's still room in the session, we're good.
-                if (!session.hasReachedQuorum()) {
-                    return i;
-                }
+        for (let j = 0; j < this.assignedWorkshops.length; j++) {
+            if (this.assignedWorkshops[j] === null) {
+                this.assignedWorkshops[j] = workshop;
+                workshop.addStudent(this);
+                break;
             }
-        }
-        // Otherwise, this workshop doesn't fit with the student's schedule.
-        return null;
-    }
-
-    /**
-     * Assign this student to a particular workshop session.
-     * @access private
-     * @param {Workshop}    workshop    A workshop to put this student in.
-     * @param {int}         session     A session number to put the student in.
-     */
-    assignWorkshopSession(workshop, session) {
-        workshop.sessions[session].addStudent();
-        this.assignedWorkshops[session] = workshop;
-    }
-
-    /**
-     * Swaps the session times of two workshops the student is assigned to, or moves an assigned workshop from one session time to another empty one.
-     *
-     * @param {int} session1 The index of one of the workshops in the student's assigned workshops.
-     * @param {int} session2 The index of one of the workshops in the student's assigned workshops.
-     */
-    swapWorkshops(session1, session2) {
-        if (this.assignedWorkshops[session1] != null) {
-            this.assignedWorkshops[session1].sessions[
-                session1
-            ].subtractStudent();
-        }
-        if (this.assignedWorkshops[session2] != null) {
-            this.assignedWorkshops[session2].sessions[
-                session2
-            ].subtractStudent();
-        }
-
-        const temp = this.assignedWorkshops[session1];
-        this.assignedWorkshops[session1] = this.assignedWorkshops[session2];
-        this.assignedWorkshops[session2] = temp;
-
-        if (this.assignedWorkshops[session1] != null) {
-            this.assignedWorkshops[session1].sessions[session1].addStudent();
-        }
-        if (this.assignedWorkshops[session2] != null) {
-            this.assignedWorkshops[session2].sessions[session2].addStudent();
         }
     }
 
@@ -176,14 +109,15 @@ class Student {
     }
 
     /**
-     * Appends a workshop to a student's list of preferences.
-     *
-     * @param {Workshop} workshop A workshop object to be appended onto the student's list of preferences.
+     * Returns true if the student has already been assigned the listed workshop, false if not.
      */
-    appendPreference(workshop) {
-        const index = this.preferences.length;
-        this.preferences.push(workshop);
-        workshop.incrementPopularity(this.popularityPoints[index]);
+    isAssigned(workshop) {
+        return this.assignedWorkshops.indexOf(workshop) !== -1;
+    }
+
+    givenFirstPreference() {
+        const firstPreference = this.preferences[0];
+        return this.assignedWorkshops.indexOf(firstPreference) !== -1;
     }
 
     /**
