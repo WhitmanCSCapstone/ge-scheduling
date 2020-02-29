@@ -25,10 +25,7 @@ class Student {
 
         this.preferences = preferenceArray;
 
-        this.assignedWorkshops = [];
-        for (let i = 0; i < sessionsPerWorkshop; i++) {
-            this.assignedWorkshops.push(null);
-        }
+        this.assignedWorkshops = Array(sessionsPerWorkshop).fill(null);
 
         this.studentScore = 0;
 
