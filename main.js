@@ -199,7 +199,7 @@ function populateSheet(outputSheet, dataSheet, matcher) {
         studentLines.push(studentLine);
     }
 
-
+    var dataInfoFull = []
     for (var k = 0; k < matcher.workshopsByPopularity.length; k++) {
         Logger.log(matcher.workshopsByPopularity.length);
         var dataInfo = [];
@@ -209,8 +209,11 @@ function populateSheet(outputSheet, dataSheet, matcher) {
         dataInfo.push(workshopData.number);
         dataInfo.push(workshopData.slotsFilled);
         dataInfo.push(workshopData.totalBaseCapacity);
-        dataSheet.appendRow(dataInfo);
+        dataInfoFull.push(dataInfo);
     }
+    var dataInfoRows = dataInfoFull.length;
+    var dataInfoColumns = dataInfoFull[0].length;
+    dataSheet.getRange(dataSheet.getLastRow() + 1, 1, dataInfoRows, dataInfoColumns).setValues(dataInfoFull);
 
     dataSheet.appendRow(DATA_SHEET_HEADER2);
     dataSheet.appendRow(results);
