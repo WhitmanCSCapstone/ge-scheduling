@@ -158,13 +158,19 @@ function populateSheet(outputSheet, dataSheet, matcher) {
     //Formats the sheets before writing to them.
     outputSheet.clear();
     outputSheet.appendRow(OUTPUT_SHEET_HEADERS);
+    outputSheet.setFrozenRows(1);
+
+  
     dataSheet.clear();
     dataSheet.appendRow(DATA_SHEET_HEADER1);
+    outputSheet.setFrozenRows(1);
 
     matcher.fixStudentPreferences();
     matcher.matchGirls();
 
+
     var results = [0, 0, 0, 0, 0, 0, 0];
+    var studentLines = [];
 
     for (var i = 0; i < matcher.allStudents.length; i++) {
         var student = matcher.allStudents[i];
@@ -190,9 +196,9 @@ function populateSheet(outputSheet, dataSheet, matcher) {
             //studentLine.push(workshop.toString());
             //Logger.log(studentLine);
         }
-
-        outputSheet.appendRow(studentLine);
+        studentLines.push(studentLine);
     }
+
 
     for (var k = 0; k < matcher.workshopsByPopularity.length; k++) {
         Logger.log(matcher.workshopsByPopularity.length);
@@ -208,4 +214,11 @@ function populateSheet(outputSheet, dataSheet, matcher) {
 
     dataSheet.appendRow(DATA_SHEET_HEADER2);
     dataSheet.appendRow(results);
+
+    var rowCount = studentLines.length;
+    var columnCount = studentLines[0].length;
+    outputSheet
+        .getRange(outputSheet.getLastRow() + 1, 1, rowCount, columnCount)
+        .setValues(studentLines);
+
 }
