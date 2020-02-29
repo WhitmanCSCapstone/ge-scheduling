@@ -40,8 +40,8 @@ var OUTPUT_SHEET_HEADERS = [
 
 var DATA_SHEET_HEADER1 = [
     "Workshop Name",
-    "WorkShop Number",
-    "Slots taken",
+    "Workshop #",
+    "Slots Taken",
     "Total Slots"
 ];
 
