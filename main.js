@@ -150,17 +150,15 @@ function main() {
     populateSheet(outputSheet, dataSheet, matcher);
 }
 
-
 /**
  * Output the results of the matcher to the given sheet.
  */
 function populateSheet(outputSheet, dataSheet, matcher) {
-    //Formats the sheets before writing to them.
+    // Formats the sheets before writing to them.
     outputSheet.clear();
     outputSheet.appendRow(OUTPUT_SHEET_HEADERS);
     outputSheet.setFrozenRows(1);
 
-  
     dataSheet.clear();
     dataSheet.appendRow(DATA_SHEET_HEADER1);
     outputSheet.setFrozenRows(1);
@@ -168,16 +166,14 @@ function populateSheet(outputSheet, dataSheet, matcher) {
     matcher.fixStudentPreferences();
     matcher.matchGirls();
 
-
     var results = [0, 0, 0, 0, 0, 0, 0];
     var studentLines = [];
 
     for (var i = 0; i < matcher.allStudents.length; i++) {
         var student = matcher.allStudents[i];
         var prefnums = student.checkPreferenceNumbers();
-        Logger.log(results);
-        Logger.log(prefnums);
-        //For loop records the the number of times a student has # preference in his preference list
+
+        // For loop records the the number of times a student has # preference in his preference list
         for (var z = 0; z < prefnums.length; z++) {
             results[prefnums[z]] = results[prefnums[z]] + 1;
         }
@@ -189,16 +185,17 @@ function populateSheet(outputSheet, dataSheet, matcher) {
 
         // List the student's assigned workshops in the row
         for (var j = 0; j < student.assignedWorkshops.length; j++) {
-            var assignedWorkshop = student.assignedWorkshops[j];
-            studentLine.push(assignedWorkshop.number);
-            studentLine.push(assignedWorkshop.name);
-            studentLine.push(assignedWorkshop.location);
-            //studentLine.push(workshop.toString());
-            //Logger.log(studentLine);
+            var workshop = student.assignedWorkshops[j];
+            if (workshop === null) {
+                studentLine.push("", "", "");
+            } else {
+                studentLine.push(workshop.number);
+                studentLine.push(workshop.name);
+                studentLine.push(workshop.location);
+            }
         }
         studentLines.push(studentLine);
     }
-
 
     for (var k = 0; k < matcher.workshopsByPopularity.length; k++) {
         Logger.log(matcher.workshopsByPopularity.length);
@@ -220,5 +217,4 @@ function populateSheet(outputSheet, dataSheet, matcher) {
     outputSheet
         .getRange(outputSheet.getLastRow() + 1, 1, rowCount, columnCount)
         .setValues(studentLines);
-
 }
