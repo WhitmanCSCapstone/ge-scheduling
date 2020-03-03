@@ -1,4 +1,4 @@
-/*globals Workshop */
+/*globals Workshop, Logger*/
 
 /**
  * Student Class.
@@ -10,7 +10,13 @@
  * @param {array}  preferenceArray     The ordered array of the student's preferred workshops from most to least preferred.
  * @param {int}    sessionsPerWorkshop The number of sessions in a workshop.
  */
-function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorkshop) {
+function Student(
+    firstName,
+    lastName,
+    preferenceArray,
+    grade,
+    sessionsPerWorkshop
+) {
     this.init = function() {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -21,11 +27,6 @@ function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorksho
         this.assignedWorkshops = [];
         for (var i = 0; i < sessionsPerWorkshop; i++) {
             this.assignedWorkshops.push(null);
-        }
-
-        this.orderedWorkshops = [];
-        for (var i = 0; i < sessionsPerWorkshop; i++) {
-            this.orderedWorkshops.push(null);
         }
 
         this.studentScore = 0;
@@ -61,26 +62,23 @@ function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorksho
      */
     this.assignWorkshop = function(workshop) {
         if (this.fullyAssigned()) {
-            for (var i = 0; i < this.assignedWorkshops.length; i++) {
-                Logger.log(this.assignedWorkshops[i].name);
-            }
-            Logger.log(workshop.name);
-            throw new Error(this.fullName() + " cannot be assigned any more workshops");
+            throw new Error(
+                this.toString() + " cannot be assigned any more workshops"
+            );
         }
 
         if (this.isAssigned(workshop)) {
-            throw new Error("duplicate match")
+            throw new Error("duplicate match");
         }
 
-        for (var i = 0; i < this.assignedWorkshops.length; i++) {
-            if (this.assignedWorkshops[i] === null) {
-                this.assignedWorkshops[i] = workshop;
+        for (var j = 0; j < this.assignedWorkshops.length; j++) {
+            if (this.assignedWorkshops[j] === null) {
+                this.assignedWorkshops[j] = workshop;
                 workshop.addStudent(this);
                 break;
             }
         }
-    }
-    
+    };
 
     /**
      * Calculates and returns the number of workshops to which the student has been assigned.
@@ -113,13 +111,17 @@ function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorksho
      * Returns true if the student has already been assigned the listed workshop, false if not.
      */
     this.isAssigned = function(workshop) {
-        return (this.assignedWorkshops.indexOf(workshop) !== -1);
+        return this.assignedWorkshops.indexOf(workshop) !== -1;
+    };
+
+    this.hasTimeSlotFree = function(timeSlot) {
+        return this.assignedWorkshops[timeSlot] === null;
     }
 
     this.givenFirstPreference = function() {
         var firstPreference = this.preferences[0];
-        return (this.assignedWorkshops.indexOf(firstPreference) !== -1);
-    }
+        return this.assignedWorkshops.indexOf(firstPreference) !== -1;
+    };
 
     /**
      * Calculates and returns the "score" of this student's assigned workshops based on their preferences.
@@ -157,12 +159,21 @@ function Student(firstName, lastName, preferenceArray, grade, sessionsPerWorksho
     /**
      * Returns the full name of the student as a string.
      */
-    this.fullName = function() {
+    this.toString = function() {
         return this.firstName.concat(" ", this.lastName);
     };
 
-    this.toString = function() {
-        return this.fullName();
+    this.checkPreferenceNumbers = function() {
+        var preferencearray = [];
+        for (var i = 0; i < this.assignedWorkshops.length; i++) {
+            var assignedWorkshop = this.assignedWorkshops[i];
+            if (this.preferences.indexOf(assignedWorkshop) === -1) {
+                preferencearray[i] = this.preferences.length;
+            } else {
+                preferencearray[i] = this.preferences.indexOf(assignedWorkshop);
+            }
+        }
+        return preferencearray;
     };
 
     this.init();

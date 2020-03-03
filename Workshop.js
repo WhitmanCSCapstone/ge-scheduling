@@ -10,7 +10,14 @@
  * @param {int}    capacity            The capacity of a single session of the workshop.
  * @param {int}    sessionsPerWorkshop The number of sessions in a workshop.
  */
-function Workshop(name, number, capacity, location, sessionsPerWorkshop, minimumFill) {
+function Workshop(
+    name,
+    number,
+    capacity,
+    location,
+    sessionsPerWorkshop,
+    minimumFill
+) {
     this.init = function() {
         this.name = name;
         this.number = number;
@@ -18,13 +25,13 @@ function Workshop(name, number, capacity, location, sessionsPerWorkshop, minimum
 
         this.sessions = [];
 
+        this.studentsAssigned = [];
+
         this.totalBaseCapacity = 0;
         for (var i = 0; i < sessionsPerWorkshop; i++) {
-            this.sessions.push(new Session(capacity, minimumFill));
+            this.sessions.push(new Session(capacity, minimumFill, i));
             this.totalBaseCapacity += capacity;
         }
-
-        this.studentsAssigned = [];
 
         this.slotsFilled = 0;
 
@@ -43,22 +50,50 @@ function Workshop(name, number, capacity, location, sessionsPerWorkshop, minimum
     };
 
     this.isFull = function() {
-        return (this.slotsFilled === this.totalBaseCapacity);
-    }
+        return this.slotsFilled === this.totalBaseCapacity;
+    };
+
+    this.hasSessionOpen = function(timeSlot) {
+        return !this.sessions[timeSlot].isFull();
+    };
+
+    this.moreFull = function(sessionA, sessionB) {
+        if (sessionA.slotsFilled < sessionB.slotsFilled) {
+            return -1;
+        } else if (sessionA.slotsFilled > sessionB.slotsFilled) {
+            return 1;
+        } else {
+            return 0;
+        }
+    };
+
+    this.leastFullSessions = function() {
+        var sessionsByFill = this.sessions.slice();
+        sessionsByFill.sort(this.moreFull);
+        return sessionsByFill;
+    };
 
     this.addStudent = function(student) {
         if (this.isFull()) {
             throw new Error("Cannot add students to a full workshop");
+        } else {
+            var sessionsByFill = this.leastFullSessions();
+            for (var i = 0; i < sessionsByFill.length; i++) {
+                var timeSlot = sessionsByFill[i].timeSlot;
+                if (student.hasTimeSlotFree(timeSlot) && !sessionsByFill[i].isFull()) {
+                    this.slotsFilled += 1;
+                    this.studentsAssigned.push(student);
+                    sessionsByFill[i].addStudent(student);
+                    return;
+                }
+            }
+            throw new Error("The student does not share any free slots with the workshop")
         }
-        else {
-            this.slotsFilled += 1;
-            this.studentsAssigned.push(student);
-        }
-    }
+    };
 
     this.hasReachedQuorum = function() {
-        return (this.slotsFilled >= this.minimumFill);
-    }
+        return this.slotsFilled >= this.minimumFill;
+    };
 
     this.init();
 }
