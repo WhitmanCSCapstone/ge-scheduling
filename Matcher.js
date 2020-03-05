@@ -5,8 +5,8 @@
  *
  * An object used to simulate a complete set of students and workshops, used to create the matches for each student with workshops.
  */
-function Matcher() {
-    this.init = function() {
+class Matcher {
+    constructor() {
         // The number of sessions that an individual workshop has
         this.sessionsPerWorkshop = 3; // maybe could be moved to a subclass
 
@@ -30,7 +30,7 @@ function Matcher() {
 
         // The number of preferences each student should have
         this.numberOfPreferences = 6;
-    };
+    }
 
     /**
      * Adds a new Workshop into workshopsByNumber and workshopsByPopularity
@@ -39,8 +39,8 @@ function Matcher() {
      * @param {int}    number   The number of the workshop.
      * @param {int}    capacity The capacity of each session of the workshop.
      */
-    this.addNewWorkshop = function(name, number, capacity, location) {
-        var thisWorkshop = new Workshop(
+    addNewWorkshop(name, number, capacity, location) {
+        const thisWorkshop = new Workshop(
             name,
             number,
             capacity,
@@ -51,7 +51,7 @@ function Matcher() {
 
         this.workshopsByNumber[number] = thisWorkshop;
         this.workshopsByPopularity.push(thisWorkshop);
-    };
+    }
 
     /**
      * Adds a new Student object into allStudents
@@ -60,16 +60,15 @@ function Matcher() {
      * @param {string} lastName       The last name of the student.
      * @param {array}  preferenceNums The student's preferences as an array of integers.
      */
-    this.addNewStudent = function(firstName, lastName, preferenceNums, grade) {
-        var preferenceArray = [];
+    addNewStudent(firstName, lastName, preferenceNums, grade) {
+        const preferenceArray = [];
 
-        for (var i = 0; i < preferenceNums.length; i++) {
-            var preference = this.workshopsByNumber[preferenceNums[i]];
-
+        for (const n in preferenceNums) {
+            const preference = this.workshopsByNumber[preferenceNums[n]];
             preferenceArray.push(preference);
         }
 
-        var thisStudent = new Student(
+        const student = new Student(
             firstName,
             lastName,
             preferenceArray,
@@ -77,9 +76,9 @@ function Matcher() {
             this.sessionsPerWorkshop
         );
 
-        this.allStudents.push(thisStudent);
-        thisStudent.updatePopularities();
-    };
+        this.allStudents.push(student);
+        student.updatePopularities();
+    }
 
     /**
      * Helper function for sorting that compares two workshops by their popularity.
@@ -87,7 +86,7 @@ function Matcher() {
      * @param {Workshop} workshopA A workshop to have its popularity compared to workshopB.
      * @param {Workshop} workshopB A workshop to have its popularity compared to workshopA.
      */
-    this.morePopular = function(workshopA, workshopB) {
+    morePopular(workshopA, workshopB) {
         if (workshopA.popularityScore < workshopB.popularityScore) {
             return -1;
         } else if (workshopA.popularityScore > workshopB.popularityScore) {
@@ -95,80 +94,75 @@ function Matcher() {
         } else {
             return 0;
         }
-    };
+    }
 
     /**
      * Sorts the workshopsByPopularity array from least to most popular.
      */
-    this.sortWorkshops = function() {
+    sortWorkshops() {
         this.workshopsByPopularity.sort(this.morePopular);
-    };
+    }
 
     /**
      * Appends "null" to a student's preference list if they have fewer than the correct number of preferences
      */
-    this.fixStudentPreferences = function() {
-        for (var i = 0; i < this.allStudents.length; i++) {
-            var thisStudent = this.allStudents[i];
-            while (!thisStudent.hasAllPreferences()) {
-                thisStudent.preferences.push(null);
+    fixStudentPreferences() {
+        for (const student of this.allStudents) {
+            while (!student.hasAllPreferences()) {
+                student.preferences.push(null);
             }
         }
-    };
+    }
 
     /**
      * Calculates the absolute maximum percentage that every workshop can be filled to. this.minimumWorkshopFill can NOT be above this number.
      */
-    this.calculateMinPercent = function() {
-        var totalSlots = 0;
-        for (var i = 0; i < this.workshopsByPopularity.length; i++) {
-            totalSlots += this.workshopsByPopularity[i].totalBaseCapacity;
+    calculateMinPercent() {
+        let totalSlots = 0;
+        for (const workshop of this.workshopsByPopularity) {
+            totalSlots += workshop.totalBaseCapacity;
         }
-        var minPercent =
+        const minPercent =
             (this.allStudents.length * this.sessionsPerWorkshop) / totalSlots;
         Logger.log("minimum possible average fill: " + minPercent);
-    };
+    }
 
     /**
      * Returns an array of students who are eligible to be assigned the given workshop as a filler workshop
      *
      * @param {Workshop} workshop A workshop that needs to be assigned as filler to some students
      */
-    this.findEligible = function(workshop) {
-        var eligibleStudents = [];
-        for (var i = 0; i < this.allStudents.length; i++) {
-            var tempStudent = this.allStudents[i];
-            if (
-                tempStudent.numberAssigned() < 2 &&
-                !tempStudent.isAssigned(workshop)
-            ) {
-                eligibleStudents.push(tempStudent);
+    findEligible(workshop) {
+        const eligibleStudents = [];
+        for (const student of this.allStudents) {
+            if (student.numberAssigned() < 2 && !student.isAssigned(workshop)) {
+                eligibleStudents.push(student);
             }
         }
         return eligibleStudents;
-    };
+    }
 
     /**
      * Chooses random students to fill a workshop that hasn't been filled and gives them their highest possible preferences as compensation
      *
      * @param workshop the workshop that needs to be filled to Quorum
      */
-    this.fillOneWorkshop = function(workshop) {
-        var eligibleStudents = this.findEligible(workshop);
+    fillOneWorkshop(workshop) {
+        const eligibleStudents = this.findEligible(workshop);
         /*
          * This portion of the function iterates through preferences 1 through 6 and assigns random students who have that preference
          * open to the workshop until it reaches its quorum. If the preference for that student is full, then they are temporarily
          * removed from the list of "eligible" students until the next preference iteration.
          */
-        for (var i = 0; i < this.numberOfPreferences; i++) {
+        for (let i = 0; i < this.numberOfPreferences; i++) {
             // for each preference, starting with the highest
-            var currentStage = eligibleStudents.slice();
+            const currentStage = eligibleStudents.slice();
             while (currentStage.length > 0) {
-                var randomIndex = Math.floor(
+                const randomIndex = Math.floor(
                     Math.random() * currentStage.length
                 );
-                var randomStudent = currentStage[randomIndex];
-                var currentPreference = randomStudent.preferences[i];
+                const randomStudent = currentStage[randomIndex];
+                const currentPreference = randomStudent.preferences[i];
                 if (currentPreference === null) {
                     currentStage.splice(randomIndex, 1);
                     continue;
@@ -191,42 +185,38 @@ function Matcher() {
         );
         Logger.log("Base Popularity: " + workshop.popularityScore);
         throw new Error("Was unable to fill workshop " + workshop.name); // will handle this differently if it happens, EXTREMELY unlikely
-    };
+    }
 
-    this.fillWithPreferred = function(workshop) {
-        for (var i = 0; i < this.numberOfPreferences; i++) {
+    fillWithPreferred(workshop) {
+        for (let i = 0; i < this.numberOfPreferences; i++) {
             // for each preference rank i
-            for (var j = 0; j < this.allStudents.length; j++) {
+            for (const student of this.allStudents) {
                 // for each student j
-                var currentStudent = this.allStudents[j];
-                if (
-                    currentStudent.isAssigned(workshop) ||
-                    currentStudent.fullyAssigned()
-                ) {
+                if (student.isAssigned(workshop) || student.fullyAssigned()) {
                     continue;
-                } else if (currentStudent.preferences[i] === workshop) {
-                    currentStudent.assignWorkshop(workshop);
+                } else if (student.preferences[i] === workshop) {
+                    student.assignWorkshop(workshop);
                     if (workshop.hasReachedQuorum()) {
                         return;
                     }
                 }
             }
         }
-    };
+    }
 
     /**
      * The main matching algorithm, fills every workshop to its minimum with the students who prefer that workshop the most
      */
-    this.reachMinimumForAll = function() {
+    reachMinimumForAll() {
         /*
          * Iterates through the workshops from least to most popular, filling each one with students who have it listed as their first
          * preference, then those who have it listed as the second, etc. If the workshop is not filled by the time the end of all the
          * preferences is reached, then the fillOneWorkshop() function is called to fill the remaining slots of the workshop until it
          * reaches its minimum viable fill.
          */
-        for (var i = 0; i < this.workshopsByPopularity.length; i++) {
+        for (let i = 0; i < this.workshopsByPopularity.length; i++) {
             // for each workshop i
-            var currentWorkshop = this.workshopsByPopularity[i];
+            const currentWorkshop = this.workshopsByPopularity[i];
             if (currentWorkshop.hasReachedQuorum()) {
                 continue;
             }
@@ -236,76 +226,72 @@ function Matcher() {
                 this.fillOneWorkshop(currentWorkshop);
             }
         }
-    };
+    }
 
     /**
      * The final portion of the matching algorithm, gives the students their highest possible preferences who are not already assigned to max workshops
      */
-    this.finalMatches = function() {
-        for (var i = 0; i < this.allStudents.length; i++) {
+    finalMatches() {
+        for (const student of this.allStudents) {
             // for every student i
-            var currentStudent = this.allStudents[i];
-            if (!currentStudent.fullyAssigned()) {
+            if (!student.fullyAssigned()) {
                 // if the student still has empty slots
-                for (var j = 0; j < currentStudent.preferences.length; j++) {
+                for (const preference of student.preferences) {
                     // for each student preference j
-                    var currentPreference = currentStudent.preferences[j];
-                    if (currentPreference === null) {
+                    if (preference === null) {
                         continue;
                     } else if (
-                        !currentStudent.isAssigned(currentPreference) &&
-                        !currentPreference.isFull()
+                        !student.isAssigned(preference) &&
+                        !preference.isFull()
                     ) {
                         //if the student is not already assigned to the workshop AND the workshop has slots left
-                        currentStudent.assignWorkshop(currentPreference);
-                        if (currentStudent.fullyAssigned()) {
+                        student.assignWorkshop(preference);
+                        if (student.fullyAssigned()) {
                             break;
                         }
                     }
                 }
             }
-            if (!currentStudent.fullyAssigned()) {
+            if (!student.fullyAssigned()) {
                 throw new Error(
                     "Could not give " +
-                        currentStudent.fullName() +
+                        student.fullName() +
                         " one of their remaining preferences."
                 );
             }
         }
-    };
+    }
 
     /**
      * Assigns every student to workshops according to their preferences.
      */
-    this.matchGirls = function() {
+    matchGirls() {
         this.sortWorkshops();
         this.fixStudentPreferences();
         this.reachMinimumForAll();
         this.finalMatches();
-    };
+    }
 
     /**
      * Give a score to the final matches based on how many students received their preferences.
      */
-    this.scorer = function() {
+    scorer() {
         this.score = 0;
-        for (var i = 0; i < this.allStudents.length; i++) {
+        for (const student of this.allStudents) {
             // For each student i
-            var thisStudent = this.allStudents[i];
-            this.score += thisStudent.calculateScore();
+            this.score += student.calculateScore();
         }
-    };
+    }
 
     /**
      * Logs the names of all students who received none of their preferred workshops.
      */
-    this.checkMatches = function() {
-        var numberOfFails = 0;
-        for (var i = 0; i < this.allStudents.length; i++) {
+    checkMatches() {
+        let numberOfFails = 0;
+        for (const student of this.allStudents) {
             // For each student i
-            var thisStudent = this.allStudents[i];
-            var worstScore = this.unpreferredScore * this.sessionPerWorkshop;
-            if (thisStudent.compareToScore(worstScore)) {
+            const worstScore = this.unpreferredScore * this.sessionPerWorkshop;
+            if (student.compareToScore(worstScore)) {
                 numberOfFails += 1;
             }
         }
@@ -318,7 +304,5 @@ function Matcher() {
         } else {
             Logger.log("Every student got at least one preference");
         }
-    };
-
-    this.init();
+    }
 }
