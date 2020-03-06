@@ -10,15 +10,15 @@
  * @param {int}    capacity            The capacity of a single session of the workshop.
  * @param {int}    sessionsPerWorkshop The number of sessions in a workshop.
  */
-function Workshop(
-    name,
-    number,
-    capacity,
-    location,
-    sessionsPerWorkshop,
-    minimumFill
-) {
-    this.init = function() {
+class Workshop {
+    constructor(
+        name,
+        number,
+        capacity,
+        location,
+        sessionsPerWorkshop,
+        minimumFill
+    ) {
         this.name = name;
         this.number = number;
         this.location = location;
@@ -28,7 +28,7 @@ function Workshop(
         this.studentsAssigned = [];
 
         this.totalBaseCapacity = 0;
-        for (var i = 0; i < sessionsPerWorkshop; i++) {
+        for (let i = 0; i < sessionsPerWorkshop; i++) {
             this.sessions.push(new Session(capacity, minimumFill));
             this.totalBaseCapacity += capacity;
         }
@@ -38,37 +38,35 @@ function Workshop(
         this.minimumFill = Math.floor(this.totalBaseCapacity * minimumFill);
 
         this.popularityScore = 0;
-    };
+    }
 
     /**
      * Increments the popularity of the workshop based on the students' preferences.
      *
      * @param {int} points The value with which the popularity of this workshop is incremented.
      */
-    this.incrementPopularity = function(points) {
+    incrementPopularity(points) {
         this.popularityScore += points;
-    };
+    }
 
-    this.isFull = function() {
+    isFull() {
         return this.slotsFilled === this.totalBaseCapacity;
-    };
+    }
 
-    this.addStudent = function(student) {
+    addStudent(student) {
         if (this.isFull()) {
             throw new Error("Cannot add students to a full workshop");
         } else {
             this.slotsFilled += 1;
             this.studentsAssigned.push(student);
         }
-    };
+    }
 
-    this.hasReachedQuorum = function() {
+    hasReachedQuorum() {
         return this.slotsFilled >= this.minimumFill;
-    };
+    }
 
-    this.toString = function() {
+    toString() {
         return "(" + this.number.toString() + ") " + this.name;
-    };
-
-    this.init();
+    }
 }

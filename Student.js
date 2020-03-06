@@ -10,24 +10,22 @@
  * @param {array}  preferenceArray     The ordered array of the student's preferred workshops from most to least preferred.
  * @param {int}    sessionsPerWorkshop The number of sessions in a workshop.
  */
-function Student(
-    firstName,
-    lastName,
-    preferenceArray,
-    grade,
-    sessionsPerWorkshop
-) {
-    this.init = function() {
+class Student {
+    constructor(
+        firstName,
+        lastName,
+        preferenceArray,
+        grade,
+        sessionsPerWorkshop
+    ) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.grade = grade;
+        this.sessionsPerWorkshop = sessionsPerWorkshop;
 
         this.preferences = preferenceArray;
 
-        this.assignedWorkshops = [];
-        for (var i = 0; i < sessionsPerWorkshop; i++) {
-            this.assignedWorkshops.push(null);
-        }
+        this.assignedWorkshops = Array(sessionsPerWorkshop).fill(null);
 
         this.studentScore = 0;
 
@@ -39,7 +37,7 @@ function Student(
 
         // Points given for calculating workshop popularity based on what number preference the workshop is listed
         this.popularityPoints = [1, 1, 1, 1, 1, 1];
-    };
+    }
 
     /**
      * Increments the popularities of all the workshops in the student's
@@ -47,11 +45,11 @@ function Student(
      *
      * Ignores null preferences.
      */
-    this.updatePopularities = function() {
-        for (var i = 0; i < this.preferences.length; i++) {
+    updatePopularities() {
+        for (let i = 0; i < this.preferences.length; i++) {
             this.preferences[i].incrementPopularity(this.popularityPoints[i]);
         }
-    };
+    }
 
     /**
      * Assigns this student to a workshop in the student's first available slot.
@@ -60,7 +58,7 @@ function Student(
      *
      * @throws an error if the student already has workshops in each slot.
      */
-    this.assignWorkshop = function(workshop) {
+    assignWorkshop(workshop) {
         if (this.fullyAssigned()) {
             throw new Error(
                 this.fullName() + " cannot be assigned any more workshops"
@@ -71,67 +69,66 @@ function Student(
             throw new Error("duplicate match");
         }
 
-        for (var j = 0; j < this.assignedWorkshops.length; j++) {
+        for (let j = 0; j < this.assignedWorkshops.length; j++) {
             if (this.assignedWorkshops[j] === null) {
                 this.assignedWorkshops[j] = workshop;
                 workshop.addStudent(this);
                 break;
             }
         }
-    };
+    }
 
     /**
      * Calculates and returns the number of workshops to which the student has been assigned.
      */
-    this.numberAssigned = function() {
-        var total = 0;
-        for (var i = 0; i < this.assignedWorkshops.length; i++) {
-            if (this.assignedWorkshops[i] !== null) {
+    numberAssigned() {
+        let total = 0;
+        for (const workshop of this.assignedWorkshops) {
+            if (workshop != null) {
                 total += 1;
             }
         }
         return total;
-    };
+    }
 
     /**
      * Calculates and returns whether or not the student has been assigned a workshop in all 3 sessions.
      */
-    this.fullyAssigned = function() {
-        return this.numberAssigned() === sessionsPerWorkshop;
-    };
+    fullyAssigned() {
+        return this.numberAssigned() === this.sessionsPerWorkshop;
+    }
 
     /**
      * Calculates and returns whether or not the student has a full list of preferences.
      */
-    this.hasAllPreferences = function() {
+    hasAllPreferences() {
         return this.preferences.length >= this.scorerPoints.length;
-    };
+    }
 
     /**
      * Returns true if the student has already been assigned the listed workshop, false if not.
      */
-    this.isAssigned = function(workshop) {
+    isAssigned(workshop) {
         return this.assignedWorkshops.indexOf(workshop) !== -1;
-    };
+    }
 
-    this.givenFirstPreference = function() {
-        var firstPreference = this.preferences[0];
+    givenFirstPreference() {
+        const firstPreference = this.preferences[0];
         return this.assignedWorkshops.indexOf(firstPreference) !== -1;
-    };
+    }
 
     /**
      * Calculates and returns the "score" of this student's assigned workshops based on their preferences.
      */
-    this.calculateScore = function() {
+    calculateScore() {
         this.studentScore = 0;
-        for (var i = 0; i < this.assignedWorkshops.length; i++) {
+        for (const assignedWorkshop of this.assignedWorkshops) {
             // for each assigned workshop i
-            var unpreferred = true;
-            var assignedWorkshop = this.assignedWorkshops[i];
-            for (var j = 0; j < this.preferences.length; j++) {
+            let unpreferred = true;
+            for (let j = 0; j < this.preferences.length; j++) {
                 // for each preferred workshop j
-                var thisPreference = this.preferences[j];
-                if (assignedWorkshop === thisPreference) {
+                const preference = this.preferences[j];
+                if (assignedWorkshop === preference) {
                     this.studentScore += this.scorerPoints[j];
                     unpreferred = false;
                 }
@@ -141,40 +138,37 @@ function Student(
             }
         }
         return this.studentScore;
-    };
+    }
 
     /**
      * Calculates and returns whether or not this student's score is equal to a given value.
      *
      * @param {int} scoreToCheck The value that is compared to this student's score.
      */
-    this.compareToScore = function(scoreToCheck) {
+    compareToScore(scoreToCheck) {
         return scoreToCheck === this.studentScore;
-    };
+    }
 
     /**
      * Returns the full name of the student as a string.
      */
-    this.fullName = function() {
+    fullName() {
         return this.firstName.concat(" ", this.lastName);
-    };
+    }
 
-    this.toString = function() {
+    toString() {
         return this.fullName();
-    };
+    }
 
-    this.checkPreferenceNumbers = function() {
-        var preferencearray = [];
-        for (var i = 0; i < this.assignedWorkshops.length; i++) {
-            var assignedWorkshop = this.assignedWorkshops[i];
-            if (this.preferences.indexOf(assignedWorkshop) === -1) {
-                preferencearray[i] = this.preferences.length;
+    checkPreferenceNumbers() {
+        const preferencearray = [];
+        for (const workshop of this.assignedWorkshops) {
+            if (this.preferences.includes(workshop)) {
+                preferencearray.push(this.preferences.indexOf(workshop));
             } else {
-                preferencearray[i] = this.preferences.indexOf(assignedWorkshop);
+                preferencearray.push(this.preferences.length);
             }
         }
         return preferencearray;
-    };
-
-    this.init();
+    }
 }
