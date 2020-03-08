@@ -103,7 +103,6 @@ class Matcher {
             //for all assignments
             const workshop = this.workshopsByNumber[assignments[i]];
             student.assignWorkshop(workshop);
-            Logger.log(student.assignedWorkshops[i].name);
         }
 
         this.preAssignedStudents.push(student);
