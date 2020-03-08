@@ -104,7 +104,6 @@ class Matcher {
             const workshop = this.workshopsByNumber[assignments[i]];
             student.assignWorkshop(workshop);
         }
-
         this.preAssignedStudents.push(student);
     }
 
