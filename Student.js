@@ -29,6 +29,8 @@ function Student(
             this.assignedWorkshops.push(null);
         }
 
+        this.givenFiller = false;
+
         this.studentScore = 0;
 
         // Points given for workshop assignments from most preferred to least preferred
@@ -71,13 +73,40 @@ function Student(
             throw new Error("duplicate match");
         }
 
-        for (var j = 0; j < this.assignedWorkshops.length; j++) {
-            if (this.assignedWorkshops[j] === null) {
-                this.assignedWorkshops[j] = workshop;
+        var sessionsByFill = workshop.leastFullSessions()
+
+        for (var i = 0; i < sessionsByFill.length; i++) { //maybe this can be refactored into a "find available slot" method?
+            var currentSession = sessionsByFill[i];
+            var timeSlot = currentSession.timeSlot;
+            if (this.hasTimeSlotFree(timeSlot)) {
                 workshop.addStudent(this);
-                break;
+                currentSession.addStudent(this);
+                this.assignedWorkshops[timeSlot] = workshop;
+                return;
             }
         }
+        Logger.log("problem found")
+    };
+
+    this.printAssigned = function() {
+        Logger.log(this.toString());
+        for (var i = 0; i < this.assignedWorkshops.length; i++) {
+            workshop = this.assignedWorkshops[i];
+            if (workshop === null) {
+                Logger.log("    null")
+            }
+            else {
+                Logger.log("    " + workshop.name);
+            }
+        }
+    }
+
+    this.assignFiller = function(workshop) {
+        if (this.givenFiller) {
+            throw new Error(this.toString() + " has already been assigned a filler workshop");
+        }
+        this.givenFiller = true;
+        this.assignWorkshop(workshop);
     };
 
     /**
@@ -114,9 +143,57 @@ function Student(
         return this.assignedWorkshops.indexOf(workshop) !== -1;
     };
 
+    this.topAssignedPreference = function() {
+        for (var i = 0; i < this.preferences.length; i++) {
+            var currentWorkshop = this.preferences[i];
+            if (this.isAssigned(currentWorkshop)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     this.hasTimeSlotFree = function(timeSlot) {
         return this.assignedWorkshops[timeSlot] === null;
     }
+
+    this.canBeAssigned = function(workshop) {
+        if (workshop === null) {
+            return false;
+        }
+        if (workshop.isFull()) {
+            return false;
+        }
+        if (this.isAssigned(workshop)) {
+            return false;
+        }
+        if (this.fullyAssigned(workshop)) {
+            return false;
+        }
+        for (var i = 0; i < this.assignedWorkshops.length; i++) {
+            if (this.hasTimeSlotFree(i) && !workshop.sessions[i].isFull()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    this.compensate = function() {
+        if (this.fullyAssigned()) {
+            return;
+        }
+        for (var i = 0; i < this.preferences.length; i++) {
+            var currentPreference = this.preferences[i];
+            if (currentPreference === null) {
+                continue;
+            }
+            if (this.canBeAssigned(currentPreference)) {
+                this.assignWorkshop(currentPreference);
+                return;
+            }
+        }
+        throw new Error(this.toString() + " could not be compensated for a filler workshop")
+    };
 
     this.givenFirstPreference = function() {
         var firstPreference = this.preferences[0];

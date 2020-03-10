@@ -155,9 +155,9 @@ function Matcher() {
         for (var i = 0; i < this.allStudents.length; i++) {
             var tempStudent = this.allStudents[i];
             if (
-                tempStudent.numberAssigned() < 2 &&
-                !tempStudent.isAssigned(workshop)
-            ) {
+                tempStudent.canBeAssigned(workshop) &&
+                !tempStudent.givenFiller
+                ) {
                 eligibleStudents.push(tempStudent);
             }
         }
@@ -177,23 +177,29 @@ function Matcher() {
          * removed from the list of "eligible" students until the next preference iteration.
          */
         for (var i = 0; i < this.numberOfPreferences; i++) {
-            // for each preference, starting with the highest
             var currentStage = eligibleStudents.slice();
-            while (currentStage.length > 0) {
-                var randomIndex = Math.floor(
-                    Math.random() * currentStage.length
-                );
+            while(currentStage.length > 0) {
+                var randomIndex = Math.floor(Math.random() * currentStage.length);
                 var randomStudent = currentStage[randomIndex];
-                var currentPreference = randomStudent.preferences[i];
-                if (currentPreference === null) {
+
+                if (!randomStudent.canBeAssigned(workshop)) {
                     currentStage.splice(randomIndex, 1);
                     continue;
                 }
-                if (randomStudent.isAssigned(currentPreference)) {
-                    randomStudent.assignWorkshop(workshop);
-                } else if (!currentPreference.isFull()) {
-                    randomStudent.assignWorkshop(workshop);
-                    randomStudent.assignWorkshop(currentPreference);
+
+                var preference = randomStudent.preferences[i];
+
+                if (randomStudent.isAssigned(preference)) {
+                    randomStudent.assignFiller(workshop);
+                }
+                else if (randomStudent.canBeAssigned(preference)) {
+                    randomStudent.assignFiller(workshop);
+                    if (randomStudent.canBeAssigned(preference)) {
+                        randomStudent.assignWorkshop(preference);
+                    }
+                    else {
+                        randomStudent.compensate();
+                    }
                 }
                 currentStage.splice(randomIndex, 1);
                 if (workshop.hasReachedQuorum()) {
@@ -216,15 +222,13 @@ function Matcher() {
                 // for each student j
                 var currentStudent = this.allStudents[j];
                 if (
-                    currentStudent.isAssigned(workshop) ||
-                    currentStudent.fullyAssigned()
+                    currentStudent.preferences[i] === workshop &&
+                    currentStudent.canBeAssigned(workshop)
                 ) {
-                    continue;
-                } else if (currentStudent.preferences[i] === workshop) {
                     currentStudent.assignWorkshop(workshop);
-                    if (workshop.hasReachedQuorum()) {
-                        return;
-                    }
+                }
+                if (workshop.hasReachedQuorum()) {
+                    return;
                 }
             }
         }

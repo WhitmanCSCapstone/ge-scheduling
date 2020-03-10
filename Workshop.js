@@ -25,7 +25,7 @@ function Workshop(
 
         this.sessions = [];
 
-        this.studentsAssigned = [];
+        this.studentsAssigned = []; //maybe rename this something more meaningful, like attendance sheet or something
 
         this.totalBaseCapacity = 0;
         for (var i = 0; i < sessionsPerWorkshop; i++) {
@@ -67,8 +67,25 @@ function Workshop(
         }
     };
 
+    /**
+     * Hard copies an array and shuffles its contents randomly
+     * 
+     * @param {array} array The array that will be hard copied and shuffled
+     */
+    this.shuffle = function(array) {
+        var tempArray = array.slice();
+        var returnArray = [];
+        while (tempArray.length) {
+            var randomIndex = Math.floor(Math.random() * tempArray.length);
+            returnArray.push(tempArray[randomIndex]);
+            tempArray.splice(randomIndex, 1);
+        }
+        return returnArray;
+    }
+
     this.leastFullSessions = function() {
-        var sessionsByFill = this.sessions.slice();
+        var temp = this.sessions.slice();
+        var sessionsByFill = this.shuffle(temp);
         sessionsByFill.sort(this.moreFull);
         return sessionsByFill;
     };
@@ -77,17 +94,8 @@ function Workshop(
         if (this.isFull()) {
             throw new Error("Cannot add students to a full workshop");
         } else {
-            var sessionsByFill = this.leastFullSessions();
-            for (var i = 0; i < sessionsByFill.length; i++) {
-                var timeSlot = sessionsByFill[i].timeSlot;
-                if (student.hasTimeSlotFree(timeSlot) && !sessionsByFill[i].isFull()) {
-                    this.slotsFilled += 1;
-                    this.studentsAssigned.push(student);
-                    sessionsByFill[i].addStudent(student);
-                    return;
-                }
-            }
-            throw new Error("The student does not share any free slots with the workshop")
+            this.slotsFilled += 1;
+            this.studentsAssigned.push(student);
         }
     };
 
