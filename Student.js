@@ -78,14 +78,15 @@ function Student(
         for (var i = 0; i < sessionsByFill.length; i++) { //maybe this can be refactored into a "find available slot" method?
             var currentSession = sessionsByFill[i];
             var timeSlot = currentSession.timeSlot;
-            if (this.hasTimeSlotFree(timeSlot)) {
+            if (this.hasTimeSlotFree(timeSlot) && !currentSession.isFull()) {
                 workshop.addStudent(this);
                 currentSession.addStudent(this);
                 this.assignedWorkshops[timeSlot] = workshop;
                 return;
             }
         }
-        Logger.log("problem found")
+        Logger.log("problem found");
+        throw new Error("what is wrong with you");
     };
 
     this.printAssigned = function() {

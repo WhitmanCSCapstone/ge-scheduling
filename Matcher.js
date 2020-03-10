@@ -272,11 +272,7 @@ function Matcher() {
                     var currentPreference = currentStudent.preferences[j];
                     if (currentPreference === null) {
                         continue;
-                    } else if (
-                        !currentStudent.isAssigned(currentPreference) &&
-                        !currentPreference.isFull()
-                    ) {
-                        //if the student is not already assigned to the workshop AND the workshop has slots left
+                    } else if (currentStudent.canBeAssigned(currentPreference)) {
                         currentStudent.assignWorkshop(currentPreference);
                         if (currentStudent.fullyAssigned()) {
                             break;
@@ -285,11 +281,16 @@ function Matcher() {
                 }
             }
             if (!currentStudent.fullyAssigned()) {
-                throw new Error(
-                    "Could not give " +
-                        currentStudent.toString() +
-                        " one of their remaining preferences."
-                );
+                var shuffledWorkshops = this.shuffle(this.workshopsByPopularity.slice());
+                for (var i = 0; i < shuffledWorkshops.length; i++) {
+                    var randomWorkshop = shuffledWorkshops[i];
+                    if (currentStudent.canBeAssigned(randomWorkshop)) {
+                        currentStudent.assignWorkshop(randomWorkshop);
+                        if (currentStudent.fullyAssigned()) {
+                            break;
+                        }
+                    }
+                }
             }
         }
     };
