@@ -86,17 +86,17 @@ class Matcher {
     /**
      * Adds a preassigned Student object into preAssignedStudents
      *
-     * @param {string} firstNameP      The first name of the student.
-     * @param {string} lastNameP       The last name of the student.
-     * @param {string} gradeP          The last name of the student.
-     * @param {array}  assignements    The student's assignments as an array of integers.
+     * @param {string} firstName       The first name of the student.
+     * @param {string} lastName        The last name of the student.
+     * @param {string} grade           The last name of the student.
+     * @param {array}  assignments     The student's assignments as an array of integers.
      */
-    addPreassStudent(firstNameP, lastNameP, gradeP, assignments) {
+    addPreassignedStudent(firstName, lastName, grade, assignments) {
         const student = new Student(
-            firstNameP,
-            lastNameP,
+            firstName,
+            lastName,
             assignments,
-            gradeP,
+            grade,
             this.sessionsPerWorkshop
         );
         for (let i = 0; i < assignments.length; i++) {

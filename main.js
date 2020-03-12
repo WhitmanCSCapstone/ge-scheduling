@@ -125,21 +125,18 @@ function main() {
     }
 
     for (let l = 0; l < PRE_ASSIGNMENT_DATA.length; l++) {
-        // for all preassignements l
-        const firstNameP = PRE_ASSIGNMENT_DATA[l][COLUMN_FIRST_NAMEP];
-        const lastNameP = PRE_ASSIGNMENT_DATA[l][COLUMN_LAST_NAMEP];
-        const gradeP = PRE_ASSIGNMENT_DATA[l][COLUMN_GRADEP];
+        // For all preassignements l
+        const firstName = PRE_ASSIGNMENT_DATA[l][COLUMN_FIRST_NAMEP];
+        const lastName = PRE_ASSIGNMENT_DATA[l][COLUMN_LAST_NAMEP];
+        const grade = PRE_ASSIGNMENT_DATA[l][COLUMN_GRADEP];
         const assignments = [];
         for (let m = 0; m < COLUMN_ASSIGNMENTS.length; m++) {
             //for each Assignment m
             assignments.push(PRE_ASSIGNMENT_DATA[l][COLUMN_ASSIGNMENTS[m]]);
         }
 
-        matcher.addPreassStudent(firstNameP, lastNameP, gradeP, assignments);
+        matcher.addPreassignedStudent(firstName, lastName, grade, assignments);
     }
-
-    //Logger.log(matcher.allStudents[0].firstName);
-    //Logger.log(matcher.allStudents[0].preferences[0].name);
 
     populateSheet(outputSheet, matcher);
 }
@@ -184,7 +181,7 @@ function populateSheet(outputSheet, matcher) {
         studentLine.push(student.lastName);
         studentLine.push(student.grade);
 
-        //List the student's assigned workshops in the row
+        // List the student's assigned workshops in the row
         for (const workshop of student.assignedWorkshops) {
             if (workshop === null) {
                 studentLine.push("", "", "");
