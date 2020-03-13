@@ -159,16 +159,4 @@ class Student {
     toString() {
         return this.fullName();
     }
-
-    checkPreferenceNumbers() {
-        const preferencearray = [];
-        for (const workshop of this.assignedWorkshops) {
-            if (this.preferences.includes(workshop)) {
-                preferencearray.push(this.preferences.indexOf(workshop));
-            } else {
-                preferencearray.push(this.preferences.length);
-            }
-        }
-        return preferencearray;
-    }
 }
