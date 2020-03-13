@@ -124,7 +124,7 @@ function main() {
         matcher.addNewStudent(firstName, lastName, preferenceNums, grade);
     }
 
-    for (let l = 0; l < PRE_ASSIGNMENT_DATA.length; l++) {
+    for (let l = 1; l < PRE_ASSIGNMENT_DATA.length; l++) {
         // For all preassignements l
         const firstName = PRE_ASSIGNMENT_DATA[l][COLUMN_FIRST_NAMEP];
         const lastName = PRE_ASSIGNMENT_DATA[l][COLUMN_LAST_NAMEP];
