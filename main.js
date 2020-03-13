@@ -11,6 +11,12 @@ const COLUMN_WORKSHOP_CAPACITY = 6;
 const COLUMN_WORKSHOP_BUILDING = 4;
 const COLUMN_WORKSHOP_ROOM = 5;
 
+// Column indicies of the Pre-assignment Sheet
+const COLUMN_FIRST_NAMEP = 0;
+const COLUMN_LAST_NAMEP = 1;
+const COLUMN_GRADEP = 2;
+const COLUMN_ASSIGNMENTS = [3, 4, 5];
+
 // Column indicies for the Data Sheet
 const COLUMN_WORKSHOP_NUMBER = 1;
 const COLUMN_SLOTS_TAKEN = 2;
@@ -39,7 +45,14 @@ const OUTPUT_SHEET_HEADERS = [
 
 const DATA_SHEET_HEADER1 = [
     "Workshop Name",
-    "Workshop #",
+    "Workshop Number",
+    "Workshop Section",
+    "Slots Taken",
+    "Total Slots",
+    "Workshop Section",
+    "Slots Taken",
+    "Total Slots",
+    "Workshop Section",
     "Slots Taken",
     "Total Slots"
 ];
@@ -60,7 +73,7 @@ const OUTPUT_SHEET_INDEX = 1;
 const PREASSIGNMENT_SHEET_INDEX = 2;
 const DATA_SHEET_INDEX = 3;
 
-// Formatting workshop variables
+// Formattin workshop variables
 const WORKSHOP_SPREADSHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
 
 const RESPONSE_SPREADSHEET = SpreadsheetApp.getActiveSpreadsheet();
@@ -82,7 +95,7 @@ const PRE_ASSIGNMENT_SHEET = RESPONSE_SPREADSHEET.getSheets()[
 ];
 const PRE_ASSIGNMENT_DATA = PRE_ASSIGNMENT_SHEET.getDataRange().getValues();
 
-// Assignment Data Sheet
+// Data Sheet
 const DATA_SHEET = RESPONSE_SPREADSHEET.getSheets()[DATA_SHEET_INDEX];
 
 /**
@@ -144,41 +157,43 @@ function main() {
         matcher.addNewStudent(firstName, lastName, preferenceNums, grade);
     }
 
-    Logger.log(matcher.allStudents[0].firstName);
-    Logger.log(matcher.allStudents[0].preferences[0].name);
+    for (let l = 0; l < PRE_ASSIGNMENT_DATA.length; l++) {
+        // for all preassignements l
+        const firstNameP = PRE_ASSIGNMENT_DATA[l][COLUMN_FIRST_NAMEP];
+        const lastNameP = PRE_ASSIGNMENT_DATA[l][COLUMN_LAST_NAMEP];
+        const gradeP = PRE_ASSIGNMENT_DATA[l][COLUMN_GRADEP];
+        const assignments = [];
+        for (let m = 0; m < COLUMN_ASSIGNMENTS.length; m++) {
+            //for each Assignment m
+            assignments.push(PRE_ASSIGNMENT_DATA[l][COLUMN_ASSIGNMENTS[m]]);
+        }
 
-    populateSheet(outputSheet, DATA_SHEET, matcher);
+        matcher.addPreassStudent(firstNameP, lastNameP, gradeP, assignments);
+    }
+
+    //Logger.log(matcher.allStudents[0].firstName);
+    //Logger.log(matcher.allStudents[0].preferences[0].name);
+
+    populateSheet(outputSheet, matcher);
+    populateDataSheet(DATA_SHEET, matcher);
 }
 
 /**
  * Output the results of the matcher to the given sheet.
  */
-function populateSheet(outputSheet, DATA_SHEET, matcher) {
-    // Formats the sheets before writing to them.
+function populateSheet(outputSheet, matcher) {
     outputSheet.clear();
     outputSheet.appendRow(OUTPUT_SHEET_HEADERS);
     outputSheet.setFrozenRows(1);
 
-    DATA_SHEET.clear();
-    DATA_SHEET.appendRow(DATA_SHEET_HEADER1);
-    outputSheet.setFrozenRows(1);
-
     matcher.fixStudentPreferences();
+
     matcher.matchGirls();
 
     // All student lines to output
     const studentLines = [];
 
-    const results = [0, 0, 0, 0, 0, 0, 0];
-
-    for (const student of matcher.allStudents) {
-        const prefnums = student.checkPreferenceNumbers();
-
-        // Record the the number of times a student has # preference in their preference list
-        for (const n of prefnums) {
-            results[n]++;
-        }
-
+    for (const student of matcher.preAssignedStudents) {
         const studentLine = [];
         studentLine.push(student.firstName);
         studentLine.push(student.lastName);
@@ -197,32 +212,53 @@ function populateSheet(outputSheet, DATA_SHEET, matcher) {
         studentLines.push(studentLine);
     }
 
-    const dataInfoFull = [];
-    for (const workshop of matcher.workshopsByPopularity) {
-        const dataInfo = [];
+    for (const student of matcher.allStudents) {
+        const studentLine = [];
+        studentLine.push(student.firstName);
+        studentLine.push(student.lastName);
+        studentLine.push(student.grade);
 
-        dataInfo.push(workshop.name);
-        dataInfo.push(workshop.number);
-        dataInfo.push(workshop.slotsFilled);
-        dataInfo.push(workshop.totalBaseCapacity);
-        dataInfoFull.push(dataInfo);
+        //List the student's assigned workshops in the row
+        for (const workshop of student.assignedWorkshops) {
+            if (workshop === null) {
+                studentLine.push("", "", "");
+            } else {
+                studentLine.push(workshop.number);
+                studentLine.push(workshop.name);
+                studentLine.push(workshop.location);
+            }
+        }
+        studentLines.push(studentLine);
     }
-
-    const dataInfoRows = dataInfoFull.length;
-    const dataInfoColumns = dataInfoFull[0].length;
-    DATA_SHEET.getRange(
-        DATA_SHEET.getLastRow() + 1,
-        1,
-        dataInfoRows,
-        dataInfoColumns
-    ).setValues(dataInfoFull);
-
-    DATA_SHEET.appendRow(DATA_SHEET_HEADER2);
-    DATA_SHEET.appendRow(results);
 
     const rowCount = studentLines.length;
     const columnCount = studentLines[0].length;
     outputSheet
         .getRange(outputSheet.getLastRow() + 1, 1, rowCount, columnCount)
         .setValues(studentLines);
+}
+
+/**
+ * Output the results of the matcher to the given sheet.
+ */
+function populateDataSheet(DATA_SHEET, matcher) {
+    DATA_SHEET.clear();
+    DATA_SHEET.appendRow(DATA_SHEET_HEADER1);
+    Logger.log(matcher.workshopsByPopularity.length);
+    for (let i = 1; i < matcher.workshopsByPopularity.length + 1; i++) {
+        const workShopLine = [];
+        const workshop = matcher.workshopsByNumber[i];
+        workShopLine.push(workshop.name);
+        workShopLine.push(workshop.number);
+        let sectionNumber = 1;
+        for (const session of workshop.sessions) {
+            workShopLine.push(sectionNumber);
+            workShopLine.push(session.slotsFilled);
+            workShopLine.push(session.capacity);
+            sectionNumber++;
+        }
+        DATA_SHEET.appendRow(workShopLine);
+    }
+
+    DATA_SHEET.appendRow(DATA_SHEET_HEADER2);
 }
