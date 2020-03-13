@@ -16,6 +16,9 @@ class Matcher {
         // An array containing Student objects representing every student
         this.allStudents = [];
 
+        // An array containing Student objects that are preassigned
+        this.preAssignedStudents = [];
+
         // An array containing all workshop objects sorted from least to most popular
         this.workshopsByPopularity = [];
 
@@ -78,6 +81,30 @@ class Matcher {
 
         this.allStudents.push(student);
         student.updatePopularities();
+    }
+
+    /**
+     * Adds a preassigned Student object into preAssignedStudents
+     *
+     * @param {string} firstName       The first name of the student.
+     * @param {string} lastName        The last name of the student.
+     * @param {string} grade           The last name of the student.
+     * @param {array}  assignments     The student's assignments as an array of integers.
+     */
+    addPreassignedStudent(firstName, lastName, grade, assignments) {
+        const student = new Student(
+            firstName,
+            lastName,
+            assignments,
+            grade,
+            this.sessionsPerWorkshop
+        );
+        for (let i = 0; i < assignments.length; i++) {
+            //for all assignments
+            const workshop = this.workshopsByNumber[assignments[i]];
+            student.assignWorkshop(workshop);
+        }
+        this.preAssignedStudents.push(student);
     }
 
     /**

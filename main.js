@@ -11,6 +11,12 @@ const COLUMN_WORKSHOP_CAPACITY = 6;
 const COLUMN_WORKSHOP_BUILDING = 4;
 const COLUMN_WORKSHOP_ROOM = 5;
 
+// Column indicies of the Pre-assignment Sheet
+const COLUMN_FIRST_NAMEP = 0;
+const COLUMN_LAST_NAMEP = 1;
+const COLUMN_GRADEP = 2;
+const COLUMN_ASSIGNMENTS = [3, 4, 5];
+
 // Column indices of student preferences in order from most preferred to least
 const PREFERENCE_COLUMNS = [1, 2, 3, 4, 5, 6];
 
@@ -118,8 +124,19 @@ function main() {
         matcher.addNewStudent(firstName, lastName, preferenceNums, grade);
     }
 
-    Logger.log(matcher.allStudents[0].firstName);
-    Logger.log(matcher.allStudents[0].preferences[0].name);
+    for (let l = 1; l < PRE_ASSIGNMENT_DATA.length; l++) {
+        // For all preassignements l
+        const firstName = PRE_ASSIGNMENT_DATA[l][COLUMN_FIRST_NAMEP];
+        const lastName = PRE_ASSIGNMENT_DATA[l][COLUMN_LAST_NAMEP];
+        const grade = PRE_ASSIGNMENT_DATA[l][COLUMN_GRADEP];
+        const assignments = [];
+        for (let m = 0; m < COLUMN_ASSIGNMENTS.length; m++) {
+            //for each Assignment m
+            assignments.push(PRE_ASSIGNMENT_DATA[l][COLUMN_ASSIGNMENTS[m]]);
+        }
+
+        matcher.addPreassignedStudent(firstName, lastName, grade, assignments);
+    }
 
     populateSheet(outputSheet, matcher);
 }
@@ -138,6 +155,25 @@ function populateSheet(outputSheet, matcher) {
 
     // All student lines to output
     const studentLines = [];
+
+    for (const student of matcher.preAssignedStudents) {
+        const studentLine = [];
+        studentLine.push(student.firstName);
+        studentLine.push(student.lastName);
+        studentLine.push(student.grade);
+
+        // List the student's assigned workshops in the row
+        for (const workshop of student.assignedWorkshops) {
+            if (workshop === null) {
+                studentLine.push("", "", "");
+            } else {
+                studentLine.push(workshop.number);
+                studentLine.push(workshop.name);
+                studentLine.push(workshop.location);
+            }
+        }
+        studentLines.push(studentLine);
+    }
 
     for (const student of matcher.allStudents) {
         const studentLine = [];
