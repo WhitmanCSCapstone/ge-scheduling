@@ -10,15 +10,15 @@
  * @param {int}    capacity            The capacity of a single session of the workshop.
  * @param {int}    sessionsPerWorkshop The number of sessions in a workshop.
  */
-function Workshop(
-    name,
-    number,
-    capacity,
-    location,
-    sessionsPerWorkshop,
-    minimumFill
-) {
-    this.init = function() {
+class Workshop {
+    constructor(
+        name,
+        number,
+        capacity,
+        location,
+        sessionsPerWorkshop,
+        minimumFill
+    ) {
         this.name = name;
         this.number = number;
         this.location = location;
@@ -38,26 +38,26 @@ function Workshop(
         this.minimumFill = Math.floor(this.totalBaseCapacity * minimumFill);
 
         this.popularityScore = 0;
-    };
+    }
 
     /**
      * Increments the popularity of the workshop based on the students' preferences.
      *
      * @param {int} points The value with which the popularity of this workshop is incremented.
      */
-    this.incrementPopularity = function(points) {
+    incrementPopularity(points) {
         this.popularityScore += points;
-    };
+    }
 
-    this.isFull = function() {
+    isFull() {
         return this.slotsFilled === this.totalBaseCapacity;
-    };
+    }
 
-    this.hasSessionOpen = function(timeSlot) {
+    hasSessionOpen(timeSlot) {
         return !this.sessions[timeSlot].isFull();
-    };
+    }
 
-    this.moreFull = function(sessionA, sessionB) {
+    moreFull(sessionA, sessionB) {
         if (sessionA.slotsFilled < sessionB.slotsFilled) {
             return -1;
         } else if (sessionA.slotsFilled > sessionB.slotsFilled) {
@@ -65,14 +65,14 @@ function Workshop(
         } else {
             return 0;
         }
-    };
+    }
 
     /**
      * Hard copies an array and shuffles its contents randomly
-     * 
+     *
      * @param {array} array The array that will be hard copied and shuffled
      */
-    this.shuffle = function(array) {
+    shuffle(array) {
         var tempArray = array.slice();
         var returnArray = [];
         while (tempArray.length) {
@@ -83,25 +83,27 @@ function Workshop(
         return returnArray;
     }
 
-    this.leastFullSessions = function() {
+    leastFullSessions() {
         var temp = this.sessions.slice();
         var sessionsByFill = this.shuffle(temp);
         sessionsByFill.sort(this.moreFull);
         return sessionsByFill;
-    };
+    }
 
-    this.addStudent = function(student) {
+    addStudent(student) {
         if (this.isFull()) {
             throw new Error("Cannot add students to a full workshop");
         } else {
             this.slotsFilled += 1;
             this.studentsAssigned.push(student);
         }
-    };
+    }
 
-    this.hasReachedQuorum = function() {
+    hasReachedQuorum() {
         return this.slotsFilled >= this.minimumFill;
-    };
+    }
 
-    this.init();
+    toString() {
+        return "(" + this.number.toString() + ") " + this.name;
+    }
 }

@@ -10,24 +10,22 @@
  * @param {array}  preferenceArray     The ordered array of the student's preferred workshops from most to least preferred.
  * @param {int}    sessionsPerWorkshop The number of sessions in a workshop.
  */
-function Student(
-    firstName,
-    lastName,
-    preferenceArray,
-    grade,
-    sessionsPerWorkshop
-) {
-    this.init = function() {
+class Student {
+    constructor(
+        firstName,
+        lastName,
+        preferenceArray,
+        grade,
+        sessionsPerWorkshop
+    ) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.grade = grade;
+        this.sessionsPerWorkshop = sessionsPerWorkshop;
 
         this.preferences = preferenceArray;
 
-        this.assignedWorkshops = [];
-        for (var i = 0; i < sessionsPerWorkshop; i++) {
-            this.assignedWorkshops.push(null);
-        }
+        this.assignedWorkshops = Array(sessionsPerWorkshop).fill(null);
 
         this.givenFiller = false;
 
@@ -41,7 +39,7 @@ function Student(
 
         // Points given for calculating workshop popularity based on what number preference the workshop is listed
         this.popularityPoints = [1, 1, 1, 1, 1, 1];
-    };
+    }
 
     /**
      * Increments the popularities of all the workshops in the student's
@@ -49,11 +47,11 @@ function Student(
      *
      * Ignores null preferences.
      */
-    this.updatePopularities = function() {
-        for (var i = 0; i < this.preferences.length; i++) {
+    updatePopularities() {
+        for (let i = 0; i < this.preferences.length; i++) {
             this.preferences[i].incrementPopularity(this.popularityPoints[i]);
         }
-    };
+    }
 
     /**
      * Assigns this student to a workshop in the student's first available slot.
@@ -62,10 +60,10 @@ function Student(
      *
      * @throws an error if the student already has workshops in each slot.
      */
-    this.assignWorkshop = function(workshop) {
+    assignWorkshop(workshop) {
         if (this.fullyAssigned()) {
             throw new Error(
-                this.toString() + " cannot be assigned any more workshops"
+                this.fullName() + " cannot be assigned any more workshops"
             );
         }
 
@@ -73,9 +71,10 @@ function Student(
             throw new Error("duplicate match");
         }
 
-        var sessionsByFill = workshop.leastFullSessions()
+        var sessionsByFill = workshop.leastFullSessions();
 
-        for (var i = 0; i < sessionsByFill.length; i++) { //maybe this can be refactored into a "find available slot" method?
+        for (var i = 0; i < sessionsByFill.length; i++) {
+            //maybe this can be refactored into a "find available slot" method?
             var currentSession = sessionsByFill[i];
             var timeSlot = currentSession.timeSlot;
             if (this.hasTimeSlotFree(timeSlot) && !currentSession.isFull()) {
@@ -87,64 +86,65 @@ function Student(
         }
         Logger.log("problem found");
         throw new Error("what is wrong with you");
-    };
+    }
 
-    this.printAssigned = function() {
+    printAssigned() {
         Logger.log(this.toString());
         for (var i = 0; i < this.assignedWorkshops.length; i++) {
             workshop = this.assignedWorkshops[i];
             if (workshop === null) {
-                Logger.log("    null")
-            }
-            else {
+                Logger.log("    null");
+            } else {
                 Logger.log("    " + workshop.name);
             }
         }
     }
 
-    this.assignFiller = function(workshop) {
+    assignFiller(workshop) {
         if (this.givenFiller) {
-            throw new Error(this.toString() + " has already been assigned a filler workshop");
+            throw new Error(
+                this.toString() + " has already been assigned a filler workshop"
+            );
         }
         this.givenFiller = true;
         this.assignWorkshop(workshop);
-    };
+    }
 
     /**
      * Calculates and returns the number of workshops to which the student has been assigned.
      */
-    this.numberAssigned = function() {
-        var total = 0;
-        for (var i = 0; i < this.assignedWorkshops.length; i++) {
-            if (this.assignedWorkshops[i] !== null) {
+    numberAssigned() {
+        let total = 0;
+        for (const workshop of this.assignedWorkshops) {
+            if (workshop != null) {
                 total += 1;
             }
         }
         return total;
-    };
+    }
 
     /**
      * Calculates and returns whether or not the student has been assigned a workshop in all 3 sessions.
      */
-    this.fullyAssigned = function() {
-        return this.numberAssigned() === sessionsPerWorkshop;
-    };
+    fullyAssigned() {
+        return this.numberAssigned() === this.sessionsPerWorkshop;
+    }
 
     /**
      * Calculates and returns whether or not the student has a full list of preferences.
      */
-    this.hasAllPreferences = function() {
+    hasAllPreferences() {
         return this.preferences.length >= this.scorerPoints.length;
-    };
+    }
 
     /**
      * Returns true if the student has already been assigned the listed workshop, false if not.
      */
-    this.isAssigned = function(workshop) {
+    isAssigned(workshop) {
         return this.assignedWorkshops.indexOf(workshop) !== -1;
-    };
+    }
 
-    this.topAssignedPreference = function() {
+    topAssignedPreference() {
         for (var i = 0; i < this.preferences.length; i++) {
             var currentWorkshop = this.preferences[i];
             if (this.isAssigned(currentWorkshop)) {
@@ -154,11 +154,11 @@ function Student(
         return -1;
     }
 
-    this.hasTimeSlotFree = function(timeSlot) {
+    hasTimeSlotFree(timeSlot) {
         return this.assignedWorkshops[timeSlot] === null;
     }
 
-    this.canBeAssigned = function(workshop) {
+    canBeAssigned(workshop) {
         if (workshop === null) {
             return false;
         }
@@ -179,7 +179,7 @@ function Student(
         return false;
     }
 
-    this.compensate = function() {
+    compensate() {
         if (this.fullyAssigned()) {
             return;
         }
@@ -193,27 +193,28 @@ function Student(
                 return;
             }
         }
-        throw new Error(this.toString() + " could not be compensated for a filler workshop")
-    };
+        throw new Error(
+            this.toString() + " could not be compensated for a filler workshop"
+        );
+    }
 
-    this.givenFirstPreference = function() {
-        var firstPreference = this.preferences[0];
+    givenFirstPreference() {
+        const firstPreference = this.preferences[0];
         return this.assignedWorkshops.indexOf(firstPreference) !== -1;
-    };
+    }
 
     /**
      * Calculates and returns the "score" of this student's assigned workshops based on their preferences.
      */
-    this.calculateScore = function() {
+    calculateScore() {
         this.studentScore = 0;
-        for (var i = 0; i < this.assignedWorkshops.length; i++) {
+        for (const assignedWorkshop of this.assignedWorkshops) {
             // for each assigned workshop i
-            var unpreferred = true;
-            var assignedWorkshop = this.assignedWorkshops[i];
-            for (var j = 0; j < this.preferences.length; j++) {
+            let unpreferred = true;
+            for (let j = 0; j < this.preferences.length; j++) {
                 // for each preferred workshop j
-                var thisPreference = this.preferences[j];
-                if (assignedWorkshop === thisPreference) {
+                const preference = this.preferences[j];
+                if (assignedWorkshop === preference) {
                     this.studentScore += this.scorerPoints[j];
                     unpreferred = false;
                 }
@@ -223,25 +224,25 @@ function Student(
             }
         }
         return this.studentScore;
-    };
+    }
 
     /**
      * Calculates and returns whether or not this student's score is equal to a given value.
      *
      * @param {int} scoreToCheck The value that is compared to this student's score.
      */
-    this.compareToScore = function(scoreToCheck) {
+    compareToScore(scoreToCheck) {
         return scoreToCheck === this.studentScore;
-    };
+    }
 
     /**
      * Returns the full name of the student as a string.
      */
-    this.toString = function() {
+    fullName() {
         return this.firstName.concat(" ", this.lastName);
-    };
+    }
 
-    this.checkPreferenceNumbers = function() {
+    checkPreferenceNumbers() {
         var preferencearray = [];
         for (var i = 0; i < this.assignedWorkshops.length; i++) {
             var assignedWorkshop = this.assignedWorkshops[i];
@@ -252,7 +253,9 @@ function Student(
             }
         }
         return preferencearray;
-    };
+    }
 
-    this.init();
+    toString() {
+        return this.fullName();
+    }
 }

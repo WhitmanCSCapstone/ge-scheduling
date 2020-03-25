@@ -1,5 +1,5 @@
 /*globals COLUMN_WORKSHOP_NAME, COLUMN_WORKSHOP_CAPACITY, COLUMN_FIRST_NAME,
- * COLUMN_LAST_NAME, COLUMN_GRADE, PREFERENCE_COLUMNS, Logger */
+COLUMN_LAST_NAME, COLUMN_GRADE, PREFERENCE_COLUMNS, Logger */
 // Functions that check the inputs for valid types. Can be extended to check
 // for other params.
 
@@ -57,8 +57,8 @@ function preferenceInputChecker(workshopNum, row, preferenceNumber) {
     row++;
 
     if (typeof workshopNum !== "number" || isNaN(workshopNum)) {
-        var columnLetterCodepoint = 65 + PREFERENCE_COLUMNS[preferenceNumber];
-        var columnLetter = String.fromCharCode(columnLetterCodepoint);
+        const columnLetterCodepoint = 65 + PREFERENCE_COLUMNS[preferenceNumber];
+        const columnLetter = String.fromCharCode(columnLetterCodepoint);
         throw new Error(
             "Invalid workshop number at row " + row + " column " + columnLetter
         );
