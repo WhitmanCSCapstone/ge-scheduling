@@ -199,4 +199,13 @@ function populateSheet(outputSheet, matcher) {
     outputSheet
         .getRange(outputSheet.getLastRow() + 1, 1, rowCount, columnCount)
         .setValues(studentLines);
+
+    let colors = ["PaleGreen", "PaleTurquoise", "Pink", "PeachPuff", "White"];
+    for (let i = 0; i < 5; i++) {
+        let colorColumn = (i*3) + 1;
+        let color = colors[i];
+        outputSheet
+        .getRange(1, colorColumn, outputSheet.getLastRow(), colorColumn + 2)
+        .setBackground(color);
+    }
 }
