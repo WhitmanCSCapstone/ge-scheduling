@@ -139,6 +139,9 @@ function main() {
     }
 
     populateSheet(outputSheet, matcher);
+
+    // DEBUG
+    checkCapacity(matcher);
 }
 
 /**
@@ -199,4 +202,69 @@ function populateSheet(outputSheet, matcher) {
     outputSheet
         .getRange(outputSheet.getLastRow() + 1, 1, rowCount, columnCount)
         .setValues(studentLines);
+}
+
+function checkCapacity(matcher) {
+    for (const workshop of Object.values(matcher.workshopsByNumber)) {
+        console.log("Workshop: " + workshop.toString());
+        for (const [i, session] of workshop.sessions.entries()) {
+            //console.log("Session " + i.toString());
+            //console.log("with " + session.studentsAssigned.length.toString() + " students assigned");
+            //console.log(session.slotsFilled + " slots filled");
+            //console.log("and capacity of " + session.capacity.toString());
+
+            if (
+                session.slotsFilled != session.studentsAssigned.length ||
+                session.capacity * 3 != workshop.totalBaseCapacity
+            ) {
+                console.log(
+                    "Session " +
+                        i.toString() +
+                        " of workshop " +
+                        workshop.toString +
+                        " has a discrepancy!"
+                );
+            }
+            if (session.slotsFilled > session.capacity) {
+                console.log(
+                    "Session " +
+                        i.toString() +
+                        " of workshop " +
+                        workshop.toString +
+                        " is overfull!"
+                );
+            }
+        }
+    }
+
+    for (let i = 0; i < 3; i++) {
+        console.log(
+            "Workshop 'filledness' according to Students for session " +
+                i.toString()
+        );
+
+        // Workshop:studentCount pairs
+        const workshopFilledness = {};
+        for (const workshop of Object.values(matcher.workshopsByNumber)) {
+            workshopFilledness[workshop.name] = 0;
+
+            // Count up all the student assignments
+            for (const student of matcher.allStudents) {
+                if (student.assignedWorkshops[i] === workshop) {
+                    workshopFilledness[workshop.name] += 1;
+                }
+            }
+
+            const filledness = workshopFilledness[workshop.name];
+            if (filledness != workshop.sessions[i].studentsAssigned.length) {
+                console.log(
+                    workshop.name +
+                        " " +
+                        filledness.toString() +
+                        " " +
+                        workshop.sessions[i].studentsAssigned.length
+                );
+            }
+        }
+    }
 }
