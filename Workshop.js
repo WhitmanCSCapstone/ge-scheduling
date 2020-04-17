@@ -28,7 +28,7 @@ class Workshop {
         this.studentsAssigned = []; //maybe rename this something more meaningful, like attendance sheet or something
 
         this.totalBaseCapacity = 0;
-        for (var i = 0; i < sessionsPerWorkshop; i++) {
+        for (let i = 0; i < sessionsPerWorkshop; i++) {
             this.sessions.push(new Session(capacity, minimumFill, i));
             this.totalBaseCapacity += capacity;
         }
@@ -73,10 +73,10 @@ class Workshop {
      * @param {array} array The array that will be hard copied and shuffled
      */
     shuffle(array) {
-        var tempArray = array.slice();
-        var returnArray = [];
+        const tempArray = array.slice();
+        const returnArray = [];
         while (tempArray.length) {
-            var randomIndex = Math.floor(Math.random() * tempArray.length);
+            const randomIndex = Math.floor(Math.random() * tempArray.length);
             returnArray.push(tempArray[randomIndex]);
             tempArray.splice(randomIndex, 1);
         }
@@ -84,8 +84,8 @@ class Workshop {
     }
 
     leastFullSessions() {
-        var temp = this.sessions.slice();
-        var sessionsByFill = this.shuffle(temp);
+        const temp = this.sessions.slice();
+        const sessionsByFill = this.shuffle(temp);
         sessionsByFill.sort(this.moreFull);
         return sessionsByFill;
     }

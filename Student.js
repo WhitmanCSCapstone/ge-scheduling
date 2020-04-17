@@ -71,12 +71,12 @@ class Student {
             throw new Error("duplicate match");
         }
 
-        var sessionsByFill = workshop.leastFullSessions();
+        const sessionsByFill = workshop.leastFullSessions();
 
-        for (var i = 0; i < sessionsByFill.length; i++) {
+        for (let i = 0; i < sessionsByFill.length; i++) {
             //maybe this can be refactored into a "find available slot" method?
-            var currentSession = sessionsByFill[i];
-            var timeSlot = currentSession.timeSlot;
+            const currentSession = sessionsByFill[i];
+            const timeSlot = currentSession.timeSlot;
             if (this.hasTimeSlotFree(timeSlot) && !currentSession.isFull()) {
                 workshop.addStudent(this);
                 currentSession.addStudent(this);
@@ -90,8 +90,8 @@ class Student {
 
     printAssigned() {
         Logger.log(this.toString());
-        for (var i = 0; i < this.assignedWorkshops.length; i++) {
-            workshop = this.assignedWorkshops[i];
+        for (let i = 0; i < this.assignedWorkshops.length; i++) {
+            const workshop = this.assignedWorkshops[i];
             if (workshop === null) {
                 Logger.log("    null");
             } else {
@@ -145,8 +145,8 @@ class Student {
     }
 
     topAssignedPreference() {
-        for (var i = 0; i < this.preferences.length; i++) {
-            var currentWorkshop = this.preferences[i];
+        for (let i = 0; i < this.preferences.length; i++) {
+            const currentWorkshop = this.preferences[i];
             if (this.isAssigned(currentWorkshop)) {
                 return i;
             }
@@ -171,7 +171,7 @@ class Student {
         if (this.fullyAssigned(workshop)) {
             return false;
         }
-        for (var i = 0; i < this.assignedWorkshops.length; i++) {
+        for (let i = 0; i < this.assignedWorkshops.length; i++) {
             if (this.hasTimeSlotFree(i) && !workshop.sessions[i].isFull()) {
                 return true;
             }
@@ -183,8 +183,8 @@ class Student {
         if (this.fullyAssigned()) {
             return;
         }
-        for (var i = 0; i < this.preferences.length; i++) {
-            var currentPreference = this.preferences[i];
+        for (let i = 0; i < this.preferences.length; i++) {
+            const currentPreference = this.preferences[i];
             if (currentPreference === null) {
                 continue;
             }
@@ -243,9 +243,9 @@ class Student {
     }
 
     checkPreferenceNumbers() {
-        var preferencearray = [];
-        for (var i = 0; i < this.assignedWorkshops.length; i++) {
-            var assignedWorkshop = this.assignedWorkshops[i];
+        const preferencearray = [];
+        for (let i = 0; i < this.assignedWorkshops.length; i++) {
+            const assignedWorkshop = this.assignedWorkshops[i];
             if (this.preferences.indexOf(assignedWorkshop) === -1) {
                 preferencearray[i] = this.preferences.length;
             } else {

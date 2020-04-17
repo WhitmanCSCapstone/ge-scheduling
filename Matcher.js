@@ -160,10 +160,10 @@ class Matcher {
      * @param {array} array The array that will be hard copied and shuffled
      */
     shuffle(array) {
-        var tempArray = array.slice();
-        var returnArray = [];
+        const tempArray = array.slice();
+        const returnArray = [];
         while (tempArray.length) {
-            var randomIndex = Math.floor(Math.random() * tempArray.length);
+            const randomIndex = Math.floor(Math.random() * tempArray.length);
             returnArray.push(tempArray[randomIndex]);
             tempArray.splice(randomIndex, 1);
         }
@@ -292,11 +292,11 @@ class Matcher {
                 }
             }
             if (!student.fullyAssigned()) {
-                var shuffledWorkshops = this.shuffle(
+                const shuffledWorkshops = this.shuffle(
                     this.workshopsByPopularity.slice()
                 );
-                for (var i = 0; i < shuffledWorkshops.length; i++) {
-                    var randomWorkshop = shuffledWorkshops[i];
+                for (let i = 0; i < shuffledWorkshops.length; i++) {
+                    const randomWorkshop = shuffledWorkshops[i];
                     if (student.canBeAssigned(randomWorkshop)) {
                         student.assignWorkshop(randomWorkshop);
                         if (student.fullyAssigned()) {
@@ -322,9 +322,9 @@ class Matcher {
      * "schedules" the students randomly into workshop sessions
      */
     schedule() {
-        for (var i = 0; i < this.allStudents.length; i++) {
-            var currentStudent = this.allStudents[i];
-            var assignments = currentStudent.assignedWorkshops;
+        for (let i = 0; i < this.allStudents.length; i++) {
+            const currentStudent = this.allStudents[i];
+            const assignments = currentStudent.assignedWorkshops;
             currentStudent.assignedWorkshops = this.shuffle(assignments);
         }
     }
