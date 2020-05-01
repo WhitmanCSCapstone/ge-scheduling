@@ -154,7 +154,6 @@ function populateSheet(outputSheet, matcher) {
 
     matcher.fixStudentPreferences();
     matcher.matchGirls();
-    matcher.schedule();
 
     // All student lines to output
     const studentLines = [];

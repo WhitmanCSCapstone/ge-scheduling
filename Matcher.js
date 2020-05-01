@@ -319,17 +319,6 @@ class Matcher {
     }
 
     /**
-     * "schedules" the students randomly into workshop sessions
-     */
-    schedule() {
-        for (let i = 0; i < this.allStudents.length; i++) {
-            const currentStudent = this.allStudents[i];
-            const assignments = currentStudent.assignedWorkshops;
-            currentStudent.assignedWorkshops = this.shuffle(assignments);
-        }
-    }
-
-    /**
      * Give a score to the final matches based on how many students received their preferences.
      */
     scorer() {
