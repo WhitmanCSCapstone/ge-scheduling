@@ -139,9 +139,6 @@ function main() {
     }
 
     populateSheet(outputSheet, matcher);
-
-    // DEBUG
-    checkCapacity(matcher);
 }
 
 /**
@@ -201,87 +198,4 @@ function populateSheet(outputSheet, matcher) {
     outputSheet
         .getRange(outputSheet.getLastRow() + 1, 1, rowCount, columnCount)
         .setValues(studentLines);
-}
-
-function checkCapacity(matcher) {
-    for (const workshop of Object.values(matcher.workshopsByNumber)) {
-        //console.log("Workshop: " + workshop.toString());
-        for (const [i, session] of workshop.sessions.entries()) {
-            //console.log("Session " + i.toString());
-            //console.log("with " + session.studentsAssigned.length.toString() + " students assigned");
-            //console.log(session.slotsFilled + " slots filled");
-            //console.log("and capacity of " + session.capacity.toString());
-
-            if (
-                session.slotsFilled !== session.studentsAssigned.length ||
-                session.capacity * 3 !== workshop.totalBaseCapacity
-            ) {
-                console.log(
-                    "Session " +
-                        i.toString() +
-                        " of workshop " +
-                        workshop.toString +
-                        " has a discrepancy!"
-                );
-            }
-            if (session.slotsFilled > session.capacity) {
-                console.log(
-                    "Session " +
-                        i.toString() +
-                        " of workshop " +
-                        workshop.toString +
-                        " is overfull!"
-                );
-            }
-        }
-    }
-
-    for (let i = 0; i < 3; i++) {
-        // console.log(
-        //     "Workshop 'filledness' according to Students for session " +
-        //         i.toString()
-        // );
-
-        // Workshop:studentCount pairs
-        const workshopFilledness = {};
-        for (const workshop of Object.values(matcher.workshopsByNumber)) {
-            workshopFilledness[workshop.name] = 0;
-
-            // Count up all the student assignments
-            for (const student of matcher.allStudents) {
-                if (student.assignedWorkshops[i] === workshop) {
-                    workshopFilledness[workshop.name] += 1;
-                }
-            }
-
-            const filledness = workshopFilledness[workshop.name];
-            if (filledness !== workshop.sessions[i].studentsAssigned.length) {
-                /* FIXME
-                 * This is the big scheduling issue. The Workshops' list of
-                 * assigned Students and their redundant count of assigned
-                 * Students are both equal, but they differ from the number of
-                 * Students who list the Workshop in one of their time slots.
-                 *
-                 * Note that the discrepancies go both ways; Some workshops
-                 * have more students than they recognize, while others have
-                 * fewer.
-                 *
-                 * Check logs to see the list of problematic workshop sessions.
-                 *
-                 * Once fixed, we may find that our performance estimates were
-                 * inflated. The algorithm may perform worse than we expected.
-                 */
-                console.log(
-                    workshop.name +
-                        " has " +
-                        filledness.toString() +
-                        " students claiming to be in session " +
-                        i.toString() +
-                        " but the workshop knows of exactly " +
-                        workshop.sessions[i].studentsAssigned.length +
-                        " students assigned to it."
-                );
-            }
-        }
-    }
 }
