@@ -177,6 +177,14 @@ function main() {
     populateMetaSheet(sheets.meta, matcher);
 }
 
+function outputRows(sheet, lines) {
+    const rowCount = lines.length;
+    const columnCount = lines[0].length;
+    sheet
+        .getRange(sheet.getLastRow() + 1, 1, rowCount, columnCount)
+        .setValues(lines);
+}
+
 /**
  * Output the results of the matcher to the given sheet.
  */
@@ -229,34 +237,33 @@ function populateSheet(outputSheet, matcher) {
         studentLines.push(studentLine);
     }
 
-    const rowCount = studentLines.length;
-    const columnCount = studentLines[0].length;
-    outputSheet
-        .getRange(outputSheet.getLastRow() + 1, 1, rowCount, columnCount)
-        .setValues(studentLines);
+    outputRows(outputSheet, studentLines);
 }
 
 /**
- * Output the results of the matcher to the given sheet.
+ * Output information about the matching results to the given sheet.
  */
 function populateMetaSheet(metaSheet, matcher) {
     metaSheet.clear();
+    const metaLines = [];
     metaSheet.appendRow(META_SHEET_HEADER1);
     Logger.log(matcher.workshopsByPopularity.length);
     for (let i = 1; i < matcher.workshopsByPopularity.length + 1; i++) {
-        const workShopLine = [];
+        const workshopLine = [];
         const workshop = matcher.workshopsByNumber[i];
-        workShopLine.push(workshop.name);
-        workShopLine.push(workshop.number);
+        workshopLine.push(workshop.name);
+        workshopLine.push(workshop.number);
         let sectionNumber = 1;
         for (const session of workshop.sessions) {
-            workShopLine.push(sectionNumber);
-            workShopLine.push(session.slotsFilled);
-            workShopLine.push(session.capacity);
+            workshopLine.push(sectionNumber);
+            workshopLine.push(session.slotsFilled);
+            workshopLine.push(session.capacity);
             sectionNumber++;
         }
-        metaSheet.appendRow(workShopLine);
+        metaLines.push(workshopLine);
     }
+
+    outputRows(metaSheet, metaLines);
 
     // Header 2 is not yet used
     //metaSheet.appendRow(META_SHEET_HEADER2);
