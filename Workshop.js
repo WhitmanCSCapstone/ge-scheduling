@@ -25,11 +25,11 @@ class Workshop {
 
         this.sessions = [];
 
-        this.studentsAssigned = [];
+        this.studentsAssigned = []; //maybe rename this something more meaningful, like attendance sheet or something
 
         this.totalBaseCapacity = 0;
         for (let i = 0; i < sessionsPerWorkshop; i++) {
-            this.sessions.push(new Session(capacity, minimumFill));
+            this.sessions.push(new Session(capacity, minimumFill, i));
             this.totalBaseCapacity += capacity;
         }
 
@@ -51,6 +51,43 @@ class Workshop {
 
     isFull() {
         return this.slotsFilled === this.totalBaseCapacity;
+    }
+
+    hasSessionOpen(timeSlot) {
+        return !this.sessions[timeSlot].isFull();
+    }
+
+    moreFull(sessionA, sessionB) {
+        if (sessionA.slotsFilled < sessionB.slotsFilled) {
+            return -1;
+        } else if (sessionA.slotsFilled > sessionB.slotsFilled) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * Hard copies an array and shuffles its contents randomly
+     *
+     * @param {array} array The array that will be hard copied and shuffled
+     */
+    shuffle(array) {
+        const tempArray = array.slice();
+        const returnArray = [];
+        while (tempArray.length) {
+            const randomIndex = Math.floor(Math.random() * tempArray.length);
+            returnArray.push(tempArray[randomIndex]);
+            tempArray.splice(randomIndex, 1);
+        }
+        return returnArray;
+    }
+
+    leastFullSessions() {
+        const temp = this.sessions.slice();
+        const sessionsByFill = this.shuffle(temp);
+        sessionsByFill.sort(this.moreFull);
+        return sessionsByFill;
     }
 
     addStudent(student) {

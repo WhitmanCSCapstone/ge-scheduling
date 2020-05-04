@@ -27,6 +27,8 @@ class Student {
 
         this.assignedWorkshops = Array(sessionsPerWorkshop).fill(null);
 
+        this.givenFiller = false;
+
         this.studentScore = 0;
 
         // Points given for workshop assignments from most preferred to least preferred
@@ -69,13 +71,43 @@ class Student {
             throw new Error("duplicate match");
         }
 
-        for (let j = 0; j < this.assignedWorkshops.length; j++) {
-            if (this.assignedWorkshops[j] === null) {
-                this.assignedWorkshops[j] = workshop;
+        const sessionsByFill = workshop.leastFullSessions();
+
+        for (let i = 0; i < sessionsByFill.length; i++) {
+            //maybe this can be refactored into a "find available slot" method?
+            const currentSession = sessionsByFill[i];
+            const timeSlot = currentSession.timeSlot;
+            if (this.hasTimeSlotFree(timeSlot) && !currentSession.isFull()) {
                 workshop.addStudent(this);
-                break;
+                currentSession.addStudent(this);
+                this.assignedWorkshops[timeSlot] = workshop;
+                return;
             }
         }
+        Logger.log("problem found");
+        throw new Error("what is wrong with you");
+    }
+
+    printAssigned() {
+        Logger.log(this.toString());
+        for (let i = 0; i < this.assignedWorkshops.length; i++) {
+            const workshop = this.assignedWorkshops[i];
+            if (workshop === null) {
+                Logger.log("    null");
+            } else {
+                Logger.log("    " + workshop.name);
+            }
+        }
+    }
+
+    assignFiller(workshop) {
+        if (this.givenFiller) {
+            throw new Error(
+                this.toString() + " has already been assigned a filler workshop"
+            );
+        }
+        this.givenFiller = true;
+        this.assignWorkshop(workshop);
     }
 
     /**
@@ -110,6 +142,60 @@ class Student {
      */
     isAssigned(workshop) {
         return this.assignedWorkshops.indexOf(workshop) !== -1;
+    }
+
+    topAssignedPreference() {
+        for (let i = 0; i < this.preferences.length; i++) {
+            const currentWorkshop = this.preferences[i];
+            if (this.isAssigned(currentWorkshop)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    hasTimeSlotFree(timeSlot) {
+        return this.assignedWorkshops[timeSlot] === null;
+    }
+
+    canBeAssigned(workshop) {
+        if (workshop === null) {
+            return false;
+        }
+        if (workshop.isFull()) {
+            return false;
+        }
+        if (this.isAssigned(workshop)) {
+            return false;
+        }
+        if (this.fullyAssigned(workshop)) {
+            return false;
+        }
+        for (let i = 0; i < this.assignedWorkshops.length; i++) {
+            if (this.hasTimeSlotFree(i) && !workshop.sessions[i].isFull()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    compensate() {
+        if (this.fullyAssigned()) {
+            return;
+        }
+        for (let i = 0; i < this.preferences.length; i++) {
+            const currentPreference = this.preferences[i];
+            if (currentPreference === null) {
+                continue;
+            }
+            if (this.canBeAssigned(currentPreference)) {
+                this.assignWorkshop(currentPreference);
+                return;
+            }
+        }
+        throw new Error(
+            this.toString() + " could not be compensated for a filler workshop"
+        );
     }
 
     givenFirstPreference() {
@@ -154,6 +240,19 @@ class Student {
      */
     fullName() {
         return this.firstName.concat(" ", this.lastName);
+    }
+
+    checkPreferenceNumbers() {
+        const preferencearray = [];
+        for (let i = 0; i < this.assignedWorkshops.length; i++) {
+            const assignedWorkshop = this.assignedWorkshops[i];
+            if (this.preferences.indexOf(assignedWorkshop) === -1) {
+                preferencearray[i] = this.preferences.length;
+            } else {
+                preferencearray[i] = this.preferences.indexOf(assignedWorkshop);
+            }
+        }
+        return preferencearray;
     }
 
     toString() {
