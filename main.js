@@ -43,6 +43,30 @@ const OUTPUT_SHEET_HEADER = [
     "Workshop Location"
 ];
 
+const META_SHEET_HEADER1 = [
+    "Workshop Name",
+    "Workshop Number",
+    "Workshop Section",
+    "Slots Taken",
+    "Total Slots",
+    "Workshop Section",
+    "Slots Taken",
+    "Total Slots",
+    "Workshop Section",
+    "Slots Taken",
+    "Total Slots"
+];
+
+const META_SHEET_HEADER2 = [
+    "# of First Preferences",
+    "# of Second Preferences",
+    "# of Third Preferences",
+    "# of Fourth Preferences",
+    "# of Fifth Preferences",
+    "# of Sixth Preferences",
+    "# of Not Preferenced"
+];
+
 /**
  * Automatically runs when sheet is opened.
  */
@@ -60,7 +84,8 @@ function getSheets() {
     const sheetIndices = {
         responses: 0,
         output: 1,
-        preAssignment: 2
+        preAssignment: 2,
+        meta: 3
     };
 
     const sheets = SpreadsheetApp.getActiveSpreadsheet().getSheets();
@@ -69,6 +94,7 @@ function getSheets() {
         responses: sheets[sheetIndices.responses],
         output: sheets[sheetIndices.output],
         preAssignment: sheets[sheetIndices.preAssignment],
+        meta: sheets[sheetIndices.meta],
         workshops: SpreadsheetApp.openById(workshopSpreadsheetId)
     };
 }
@@ -144,11 +170,19 @@ function main() {
             //for each Assignment m
             assignments.push(preAssignmentData[l][COLUMN_ASSIGNMENTS[m]]);
         }
-
         matcher.addPreassignedStudent(firstName, lastName, grade, assignments);
     }
 
     populateSheet(sheets.output, matcher);
+    populateMetaSheet(sheets.meta, matcher);
+}
+
+function outputRows(sheet, lines) {
+    const rowCount = lines.length;
+    const columnCount = lines[0].length;
+    sheet
+        .getRange(sheet.getLastRow() + 1, 1, rowCount, columnCount)
+        .setValues(lines);
 }
 
 /**
@@ -203,9 +237,34 @@ function populateSheet(outputSheet, matcher) {
         studentLines.push(studentLine);
     }
 
-    const rowCount = studentLines.length;
-    const columnCount = studentLines[0].length;
-    outputSheet
-        .getRange(outputSheet.getLastRow() + 1, 1, rowCount, columnCount)
-        .setValues(studentLines);
+    outputRows(outputSheet, studentLines);
+}
+
+/**
+ * Output information about the matching results to the given sheet.
+ */
+function populateMetaSheet(metaSheet, matcher) {
+    metaSheet.clear();
+    const metaLines = [];
+    metaSheet.appendRow(META_SHEET_HEADER1);
+    Logger.log(matcher.workshopsByPopularity.length);
+    for (let i = 1; i < matcher.workshopsByPopularity.length + 1; i++) {
+        const workshopLine = [];
+        const workshop = matcher.workshopsByNumber[i];
+        workshopLine.push(workshop.name);
+        workshopLine.push(workshop.number);
+        let sectionNumber = 1;
+        for (const session of workshop.sessions) {
+            workshopLine.push(sectionNumber);
+            workshopLine.push(session.slotsFilled);
+            workshopLine.push(session.capacity);
+            sectionNumber++;
+        }
+        metaLines.push(workshopLine);
+    }
+
+    outputRows(metaSheet, metaLines);
+
+    // Header 2 is not yet used
+    //metaSheet.appendRow(META_SHEET_HEADER2);
 }
