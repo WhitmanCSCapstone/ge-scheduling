@@ -132,15 +132,17 @@ function main() {
         matcher.addNewStudent(firstName, lastName, preferenceNums, grade);
     }
 
-    for (let l = 1; l < PRE_ASSIGNMENT_DATA.length; l++) {
+    const preAssignmentData = getSheetData(sheets.preAssignment);
+
+    for (let l = 1; l < preAssignmentData.length; l++) {
         // For all preassignements l
-        const firstName = PRE_ASSIGNMENT_DATA[l][COLUMN_FIRST_NAMEP];
-        const lastName = PRE_ASSIGNMENT_DATA[l][COLUMN_LAST_NAMEP];
-        const grade = PRE_ASSIGNMENT_DATA[l][COLUMN_GRADEP];
+        const firstName = preAssignmentData[l][COLUMN_FIRST_NAMEP];
+        const lastName = preAssignmentData[l][COLUMN_LAST_NAMEP];
+        const grade = preAssignmentData[l][COLUMN_GRADEP];
         const assignments = [];
         for (let m = 0; m < COLUMN_ASSIGNMENTS.length; m++) {
             //for each Assignment m
-            assignments.push(PRE_ASSIGNMENT_DATA[l][COLUMN_ASSIGNMENTS[m]]);
+            assignments.push(preAssignmentData[l][COLUMN_ASSIGNMENTS[m]]);
         }
 
         matcher.addPreassignedStudent(firstName, lastName, grade, assignments);
