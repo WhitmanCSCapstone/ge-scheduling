@@ -67,33 +67,6 @@ const DATA_SHEET_HEADER2 = [
     "# of Not Preferenced"
 ];
 
-// Variables for response spreadsheet indices
-const RESPONSE_SHEET_INDEX = 0;
-const OUTPUT_SHEET_INDEX = 1;
-const PREASSIGNMENT_SHEET_INDEX = 2;
-
-// Formattin workshop variables
-const WORKSHOP_SPREADSHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
-
-const RESPONSE_SPREADSHEET = SpreadsheetApp.getActiveSpreadsheet();
-
-// Response Data
-const RESPONSE_SHEET = RESPONSE_SPREADSHEET.getSheets()[RESPONSE_SHEET_INDEX];
-const RESPONSE_DATA = RESPONSE_SHEET.getDataRange().getValues();
-
-// Workshop Sheet
-const WORKSHOP_SHEET = SpreadsheetApp.openById(WORKSHOP_SPREADSHEET_ID);
-const WORKSHOP_DATA = WORKSHOP_SHEET.getDataRange().getValues();
-
-// Output Sheet
-const outputSheet = RESPONSE_SPREADSHEET.getSheets()[OUTPUT_SHEET_INDEX];
-
-// Pre-Assignment Sheet
-const PRE_ASSIGNMENT_SHEET = RESPONSE_SPREADSHEET.getSheets()[
-    PREASSIGNMENT_SHEET_INDEX
-];
-const PRE_ASSIGNMENT_DATA = PRE_ASSIGNMENT_SHEET.getDataRange().getValues();
-
 /**
  * Automatically runs when sheet is opened.
  */
@@ -217,6 +190,25 @@ function populateSheet(outputSheet, matcher) {
 
     // All student lines to output
     const studentLines = [];
+
+    for (const student of matcher.preAssignedStudents) {
+        const studentLine = [];
+        studentLine.push(student.firstName);
+        studentLine.push(student.lastName);
+        studentLine.push(student.grade);
+
+        // List the student's assigned workshops in the row
+        for (const workshop of student.assignedWorkshops) {
+            if (workshop === null) {
+                studentLine.push("", "", "");
+            } else {
+                studentLine.push(workshop.number);
+                studentLine.push(workshop.name);
+                studentLine.push(workshop.location);
+            }
+        }
+        studentLines.push(studentLine);
+    }
 
     for (const student of matcher.allStudents) {
         const studentLine = [];
