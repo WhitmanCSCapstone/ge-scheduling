@@ -86,7 +86,6 @@ class Matcher {
     /**
      * Adds a preassigned Student object into preAssignedStudents
      *
-
      * @param {string} firstName       The first name of the student.
      * @param {string} lastName        The last name of the student.
      * @param {string} grade           The last name of the student.
@@ -156,6 +155,22 @@ class Matcher {
     }
 
     /**
+     * Hard copies an array and shuffles its contents randomly
+     *
+     * @param {array} array The array that will be hard copied and shuffled
+     */
+    shuffle(array) {
+        const tempArray = array.slice();
+        const returnArray = [];
+        while (tempArray.length) {
+            const randomIndex = Math.floor(Math.random() * tempArray.length);
+            returnArray.push(tempArray[randomIndex]);
+            tempArray.splice(randomIndex, 1);
+        }
+        return returnArray;
+    }
+
+    /**
      * Returns an array of students who are eligible to be assigned the given workshop as a filler workshop
      *
      * @param {Workshop} workshop A workshop that needs to be assigned as filler to some students
@@ -190,16 +205,16 @@ class Matcher {
                     Math.random() * currentStage.length
                 );
                 const randomStudent = currentStage[randomIndex];
-                const currentPreference = randomStudent.preferences[i];
-                if (currentPreference === null) {
+                const preference = randomStudent.preferences[i];
+                if (preference === null) {
                     currentStage.splice(randomIndex, 1);
                     continue;
                 }
-                if (randomStudent.isAssigned(currentPreference)) {
+                if (randomStudent.isAssigned(preference)) {
                     randomStudent.assignWorkshop(workshop);
-                } else if (!currentPreference.isFull()) {
+                } else if (!preference.isFull()) {
                     randomStudent.assignWorkshop(workshop);
-                    randomStudent.assignWorkshop(currentPreference);
+                    randomStudent.assignWorkshop(preference);
                 }
                 currentStage.splice(randomIndex, 1);
                 if (workshop.hasReachedQuorum()) {
@@ -268,11 +283,7 @@ class Matcher {
                     // for each student preference j
                     if (preference === null) {
                         continue;
-                    } else if (
-                        !student.isAssigned(preference) &&
-                        !preference.isFull()
-                    ) {
-                        //if the student is not already assigned to the workshop AND the workshop has slots left
+                    } else if (student.canBeAssigned(preference)) {
                         student.assignWorkshop(preference);
                         if (student.fullyAssigned()) {
                             break;
@@ -281,11 +292,18 @@ class Matcher {
                 }
             }
             if (!student.fullyAssigned()) {
-                throw new Error(
-                    "Could not give " +
-                        student.fullName() +
-                        " one of their remaining preferences."
+                const shuffledWorkshops = this.shuffle(
+                    this.workshopsByPopularity.slice()
                 );
+                for (let i = 0; i < shuffledWorkshops.length; i++) {
+                    const randomWorkshop = shuffledWorkshops[i];
+                    if (student.canBeAssigned(randomWorkshop)) {
+                        student.assignWorkshop(randomWorkshop);
+                        if (student.fullyAssigned()) {
+                            break;
+                        }
+                    }
+                }
             }
         }
     }

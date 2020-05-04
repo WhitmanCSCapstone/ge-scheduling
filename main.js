@@ -1,15 +1,20 @@
 /*globals SpreadsheetApp, Logger, Matcher, workshopInputChecker,
 studentInputChecker, preferenceInputChecker */
 
-const COLUMN_FIRST_NAME = 10;
-const COLUMN_LAST_NAME = 11;
-const COLUMN_GRADE = 17;
+// Column indices of workshop info for the workshop class
+const WORKSHOP_COLUMNS = {
+    name: 2,
+    building: 4,
+    room: 5,
+    capacity: 6
+};
 
-// Column indicies of workshop info for the workshop class
-const COLUMN_WORKSHOP_NAME = 2;
-const COLUMN_WORKSHOP_CAPACITY = 6;
-const COLUMN_WORKSHOP_BUILDING = 4;
-const COLUMN_WORKSHOP_ROOM = 5;
+// Column indices of student response data for the student class
+const RESPONSE_COLUMNS = {
+    firstName: 10,
+    lastName: 11,
+    grade: 17
+};
 
 // Column indicies of the Pre-assignment Sheet
 const COLUMN_FIRST_NAMEP = 0;
@@ -17,14 +22,13 @@ const COLUMN_LAST_NAMEP = 1;
 const COLUMN_GRADEP = 2;
 const COLUMN_ASSIGNMENTS = [3, 4, 5];
 
-
 // Column indices of student preferences in order from most preferred to least
 const PREFERENCE_COLUMNS = [1, 2, 3, 4, 5, 6];
 
 // Column indices of student enrollments in order of session time
 const ENROLLED = [2, 3, 4];
 
-const OUTPUT_SHEET_HEADERS = [
+const OUTPUT_SHEET_HEADER = [
     "First name",
     "Last name",
     "Grade",
@@ -67,7 +71,6 @@ const DATA_SHEET_HEADER2 = [
 const RESPONSE_SHEET_INDEX = 0;
 const OUTPUT_SHEET_INDEX = 1;
 const PREASSIGNMENT_SHEET_INDEX = 2;
-const DATA_SHEET_INDEX = 3;
 
 // Formattin workshop variables
 const WORKSHOP_SPREADSHEET_ID = "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
@@ -91,9 +94,6 @@ const PRE_ASSIGNMENT_SHEET = RESPONSE_SPREADSHEET.getSheets()[
 ];
 const PRE_ASSIGNMENT_DATA = PRE_ASSIGNMENT_SHEET.getDataRange().getValues();
 
-// Data Sheet
-const DATA_SHEET = RESPONSE_SPREADSHEET.getSheets()[DATA_SHEET_INDEX];
-
 /**
  * Automatically runs when sheet is opened.
  */
@@ -104,39 +104,71 @@ function onOpen() {
         .addToUi();
 }
 
+function getSheets() {
+    const workshopSpreadsheetId =
+        "1pZQWPV532JLWQuDLYiw4CdcvvBn8zoRQZ8lX2aaDzRc";
+
+    const sheetIndices = {
+        responses: 0,
+        output: 1,
+        preAssignment: 2,
+        data: 3
+    };
+
+    const sheets = SpreadsheetApp.getActiveSpreadsheet().getSheets();
+
+    return {
+        responses: sheets[sheetIndices.responses],
+        output: sheets[sheetIndices.output],
+        preAssignment: sheets[sheetIndices.preAssignment],
+        data: sheets[sheetIndices.data],
+        workshops: SpreadsheetApp.openById(workshopSpreadsheetId)
+    };
+}
+
+function getSheetData(sheet) {
+    return sheet.getDataRange().getValues();
+}
+
 /**
  * It's the main function, what more do you need to know.
  */
 function main() {
+    const sheets = getSheets();
+
     const matcher = new Matcher();
 
-    for (let i = 1; i < WORKSHOP_DATA.length; i++) {
+    const workshopData = getSheetData(sheets.workshops);
+
+    for (let i = 1; i < workshopData.length; i++) {
         // for all workshops i
-        const name = WORKSHOP_DATA[i][COLUMN_WORKSHOP_NAME];
+        const name = workshopData[i][WORKSHOP_COLUMNS.name];
         const number = i;
-        const capacity = WORKSHOP_DATA[i][COLUMN_WORKSHOP_CAPACITY];
+        const capacity = workshopData[i][WORKSHOP_COLUMNS.capacity];
         const location =
-            WORKSHOP_DATA[i][COLUMN_WORKSHOP_BUILDING] +
+            workshopData[i][WORKSHOP_COLUMNS.building] +
             " " +
-            WORKSHOP_DATA[i][COLUMN_WORKSHOP_ROOM];
+            workshopData[i][WORKSHOP_COLUMNS.room];
 
         workshopInputChecker(name, capacity, location, i);
 
         matcher.addNewWorkshop(name, number, capacity, location);
     }
 
-    for (let j = 1; j < RESPONSE_DATA.length; j++) {
+    const responseData = getSheetData(sheets.responses);
+
+    for (let j = 1; j < responseData.length; j++) {
         // for all students j
-        const firstName = RESPONSE_DATA[j][COLUMN_FIRST_NAME];
-        const lastName = RESPONSE_DATA[j][COLUMN_LAST_NAME];
-        const grade = RESPONSE_DATA[j][COLUMN_GRADE];
+        const firstName = responseData[j][RESPONSE_COLUMNS.firstName];
+        const lastName = responseData[j][RESPONSE_COLUMNS.lastName];
+        const grade = responseData[j][RESPONSE_COLUMNS.grade];
         studentInputChecker(firstName, lastName, grade, j);
 
         const preferenceNums = [];
 
         for (let k = 0; k < PREFERENCE_COLUMNS.length; k++) {
             // for all student preferences k
-            const preferredWorkshop = RESPONSE_DATA[j][PREFERENCE_COLUMNS[k]];
+            const preferredWorkshop = responseData[j][PREFERENCE_COLUMNS[k]];
             const workshopNum = parseInt(
                 preferredWorkshop.slice(
                     preferredWorkshop.indexOf("(") + 1,
@@ -153,21 +185,23 @@ function main() {
         matcher.addNewStudent(firstName, lastName, preferenceNums, grade);
     }
 
+    const preAssignmentData = getSheetData(sheets.preAssignment);
 
-    for (let l = 1; l < PRE_ASSIGNMENT_DATA.length; l++) {
+    for (let l = 1; l < preAssignmentData.length; l++) {
         // For all preassignements l
-        const firstName = PRE_ASSIGNMENT_DATA[l][COLUMN_FIRST_NAMEP];
-        const lastName = PRE_ASSIGNMENT_DATA[l][COLUMN_LAST_NAMEP];
-        const grade = PRE_ASSIGNMENT_DATA[l][COLUMN_GRADEP];
+        const firstName = preAssignmentData[l][COLUMN_FIRST_NAMEP];
+        const lastName = preAssignmentData[l][COLUMN_LAST_NAMEP];
+        const grade = preAssignmentData[l][COLUMN_GRADEP];
         const assignments = [];
         for (let m = 0; m < COLUMN_ASSIGNMENTS.length; m++) {
             //for each Assignment m
-            assignments.push(PRE_ASSIGNMENT_DATA[l][COLUMN_ASSIGNMENTS[m]]);
+            assignments.push(preAssignmentData[l][COLUMN_ASSIGNMENTS[m]]);
         }
         matcher.addPreassignedStudent(firstName, lastName, grade, assignments);
     }
-    populateSheet(outputSheet, matcher);
-    populateDataSheet(DATA_SHEET, matcher);
+
+    populateSheet(sheets.output, matcher);
+    populateDataSheet(sheets.data, matcher);
 }
 
 /**
@@ -175,35 +209,15 @@ function main() {
  */
 function populateSheet(outputSheet, matcher) {
     outputSheet.clear();
-    outputSheet.appendRow(OUTPUT_SHEET_HEADERS);
+    outputSheet.appendRow(OUTPUT_SHEET_HEADER);
     outputSheet.setFrozenRows(1);
 
     matcher.fixStudentPreferences();
-
     matcher.matchGirls();
 
     // All student lines to output
     const studentLines = [];
 
-    for (const student of matcher.preAssignedStudents) {
-        const studentLine = [];
-        studentLine.push(student.firstName);
-        studentLine.push(student.lastName);
-        studentLine.push(student.grade);
-
-        // List the student's assigned workshops in the row
-        for (const workshop of student.assignedWorkshops) {
-            if (workshop === null) {
-                studentLine.push("", "", "");
-            } else {
-                studentLine.push(workshop.number);
-                studentLine.push(workshop.name);
-                studentLine.push(workshop.location);
-            }
-        }
-        studentLines.push(studentLine);
-    }
-
     for (const student of matcher.allStudents) {
         const studentLine = [];
         studentLine.push(student.firstName);
@@ -211,25 +225,6 @@ function populateSheet(outputSheet, matcher) {
         studentLine.push(student.grade);
 
         // List the student's assigned workshops in the row
-        for (const workshop of student.assignedWorkshops) {
-            if (workshop === null) {
-                studentLine.push("", "", "");
-            } else {
-                studentLine.push(workshop.number);
-                studentLine.push(workshop.name);
-                studentLine.push(workshop.location);
-            }
-        }
-        studentLines.push(studentLine);
-    }
-
-    for (const student of matcher.allStudents) {
-        const studentLine = [];
-        studentLine.push(student.firstName);
-        studentLine.push(student.lastName);
-        studentLine.push(student.grade);
-
-        //List the student's assigned workshops in the row
         for (const workshop of student.assignedWorkshops) {
             if (workshop === null) {
                 studentLine.push("", "", "");
@@ -252,9 +247,9 @@ function populateSheet(outputSheet, matcher) {
 /**
  * Output the results of the matcher to the given sheet.
  */
-function populateDataSheet(DATA_SHEET, matcher) {
-    DATA_SHEET.clear();
-    DATA_SHEET.appendRow(DATA_SHEET_HEADER1);
+function populateDataSheet(dataSheet, matcher) {
+    dataSheet.clear();
+    dataSheet.appendRow(DATA_SHEET_HEADER1);
     Logger.log(matcher.workshopsByPopularity.length);
     for (let i = 1; i < matcher.workshopsByPopularity.length + 1; i++) {
         const workShopLine = [];
@@ -268,8 +263,8 @@ function populateDataSheet(DATA_SHEET, matcher) {
             workShopLine.push(session.capacity);
             sectionNumber++;
         }
-        DATA_SHEET.appendRow(workShopLine);
+        dataSheet.appendRow(workShopLine);
     }
 
-    DATA_SHEET.appendRow(DATA_SHEET_HEADER2);
+    dataSheet.appendRow(DATA_SHEET_HEADER2);
 }
