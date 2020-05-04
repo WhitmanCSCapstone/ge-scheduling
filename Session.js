@@ -6,11 +6,15 @@
  *
  * @param {int} capacity The number of students who can be assigned to this workshop session.
  */
-function Session(capacity, minimumFill) {
+function Session(capacity, minimumFill, timeSlot) {
     this.init = function() {
+        this.timeSlot = timeSlot;
+
         this.slotsFilled = 0;
 
         this.capacity = capacity;
+
+        this.studentsAssigned = [];
 
         // Minimum number of slots that need to be filled in this workshop
         this.minimumFill = capacity * minimumFill;
@@ -33,11 +37,12 @@ function Session(capacity, minimumFill) {
     /**
      * Adds 1 to the number of slots filled in the session.
      */
-    this.addStudent = function() {
+    this.addStudent = function(student) {
         if (this.isFull()) {
             throw new Error("Cannot add students to a full session");
         } else {
             this.slotsFilled += 1;
+            this.studentsAssigned.push(student);
         }
     };
 

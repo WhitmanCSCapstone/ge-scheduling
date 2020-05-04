@@ -158,7 +158,6 @@ function populateSheet(outputSheet, matcher) {
     outputSheet.setFrozenRows(1);
 
     matcher.fixStudentPreferences();
-
     matcher.matchGirls();
 
     // All student lines to output
