@@ -43,7 +43,7 @@ const OUTPUT_SHEET_HEADER = [
     "Workshop Location"
 ];
 
-const DATA_SHEET_HEADER1 = [
+const META_SHEET_HEADER1 = [
     "Workshop Name",
     "Workshop Number",
     "Workshop Section",
@@ -57,7 +57,7 @@ const DATA_SHEET_HEADER1 = [
     "Total Slots"
 ];
 
-const DATA_SHEET_HEADER2 = [
+const META_SHEET_HEADER2 = [
     "# of First Preferences",
     "# of Second Preferences",
     "# of Third Preferences",
@@ -85,7 +85,7 @@ function getSheets() {
         responses: 0,
         output: 1,
         preAssignment: 2,
-        data: 3
+        meta: 3
     };
 
     const sheets = SpreadsheetApp.getActiveSpreadsheet().getSheets();
@@ -94,7 +94,7 @@ function getSheets() {
         responses: sheets[sheetIndices.responses],
         output: sheets[sheetIndices.output],
         preAssignment: sheets[sheetIndices.preAssignment],
-        data: sheets[sheetIndices.data],
+        meta: sheets[sheetIndices.meta],
         workshops: SpreadsheetApp.openById(workshopSpreadsheetId)
     };
 }
@@ -174,7 +174,7 @@ function main() {
     }
 
     populateSheet(sheets.output, matcher);
-    populateDataSheet(sheets.data, matcher);
+    populateMetaSheet(sheets.meta, matcher);
 }
 
 /**
@@ -239,9 +239,9 @@ function populateSheet(outputSheet, matcher) {
 /**
  * Output the results of the matcher to the given sheet.
  */
-function populateDataSheet(dataSheet, matcher) {
-    dataSheet.clear();
-    dataSheet.appendRow(DATA_SHEET_HEADER1);
+function populateMetaSheet(metaSheet, matcher) {
+    metaSheet.clear();
+    metaSheet.appendRow(META_SHEET_HEADER1);
     Logger.log(matcher.workshopsByPopularity.length);
     for (let i = 1; i < matcher.workshopsByPopularity.length + 1; i++) {
         const workShopLine = [];
@@ -255,8 +255,9 @@ function populateDataSheet(dataSheet, matcher) {
             workShopLine.push(session.capacity);
             sectionNumber++;
         }
-        dataSheet.appendRow(workShopLine);
+        metaSheet.appendRow(workShopLine);
     }
 
-    dataSheet.appendRow(DATA_SHEET_HEADER2);
+    // Header 2 is not yet used
+    //metaSheet.appendRow(META_SHEET_HEADER2);
 }
